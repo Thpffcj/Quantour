@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+
+        "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+
+        "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+   
+   <package name="default" namespace="/" extends="struts-default,json-default" strict-method-invocation="false">
+     
+     <action name="Users_*" class="usersAction" method="{1}">
+       <result name="login_success">Stock.jsp</result>
+       <result name="login_failure">/users/Login.jsp</result>
+       <result name="logout_success">/users/Login.jsp</result>
+       <result name="input">/users/Login.jsp</result>
+       <result name="register_success">Login.jsp</result>
+       <result name="query_success">/Stock.jsp</result>
+     </action>
+     
+      <action name="Stock_*" class="stockAction" method="{1}">
+       <result name="upsAndDowns_success">Stock.jsp</result>
+     </action>
+     
+      <action name="UpsAndDownsGraph" class="UpsAndDownsGraphAction" method="getUpsAndDownsGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>   
+     
+     <action name="VSGraph" class="VSGraphAction" method="getVSGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>   
+     
+      <action name="KGraph" class="KGraphAction" method="getKGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+      <action name="RSIGraph" class="RSIGraphAction" method="getRSIGraphData">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="KDJStochasticGraph" class="KDJStochasticGraphAction" method="getKDJStochasticGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="BollGraph" class="BoolGraphAction" method="getBollGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+      <action name="MeanReversionGraph" class="MeanReversionGraphAction" method="getMeanReversionGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     
+   </package>
+   
+</struts>

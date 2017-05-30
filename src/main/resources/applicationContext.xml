@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+
+	<!-- 引入外部的属性文件-->
+	<context:property-placeholder location="classpath:jdbc.properties"/>
+	<!-- 配置连接池 此处为c3p0-->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${driverClass}"></property>
+		<property name="jdbcUrl" value="${url}"></property>
+		<property name="user" value="${username}"></property>
+		<property name="password" value="${password}"></property>
+	</bean>
+
+	<!-- 配置hibernate相关属性 -->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<!-- 注入链接池 -->
+		<property name="dataSource" ref="dataSource"/>
+		<!-- 配置hibernate属性-->
+		<property name="hibernateProperties">
+			<props> 
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop><!-- 有表自动更新表结构，没有就创建表 -->
+			</props>
+		</property>
+		<!-- 加载hibernate配置文件-->
+		<property name="mappingResources">
+			<list>
+				<value>StockPO.hbm.xml</value>
+				<value>UserPO.hbm.xml</value>
+			</list>
+		</property>
+		
+	</bean>
+	
+	<!-- User -->
+	<!-- 配置action类 -->
+	<bean id="usersAction" class="action.UsersAction" scope="prototype">
+		<property name="usersService" ref="usersService"></property>
+	</bean>
+
+	<!-- 配置业务层的类 -->
+	<bean id="usersService" class="businessLogic.Users">
+		<property name="usersDao" ref="usersDao"></property>
+	</bean>
+
+	<!-- 配置DAO的类 -->
+	<bean id="usersDao" class="data.UsersDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<!-- KGraph -->
+	<!-- 配置action类 -->
+	<bean id="KGraphAction" class="action.StockAction" scope="prototype">
+		<property name="getKGraphDataService" ref="getKGraphDataService"></property>
+	</bean>
+	
+	<bean id="VSGraphAction" class="action.StockAction" scope="prototype">
+		<property name="getStockBLService" ref="getStockBLService"></property>
+	</bean>
+	
+	<bean id="UpsAndDownsGraphAction" class="action.StockAction" scope="prototype">
+		<property name="getStockBLService" ref="getStockBLService"></property>
+	</bean>
+
+	<!-- 配置业务层的类 -->
+	<bean id="getKGraphDataService" class="businessLogic.GetKGraphData">
+		<property name="stockDataService" ref="stockDataService"></property>
+	</bean>
+	
+	<bean id="getStockBLService" class="businessLogic.GetStockBL">
+		<property name="stockDataService" ref="stockDataService"></property>
+	</bean>
+
+	<!-- 配置DAO的类 -->
+	<bean id="stockDataService" class="data.StockData">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<!-- quantify -->
+	<!-- 配置action类 -->
+	<bean id="RSIGraphAction" class="action.QuantifyAction" scope="prototype">
+		<property name="getRSIDataService" ref="getRSIDataService"></property>
+	</bean>
+	<bean id="KDJStochasticGraphAction" class="action.QuantifyAction" scope="prototype">
+		<property name="getKDJStochasticDataService" ref="getKDJStochasticDataService"></property>
+	</bean>
+	<bean id="BoolGraphAction" class="action.QuantifyAction" scope="prototype">
+		<property name="getBollDataService" ref="getBollDataService"></property>
+	</bean>
+	<bean id="MeanReversionGraphAction" class="action.QuantifyAction" scope="prototype">
+		<property name="getBollDataService" ref="getBollDataService"></property>
+	</bean>
+	
+	
+	<!-- 配置业务层的类 -->
+	<bean id="getRSIDataService" class="businessLogic.GetRSIData">
+		<property name="stockDataService" ref="stockDataService"></property>
+	</bean>
+	<bean id="getKDJStochasticDataService" class="businessLogic.GetKDJStochasticData">
+		<property name="stockDataService" ref="stockDataService"></property>
+	</bean>
+	<bean id="getBollDataService" class="businessLogic.GetBollData">
+		<property name="stockDataService" ref="stockDataService"></property>
+	</bean>
+	<bean id="meanReversionService" class="businessLogic.MeanReversion">
+		<property name="stockDataService" ref="stockDataService"></property>
+	</bean>
+	
+
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<!-- 开启注解事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager"/>
+	
+</beans>

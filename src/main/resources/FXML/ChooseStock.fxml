@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="500.0" prefWidth="645.0" styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="presentation.ChooseStockFrameController">
+   <children>
+      <TableView fx:id="tableview" layoutX="45.0" layoutY="15.0" prefHeight="420.0" prefWidth="350.0">
+        <columns>
+          <TableColumn fx:id="chosen" prefWidth="100.0" sortable="false" />
+          <TableColumn fx:id="code" prefWidth="100.0" text="股票号" />
+            <TableColumn fx:id="name" prefWidth="150.0" text="股票名称" />
+        </columns>
+      </TableView>
+      <Label fx:id="number" layoutX="86.0" layoutY="450.0" prefHeight="22.0" prefWidth="120.0" styleClass="label-bright" text="已选择：0/100" />
+      <CheckBox fx:id="checkBox" layoutX="95.0" layoutY="26.0" mnemonicParsing="false" onAction="#ChooseCheckBox" styleClass="label-bright" text="选择" />
+      <Button fx:id="button" disable="true" layoutX="475.0" layoutY="444.0" mnemonicParsing="false" onAction="#Finish" prefHeight="34.0" prefWidth="69.0" text="完成" />
+      <Button layoutX="288.0" layoutY="444.0" mnemonicParsing="false" onAction="#Cancel" prefHeight="34.0" prefWidth="69.0" text="取消" />
+      <ListView fx:id="listView" layoutX="441.0" layoutY="56.0" prefHeight="372.0" prefWidth="150.0" styleClass="background" />
+      <Label layoutX="441.0" layoutY="27.0" styleClass="label-bright" text="已选择的股票：" />
+   </children>
+</AnchorPane>

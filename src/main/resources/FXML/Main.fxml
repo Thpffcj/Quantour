@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.effect.*?>
+<?import java.net.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.web.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="presentation.MainFrameController">
+   <children>
+      <ImageView fx:id="imageView" fitHeight="62.0" fitWidth="75.0" layoutX="456.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../resources/Images/Icon.jpg" />
+         </image></ImageView>
+      <TabPane layoutX="211.0" layoutY="76.0" prefHeight="717.0" prefWidth="962.0" rotateGraphic="true">
+        <tabs>
+          <Tab closable="false" text="个  股  展  示">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" onMouseEntered="#endDate" pickOnBounds="false" prefHeight="720.0" prefWidth="856.0">
+                     <children>
+                        <Accordion layoutX="267.0" layoutY="168.0" />
+                        <TextField fx:id="sharesid" layoutX="639.0" layoutY="27.0" onMouseClicked="#clearProjectName" prefHeight="30.0" prefWidth="183.0" text="股票号/股票名称">
+                           <effect>
+                              <Glow level="0.4" />
+                           </effect></TextField>
+                        <Button layoutX="828.0" layoutY="25.0" mnemonicParsing="false" onAction="#SearchAction" prefHeight="30.0" prefWidth="80.0" styleClass="label-bright" text="搜索" />
+                        <Label layoutX="26.0" layoutY="31.0" styleClass="label-bright" text="开始日期：" />
+                        <DatePicker fx:id="begindate1" layoutX="112.0" layoutY="27.0" onAction="#beginDate" prefHeight="31.0" prefWidth="183.0" styleClass="background" />
+                        <StackPane fx:id="chartpane" layoutX="26.0" layoutY="82.0" prefHeight="545.0" prefWidth="927.0" />
+                        <DatePicker fx:id="enddate1" layoutX="410.0" layoutY="27.0" onMouseEntered="#endDate" prefHeight="31.0" prefWidth="183.0" styleClass="background" />
+                        <Label layoutX="328.0" layoutY="32.0" styleClass="label-bright" text="结束日期：" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+          <Tab closable="false" text="股  票  比  较">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <DatePicker fx:id="begindate2" layoutX="94.0" layoutY="25.0" onAction="#beginDate" prefHeight="30.0" prefWidth="167.0" />
+                        <Label layoutX="14.0" layoutY="30.0" styleClass="label-bright" text="选择日期：" />
+                        <DatePicker fx:id="enddate2" layoutX="277.0" layoutY="26.0" onMouseEntered="#endDate" prefHeight="30.0" prefWidth="167.0" />
+                        <Label layoutX="453.0" layoutY="31.0" styleClass="label-bright" text="输入股票号/名称：" />
+                        <TextField fx:id="sharesid1" layoutX="588.0" layoutY="23.0" prefHeight="30.0" prefWidth="126.0" />
+                        <TextField fx:id="sharesid2" layoutX="731.0" layoutY="23.0" prefHeight="30.0" prefWidth="126.0" />
+                        <Button layoutX="879.0" layoutY="21.0" mnemonicParsing="false" onAction="#VSAction" prefHeight="34.0" prefWidth="69.0" text="VS" />
+                        <Separator layoutX="261.0" layoutY="38.0" prefHeight="6.0" prefWidth="16.0" />
+                        <Separator layoutX="714.0" layoutY="39.0" prefHeight="4.0" prefWidth="17.0" />
+                        <StackPane fx:id="VSChart" layoutX="189.0" layoutY="80.0" prefHeight="546.0" prefWidth="760.0" />
+                        <ComboBox fx:id="comboBox" layoutX="19.0" layoutY="82.0" onAction="#ChangeChart" prefWidth="150.0" visible="false" />
+                        <Label fx:id="text" layoutX="6.0" layoutY="271.0" prefHeight="29.0" prefWidth="190.0" styleClass="label-bright" visible="false" />
+                        <Label fx:id="variance" layoutX="10.0" layoutY="334.0" prefHeight="39.0" prefWidth="190.0" styleClass="label-bright" visible="false" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+            <Tab closable="false" text="市  场  行  情">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Label layoutX="103.0" layoutY="61.0" styleClass="label-bright" text="请选择日期：" />
+                        <DatePicker fx:id="date" layoutX="233.0" layoutY="55.0" onAction="#MarketAction" prefHeight="30.0" prefWidth="208.0" />
+                        <Label layoutX="103.0" layoutY="120.0" styleClass="label-bright" text="当日交易量：" />
+                        <Label fx:id="volume" layoutX="298.0" layoutY="120.0" prefHeight="21.0" prefWidth="213.0" styleClass="label-bright" />
+                        <Label layoutX="103.0" layoutY="173.0" styleClass="label-bright" text="涨停股票数：" />
+                        <Label layoutX="103.0" layoutY="225.0" styleClass="label-bright" text="跌停股票数：" />
+                        <Label layoutX="78.0" layoutY="285.0" styleClass="label-bright" text="涨幅超过5%的股票数：" />
+                        <Label layoutX="78.0" layoutY="339.0" styleClass="label-bright" text="跌幅超过5%的股票数：" />
+                        <Label layoutX="66.0" layoutY="396.0" prefHeight="31.0" prefWidth="190.0" styleClass="label-bright" text="开盘‐收盘大于 5%*上一个" />
+                        <Label layoutX="70.0" layoutY="423.0" prefHeight="29.0" prefWidth="182.0" styleClass="label-bright" text="交易日收盘价的股票个数" />
+                        <Label layoutX="250.0" layoutY="415.0" styleClass="label-bright" text="：" />
+                        <Label layoutX="78.0" layoutY="508.0" prefHeight="28.0" prefWidth="190.0" styleClass="label-bright" text="交易日收盘价的股票个数" />
+                        <Label layoutX="70.0" layoutY="483.0" prefHeight="28.0" prefWidth="199.0" styleClass="label-bright" text="开盘‐收盘小于 -5%*上一个" />
+                        <Label layoutX="268.0" layoutY="496.0" styleClass="label-bright" text="：" />
+                        <Label fx:id="limitup" layoutX="298.0" layoutY="173.0" prefHeight="21.0" prefWidth="213.0" styleClass="label-bright" />
+                        <Label fx:id="limitdown" layoutX="298.0" layoutY="225.0" prefHeight="21.0" prefWidth="213.0" styleClass="label-bright" />
+                        <Label fx:id="openpricerose" layoutX="337.0" layoutY="415.0" prefHeight="21.0" prefWidth="213.0" styleClass="label-bright" />
+                        <Label fx:id="drop" layoutX="308.0" layoutY="339.0" prefHeight="21.0" prefWidth="213.0" styleClass="label-bright" />
+                        <Label fx:id="rose" layoutX="306.0" layoutY="285.0" prefHeight="21.0" prefWidth="213.0" styleClass="label-bright" />
+                        <Label fx:id="openpricedrop" layoutX="343.0" layoutY="496.0" prefHeight="21.0" prefWidth="213.0" styleClass="label-bright" />
+                        <StackPane fx:id="pie" layoutX="441.0" layoutY="138.0" prefHeight="402.0" prefWidth="510.0" />
+                     </children></AnchorPane>
+              </content>
+            </Tab>
+            <Tab closable="false" text="策  略  回  测">
+               <content>
+                  <ScrollPane prefHeight="200.0" prefWidth="200.0">
+                    <content>
+                      <AnchorPane fx:id="backflow" minHeight="0.0" minWidth="0.0" prefHeight="940.0" prefWidth="944.0" styleClass="background" />
+                    </content>
+                  </ScrollPane>
+               </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+      <Label layoutX="530.0" layoutY="15.0" prefHeight="20.0" prefWidth="190.0" styleClass="label-header" text="Stock King">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <TableView fx:id="tableView" layoutX="1.0" layoutY="76.0" onMouseClicked="#ChooseTable" prefHeight="717.0" prefWidth="208.0">
+        <columns>
+          <TableColumn fx:id="code" prefWidth="75.0" text="股票编号" />
+          <TableColumn fx:id="name" prefWidth="125.0" text="股票名称" />
+        </columns>
+      </TableView>
+      <ImageView fx:id="photo" fitHeight="48.0" fitWidth="45.0" layoutX="14.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" />
+      <MenuBar layoutX="74.0" layoutY="14.0" prefHeight="48.0" prefWidth="126.0" visible="false">
+        <menus>
+          <Menu fx:id="menu" mnemonicParsing="false" text="Username">
+            <items>
+              <MenuItem fx:id="cpw" mnemonicParsing="false" onAction="#ChangePassword" text="修改密码" />
+                  <MenuItem fx:id="upload" mnemonicParsing="false" onAction="#UploadPhoto" text="上传头像" />
+                  <MenuItem fx:id="logout" mnemonicParsing="false" onAction="#LogOut" text="退出登录" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </children>
+</AnchorPane>

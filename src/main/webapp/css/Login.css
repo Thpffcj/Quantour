@@ -1,0 +1,73 @@
+@CHARSET "UTF-8";
+
+body {
+	background-image: url(/Quantour/images/background.jpg);
+	background-size: 100%;
+}
+
+p{
+	font-size: 28px;
+	position: absolute;
+	min-width: 240px;
+	width: 50%;
+	height: 15%;
+	left: 25%;
+	top: 23%;
+	text-align: center;
+	color: white;
+}
+
+#input {
+	position: absolute;
+	min-width: 240px;
+	width: 50%;
+	height: 15%;
+	left: 25%;
+	top: 35%;
+	text-align: center;
+}
+
+#input label {
+	font-size: 20px;
+	margin-right: 10px;
+	margin-bottom: 10px;
+	color: white;
+}
+
+#input input {
+	margin: 10px 30px 10px 30px;
+	width: 180px;
+	height: 30px;
+	border-color: #ccc;
+	border: 1px solid transparent;
+	border-radius: 3px;
+}
+
+#input button {
+	width: 100px;
+	height: 40px;
+	display: block;
+	background-color: #5584ff;
+	border: transparent;
+	font-size: 18px;
+	color: white;
+	text-decoration: none;
+	vertical-align: center;
+	margin: 0 auto;
+	margin-top: 40px;
+	text-align: center;
+}
+
+#input a {
+	margin-bottom: 40px;
+}
+
+#username{
+	position: relative;
+	left: 10px;
+}
+
+#password {
+	position: relative;
+	left: 20px;
+}

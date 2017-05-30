@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2017-3-8 23:17:01 by Hibernate Tools 3.5.0.Final -->
+<hibernate-mapping>
+    <class name="po.StockPO" table="stockdata">
+        <composite-id>
+        	 <key-property name="index" type="int">
+            <column name="index" />
+        	</key-property>
+         <key-property name="code" type="java.lang.String">
+            <column name="code" />
+        </key-property>
+        </composite-id>
+      
+      <property name="date" type="java.lang.String">
+            <column name="date" />
+        </property>
+        <property name="open" type="double">
+            <column name="open" />
+        </property>
+        <property name="close" type="double">
+            <column name="close" />
+        </property>
+        <property name="high" type="double">
+            <column name="high" />
+        </property>
+        <property name="low" type="double">
+            <column name="low" />
+        </property>
+        <property name="adjClose" type="double">
+            <column name="adjClose" />
+        </property>
+         <property name="volume" type="java.lang.String">
+            <column name="volume" />
+        </property>
+       
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="940.0" prefWidth="944.0" styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="presentation.BackFlowController">
+   <children>
+      <Label fx:id="holding" layoutX="896.0" layoutY="93.0" styleClass="label-bright" text="0天" />
+      <Slider fx:id="slider1" layoutX="740.0" layoutY="94.0" minorTickCount="5" onMouseClicked="#getHolding" onMouseDragged="#getHolding" showTickLabels="true" showTickMarks="true" styleClass="background" />
+      <Label fx:id="formation" layoutX="603.0" layoutY="93.0" styleClass="label-bright" text="0天" />
+      <Slider fx:id="slider" layoutX="443.0" layoutY="94.0" majorTickUnit="50.0" minorTickCount="5" onMouseClicked="#getFormation" onMouseDragged="#getFormation" showTickLabels="true" showTickMarks="true" styleClass="background" />
+      <TextField fx:id="number" layoutX="139.0" layoutY="142.0" prefHeight="30.0" prefWidth="150.0" />
+      <Label fx:id="yword" layoutX="25.0" layoutY="147.0" styleClass="label-bright" text="持有股票数：" />
+      <ComboBox fx:id="EMA" layoutX="452.0" layoutY="88.0" prefWidth="150.0" visible="false" />
+      <Label layoutX="674.0" layoutY="92.0" styleClass="label-bright" text="持有期：" fx:id="xword" />
+      <Label fx:id="word" layoutX="376.0" layoutY="92.0" styleClass="label-bright" text="形成期：" />
+      <Label layoutX="689.0" layoutY="37.0" styleClass="label-bright" text="—" />
+      <Button layoutX="526.0" layoutY="141.0" mnemonicParsing="false" onAction="#BackFlow" prefHeight="33.0" prefWidth="115.0" text="开始回测" />
+      <DatePicker fx:id="time2" layoutX="719.0" layoutY="32.0" onAction="#changeSliderMax" prefHeight="7.0" prefWidth="152.0" />
+      <DatePicker fx:id="time1" layoutX="518.0" layoutY="32.0" onAction="#changeSliderMax" prefHeight="7.0" prefWidth="152.0" />
+      <Label layoutX="406.0" layoutY="35.0" styleClass="label-bright" text="回测时间：" />
+      <ComboBox fx:id="way" layoutX="139.0" layoutY="88.0" onAction="#changeword" prefWidth="150.0" />
+      <Label layoutX="32.0" layoutY="91.0" styleClass="label-bright" text="策略类型：" />
+      <Label layoutX="24.0" layoutY="35.0" styleClass="label-bright" text="请选择股票池：" />
+      <ComboBox fx:id="stocklist" layoutX="139.0" layoutY="31.0" onAction="#Custom" prefWidth="150.0" />
+      <HBox layoutX="256.0" layoutY="214.0" prefHeight="60.0" prefWidth="450.0">
+         <children>
+            <Label fx:id="label1" alignment="CENTER" onMouseClicked="#Cumulative" prefHeight="60.0" prefWidth="150.0" styleClass="label-half" text="累计收益" underline="true" visible="false" />
+            <Label fx:id="label2" alignment="CENTER" onMouseClicked="#Excess" prefHeight="60.0" prefWidth="150.0" styleClass="label-half" text="超额收益" visible="false" />
+            <Label fx:id="label3" alignment="CENTER" onMouseClicked="#distribution" prefHeight="60.0" prefWidth="150.0" styleClass="label-half" text="收益分布" visible="false" />
+         </children>
+      </HBox>
+      <StackPane fx:id="pane" layoutY="260.0" prefHeight="680.0" prefWidth="944.0" />
+      <ProgressIndicator fx:id="indicator" layoutX="652.0" layoutY="148.0" visible="false" />
+      <Label fx:id="text" layoutX="724.0" layoutY="164.0" styleClass="label-bright" text="正在回测中，请耐心等待..." visible="false" />
+      <Hyperlink fx:id="link" layoutX="303.0" layoutY="32.0" onAction="#lookcode" text="查看股票池" />
+      <CheckBox fx:id="box" layoutX="370.0" layoutY="147.0" mnemonicParsing="false" styleClass="label-bright" text="固定形成期" visible="false" />
+   </children>
+</AnchorPane>

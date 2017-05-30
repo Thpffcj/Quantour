@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="200.0" prefWidth="300.0" styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="presentation.PopFrameController">
+   <children>
+      <Label fx:id="word" alignment="CENTER" contentDisplay="CENTER" layoutY="49.0" prefWidth="300.0" styleClass="label-bright" stylesheets="@DarkTheme.css" />
+      <Button layoutX="123.0" layoutY="125.0" mnemonicParsing="false" onAction="#Close" text="确定" />
+   </children>
+</AnchorPane>

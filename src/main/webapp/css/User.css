@@ -1,0 +1,186 @@
+@CHARSET "UTF-8";
+
+body {
+	background-image: url(/Quantour/images/background.jpg);
+	background-size: 100%;
+}
+
+.w1200 {
+	width: 1060px;
+	margin: 0 auto;
+	padding-top: 80px;
+}
+
+.navigation {
+	float: left;
+	width: 220px;
+	height: 600px;
+}
+
+.navigation .tab {
+	width: 220px;
+	border-right: 3px solid #528fcc;
+}
+
+.navigation .tab li {
+	width: 220px;
+	color: grey;
+	font-size: 18px;
+	list-style-type: none;
+	margin: 20px 30px 20px 30px;
+	cursor: pointer;
+}
+
+.navigation .tab li.less {
+	color: white;
+	font-size: 16px;
+}
+
+.navigation .tab li.active {
+	font-weight: 500;
+	color: red;
+}
+
+.operate-area {
+	float: left;
+	width: 840px;
+	height: 600px;
+}
+
+.selfstock {
+	display: none;
+	width: 840px;
+	height: 600px;
+	padding: 30px 0px 0px 50px;
+}
+
+.header label {
+	color: white;
+	font-weight: 200;
+}
+
+.header select {
+	width: 50px;
+	height: 25px;
+	border-radius: 2px;
+	cursor: pointer;
+}
+
+.header a {
+	color: white;
+	margin: 0px 15px 0px 15px;
+	cursor: pointer;
+}
+
+.header a:hover {
+	color: #528fcc;
+}
+
+.header input {
+	width: 150px;
+	margin-left: 20px;
+	border-color: #ccc;
+	border: 1px solid transparent;
+	border-radius: 3px;
+}
+
+.header button {
+	background-color: #528fcc;
+	border-color: #ccc;
+	border: 1px solid transparent;
+	border-radius: 3px;
+}
+
+.list {
+	width: 790px;
+	height: 570px;
+	padding-top: 20px;
+}
+
+.list table {
+	font-size: 16px;
+	border: 1px;
+	width: 600px;
+	text-align: center;
+	background-color: #eee;
+}
+
+.list tbody {
+	font-weight: 200;
+	text-align: center;
+}
+
+.list tr th td {
+	width: 100px;
+	border: 1px;
+	text-align: center;
+	font-weight: 200;
+}
+
+.input-form {
+	display: none;
+	width: 840px;
+	height: 600px;
+	padding: 30px 0px 0px 50px;
+}
+
+.operate-area .active{
+	display: block;
+}
+
+.input-form form{
+	padding-left: 40px;
+}
+
+.input-form label {
+	color: white;
+	padding: 10px;
+}
+
+.input-form input {
+	width: 150px;
+	height: 35px;
+	margin-left: 10px;
+	border-color: #ccc;
+	border: 1px solid transparent;
+	border-radius: 3px;
+}
+
+.btn {
+	margin-top: 30px;
+	background-color: #528fcc;
+}
+
+.modal {
+	width: 350px;
+	margin: 0 auto;
+}
+
+.modal-header {
+	width: 350px;
+	text-align: center;
+}
+
+.modal-body {
+	width: 350px;
+	text-align: center;
+}
+
+.modal-footer {
+	width: 350px;
+	text-align: center;
+}
+
+.modal-footer .btn {
+	margin: 0px 20px 0px 20px;
+}
+
+.modal label {
+	font-weight: 200;
+	color: red;
+}
+
+.modal input {
+	border: 1px solid #000;
+	border-radius: 3px;
+}
