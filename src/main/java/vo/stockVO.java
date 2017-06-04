@@ -13,22 +13,18 @@ import po.StockPO;
  * @author 费慧通
  *保存stock的暂时对象
  */
-public class stockVO {
-	private int serial;
+public class stockVO {	
+	private int index;
 	private String date;
 	private double open;
-	private double close;
 	private double high;
 	private double low;
-	private int volume;
+	private double close;
 	private double adjClose;
-	private int code;
-	private String name;
-	private String market;
-	private String plate;
+	private String volume;
+	private String code;
 	
 	public stockVO(StockPO po){
-		serial = po.getSerial();
 		date = po.getDate();
 		open = po.getOpen();
 		close = po.getClose();
@@ -37,17 +33,14 @@ public class stockVO {
 		volume = po.getVolume();
 		adjClose = po.getAdjClose();
 		code = po.getCode();
-		name = po.getName();
-		market = po.getMarket();
-		plate = po.getPlate();
 	}
 	
 	/**
 	 * 获取股票的记录编号
 	 * @return
 	 */
-	public int getSerial() {
-		return serial;
+	public int getIndex() {
+		return index;
 	}
 	
 	/**
@@ -94,7 +87,7 @@ public class stockVO {
 	 * 获得成交量
 	 * @return
 	 */
-	public long getVolume() {
+	public String getVolume() {
 		return volume;
 	}
 	
@@ -110,39 +103,7 @@ public class stockVO {
 	 * 获得股票代码
 	 * @return
 	 */
-	public int getCode() {
+	public String getCode() {
 		return code;
-	}
-	
-	public IntegerProperty getCodeProperty(){
-		return new SimpleIntegerProperty(code);
-	}
-	
-	/**
-	 * 获得股票名称
-	 * @return
-	 */
-	public String getName() {
-		return name;
-	}
-	
-	public StringProperty getNameProperty(){
-		return new SimpleStringProperty(name);
-	}
-	
-	/**
-	 * 获得股票市场名称
-	 * @return
-	 */
-	public String getMarket() {
-		return market;
-	}
-	
-	/**
-	 * 获得股票板块
-	 * @return
-	 */
-	public String getPlate(){
-		return plate;
 	}
 }

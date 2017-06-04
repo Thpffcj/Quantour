@@ -17,6 +17,7 @@ import vo.MarketQuotationVO;
 
 public class MarketChanges implements MarketChangesService{
 
+	StockDataService stockDataService = new StockData();
 	private String Day;
 	private ArrayList<StockPO> todayList;
 	private ArrayList<StockPO> yesterdayList;
@@ -52,7 +53,7 @@ public class MarketChanges implements MarketChangesService{
 		StockDataService sds = new StockData();
 		SimpleDateFormat time = new SimpleDateFormat("MM/dd/yy");
 		String yesterday = today;
-		int volume;
+		double volume;
 		try {
 			do{
 				Date origin = time.parse(yesterday);
@@ -72,7 +73,7 @@ public class MarketChanges implements MarketChangesService{
 	private long getTotalVolumn(){
 		long totalVolumn = 0;
 		for(StockPO po:todayList){
-			totalVolumn += po.getVolume();
+			totalVolumn += Double.parseDouble(po.getVolume());
 		}
 		
 		return totalVolumn;
@@ -91,10 +92,11 @@ public class MarketChanges implements MarketChangesService{
 		//4为其它股票
 		//5为总股票数
 		for(StockPO po:todayList){
-			if(po.getVolume()==0)
+			if(Double.parseDouble(po.getVolume())==0)
 				continue;
 			numOfIncreaseAndDecrease[5]++;
-			String name = po.getName();
+			String code = po.getCode();
+			String name = stockDataService.getNameByCode(Integer.parseInt(code));
 			DecimalFormat df = (DecimalFormat) NumberFormat.getInstance();
 			// 设置几位小数
 			df.setMaximumFractionDigits(6);
@@ -102,7 +104,8 @@ public class MarketChanges implements MarketChangesService{
 			df.setRoundingMode(RoundingMode.HALF_UP);
 			
 			for(StockPO po1:yesterdayList){
-				if(po1.getName().equals(name)){
+				code = po1.getCode();
+				if(stockDataService.getNameByCode(Integer.parseInt(code)).equals(name)){
 					double changes = (po.getAdjClose()-po1.getAdjClose())/po1.getAdjClose();
 					changes = Double.valueOf(df.format(changes));
 					if(changes>=0.050000){
@@ -130,12 +133,16 @@ public class MarketChanges implements MarketChangesService{
 	 */
 	private int[] getNum(){
 		int[] num = {0,0};
+		String code = null;
+		String code1 = null;
 		//数组位置0为开盘-收盘大于5%*上一个交易日收盘价的股票个数，
 		//位置1为开盘‐收盘小于-5%*上一个交易日收盘价的股票个数
 		for(StockPO po:todayList){
-			String name = po.getName();
+			code = po.getCode();
+			String name = stockDataService.getNameByCode(Integer.parseInt(code));
 			for(StockPO po1:yesterdayList){
-				if(name.equals(po1.getName())){
+				code1 = po1.getCode();
+				if(name.equals(stockDataService.getNameByCode(Integer.parseInt(code1)))){
 					double changes = (po.getOpen()-po.getClose());
 					
 					if(changes>0.05*po1.getClose())

@@ -329,7 +329,7 @@ public class MainFrameController {
 	 */
 	private void ChooseTable(MouseEvent event) {
 		stockVO vo = tableView.getSelectionModel().getSelectedItem();
-		sharesid.setText(vo.getName());
+//		sharesid.setText(vo.getName());
 		sharesid.setEffect(new Blend());
 		String beginDate = LocalDateToString(begindate1.getValue());
 		String endDate = LocalDateToString(enddate1.getValue());
@@ -437,8 +437,8 @@ public class MainFrameController {
 //		ObservableList<stockVO> list = FXCollections.observableArrayList(arrayList);
 //		tableView.setItems(list);
 
-		code.setCellValueFactory(cellData -> cellData.getValue().getCodeProperty());
-		name.setCellValueFactory(cellData -> cellData.getValue().getNameProperty());
+//		code.setCellValueFactory(cellData -> cellData.getValue().getCodeProperty());
+//		name.setCellValueFactory(cellData -> cellData.getValue().getNameProperty());
 
 		// Logo显示
 		imageView.setImage(new Image("file:src/main/resources/Images/Icon.jpg"));

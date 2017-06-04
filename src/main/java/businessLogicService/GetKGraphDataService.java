@@ -7,4 +7,6 @@ public interface GetKGraphDataService {
 
 	public Map<String, ArrayList<String>> getKData(String condition, String beginDate, String endDate);
 	
+	public String getNameByCode(String code);
+	
 }

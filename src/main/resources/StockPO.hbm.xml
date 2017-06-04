@@ -5,17 +5,14 @@
 <hibernate-mapping>
     <class name="po.StockPO" table="stockdata">
         <composite-id>
-        	 <key-property name="index" type="int">
-            <column name="index" />
+        	<key-property name="date" type="java.lang.String">
+            	<column name="date" />
         	</key-property>
-         <key-property name="code" type="java.lang.String">
-            <column name="code" />
-        </key-property>
+         	<key-property name="code" type="java.lang.String">
+            	<column name="code" />
+       		</key-property>
         </composite-id>
       
-      <property name="date" type="java.lang.String">
-            <column name="date" />
-        </property>
         <property name="open" type="double">
             <column name="open" />
         </property>

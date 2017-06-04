@@ -10,9 +10,9 @@ import dataService.DateProcessingService;
 
 public class DateProcessing implements DateProcessingService {
 
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	
     public Date strToDate(String today) {
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date = null;
         try {
             date = sdf.parse(today);
@@ -46,6 +46,7 @@ public class DateProcessing implements DateProcessingService {
      * @return
      */
     public String dateToStr(Date date) {
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         return sdf.format(date);
     }
 
@@ -57,6 +58,7 @@ public class DateProcessing implements DateProcessingService {
      * @return 日期
      */
     public String count(String endDate, int offset) {
+    	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date = null;
         date = strToDate(endDate);
         Calendar c = Calendar.getInstance();

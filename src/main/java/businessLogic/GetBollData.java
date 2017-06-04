@@ -1,7 +1,11 @@
 package businessLogic;
 
 import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +32,7 @@ public class GetBollData implements GetBollDataService{
 	static double sharpeRatio;
 	
 	MovingAverage movingAverage = new MovingAverage();
-	GraphUtil graphUtil = new GraphUtil();
+//	GraphUtil graphUtil = new GraphUtil();
 	ParameterCalculation parameterCalculation = new ParameterCalculation();
 	
 	Map<String, ArrayList<Double>> upDatas = new HashMap<>();
@@ -87,13 +91,13 @@ public class GetBollData implements GetBollDataService{
 		//查询日期之前的数据量
 		int beforeDays = 19;
 		int isBegin = 0;
-		String code;
+		int code;
 		if (Character.isDigit(condition.charAt(0))){
-			code = condition;
+			code = Integer.parseInt(condition);
 		}
 		else{
 			stockList = sds.getStockByNameAndDate(condition, begin, end);
-			code = stockList.get(0).getCode();
+			code = Integer.parseInt(stockList.get(0).getCode());
 		}
 		
 		for(int i=0;i<19;i++){
@@ -104,7 +108,7 @@ public class GetBollData implements GetBollDataService{
 				break;
 			}
 			else{
-				begin = graphUtil.GetOrigin(String.valueOf(code),begin);
+				begin = GetOrigin(String.valueOf(code),begin);
 			}
 		}
 		stockList = getStockData(condition,begin,end);
@@ -412,5 +416,29 @@ public class GetBollData implements GetBollDataService{
 			stockList = stockDataService.getStockByNameAndDate(name, begin, end);
 		}
 		return stockList;
+	}
+	
+	/**
+	 * 获得指定日期的上一个有效日期
+	 */
+	public String GetOrigin(String Code,String Begin) {
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
+		String Origin = Begin;
+		int volume;
+		try {
+			do {
+				Date origin = time.parse(Origin);
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(origin);
+				cal.add(Calendar.DATE, -1);
+				Origin = (new SimpleDateFormat("yyyy-MM-dd")).format(cal.getTime());
+				int code = Integer.parseInt(Code);
+				volume = stockDataService.JudgeIfTheLast(code, Origin);
+			} while (volume == 0);
+
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return Origin;
 	}
 }

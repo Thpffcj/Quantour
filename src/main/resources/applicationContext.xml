@@ -30,8 +30,8 @@
 		<property name="hibernateProperties">
 			<props> 
 				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
-				<prop key="hibernate.show_sql">true</prop>
-				<prop key="hibernate.format_sql">true</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.format_sql">false</prop>
 				<prop key="hibernate.hbm2ddl.auto">update</prop><!-- 有表自动更新表结构，没有就创建表 -->
 			</props>
 		</property>
@@ -40,6 +40,10 @@
 			<list>
 				<value>StockPO.hbm.xml</value>
 				<value>UserPO.hbm.xml</value>
+				<value>NamelistPO.hbm.xml</value>
+				<value>ConceptClassifiedPO.hbm.xml</value>
+				<value>AreaClassifiedPO.hbm.xml</value>
+				<value>IndustryClassifiedPO.hbm.xml</value>
 			</list>
 		</property>
 		
@@ -74,7 +78,11 @@
 	<bean id="UpsAndDownsGraphAction" class="action.StockAction" scope="prototype">
 		<property name="getStockBLService" ref="getStockBLService"></property>
 	</bean>
-
+	
+	<bean id="GetStockList" class="action.StockAction" scope="prototype">
+		<property name="getStockBLService" ref="getStockBLService"></property>
+	</bean>
+	
 	<!-- 配置业务层的类 -->
 	<bean id="getKGraphDataService" class="businessLogic.GetKGraphData">
 		<property name="stockDataService" ref="stockDataService"></property>
@@ -89,6 +97,16 @@
 		<property name="sessionFactory" ref="sessionFactory"></property>
 	</bean>
 	
+	<!-- plate -->
+	<!-- 配置action类 -->
+	<bean id="PlateAction" class="action.PlateAction" scope="prototype">
+		<property name="getPlateDataService" ref="getPlateDataService"></property>
+	</bean>
+	
+	<bean id="getPlateDataService" class="businessLogic.GetPlateData">
+		<property name="stockDataService" ref="stockDataService"></property>
+	</bean>
+	
 	<!-- quantify -->
 	<!-- 配置action类 -->
 	<bean id="RSIGraphAction" class="action.QuantifyAction" scope="prototype">
@@ -101,7 +119,13 @@
 		<property name="getBollDataService" ref="getBollDataService"></property>
 	</bean>
 	<bean id="MeanReversionGraphAction" class="action.QuantifyAction" scope="prototype">
-		<property name="getBollDataService" ref="getBollDataService"></property>
+		<property name="meanReversionService" ref="meanReversionService"></property>
+	</bean>
+	<bean id="MeanReturnRateGraphAction" class="action.QuantifyAction" scope="prototype">
+		<property name="meanReversionService" ref="meanReversionService"></property>
+	</bean>
+	<bean id="MeanWinningPercentageGraphAction" class="action.QuantifyAction" scope="prototype">
+		<property name="meanReversionService" ref="meanReversionService"></property>
 	</bean>
 	
 	

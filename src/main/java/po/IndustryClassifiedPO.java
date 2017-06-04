@@ -2,7 +2,6 @@ package po;
 
 public class IndustryClassifiedPO {
 
-	private int index;
 	private String code;
 	private String name;
 	private String cName;
@@ -11,20 +10,11 @@ public class IndustryClassifiedPO {
 		super();
 	}
 
-	public IndustryClassifiedPO(int index, String code, String name, String cName) {
+	public IndustryClassifiedPO(String code, String name, String cName) {
 		super();
-		this.index = index;
 		this.code = code;
 		this.name = name;
 		this.cName = cName;
-	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
 	}
 
 	public String getCode() {

@@ -53,7 +53,7 @@ public class StockTest {
 			code = Integer.parseInt(data[i][8]);
 			name = data[i][9];
 			market = data[i][10];
-			StockPO spo = new StockPO(serial,date,open,close,high,low,volume,adjClose,code,name,market," ");
+			StockPO spo = new StockPO();
 			
 			session.save(spo);
 			

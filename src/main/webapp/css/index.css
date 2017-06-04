@@ -112,3 +112,7 @@
 #rightul li:hover ul{
 	display:block;
 }
+
+.platelist li{
+	float: none;
+}

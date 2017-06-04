@@ -107,6 +107,7 @@ $(document).ready(function(){
 					<li><a href="Stock.jsp">个股展示</a></li>
 					<li><a href="StockVS.jsp">股票比较</a></li>
 					<li><a href="Strategy.jsp">策略回测</a></li>
+					<li><a href="Plate.jsp">板块</a>	</li>
 				</ul>
 			</div>
 			<ul id="userul">
@@ -122,8 +123,23 @@ $(document).ready(function(){
 	</nav>
 	
 	<div class="divinput">
-		<input type="text" placeholder="输入股票代码/名称">
-		<button type="submit" class="search">搜索</button>
+		<input type="text" placeholder="输入股票代码/名称" id="code"> 
+		<a href="Stock.jsp" target="_blank" id="searchcode"><button type="submit" class="search">搜索</button></a>
+		<script type="text/javascript">
+		$("#searchcode").click(function(){ 
+			$.ajax({ 
+				type : "POST",
+				url : "SaveSearch",
+				data: {
+					code: $("#code").val()
+				},
+				dataType : "json",
+				success : function(obj) {
+					
+				}
+			});
+		});
+		</script>
 	</div>
 	
 	<div class="w1200">
@@ -142,9 +158,9 @@ $(document).ready(function(){
 					<span class="glyphicon glyphicon-plus"></span></button>
 				<br><br>
 				<label>回测时间:&emsp;</label>
-				<input type = "text" id = "begindate1" value="04/18/2017" placeholder="请选择开始日期">
+				<input type = "text" id = "begindate1" value="2016-05-25" placeholder="请选择开始日期">
 				<label>---</label>
-				<input type = "text" id = "enddate1" value="05/18/2017" placeholder="请选择结束日期">
+				<input type = "text" id = "enddate1" value="2017-05-25" placeholder="请选择结束日期">
 				<label>持有股票数:</label>
 				<input type = "number" id = "number" placeholder="请输入持有股票数">
 				<br><br>
@@ -166,9 +182,9 @@ $(document).ready(function(){
 				</select>
 				<button type="button" class="btn-plus" data-toggle="modal" data-target="#addpool"><span class="glyphicon glyphicon-plus"></span></button>
 				<label>回测时间:</label>
-				<input type = "text" id = "begindate2" value="04/18/2017" placeholder="请选择开始日期">
+				<input type = "text" id = "begindate2" value="2016-05-25" placeholder="请选择开始日期">
 				<label>---</label>
-				<input type = "text" id = "enddate2" value="05/18/2017" placeholder="请选择结束日期">
+				<input type = "text" id = "enddate2" value="2017-05-25" placeholder="请选择结束日期">
 				<br><br>
 				<label>&emsp;均&emsp;线:&emsp;</label>
 				<select id = "stockpool">
@@ -298,6 +314,274 @@ $(document).ready(function(){
 		$(function () { $("[data-toggle='tooltip']").tooltip(); });
 	</script>
 	
+	<script src="theme/dark.js"></script>
+	<script type="text/javascript">
+
+		var date = new Array;
+		var marketIncome = new Array;
+		var strategicIncome = new Array;
+
+		var colors = [ '#FFFFFF', '#FFFF00', '#A020F0' ];
+
+		$.ajax({
+			type : "GET",
+			url : "MeanReversionGraph",
+			dataType : "json",
+			success : function(obj) {
+				var resultJSONData = JSON.parse(obj);
+				for (i = 0; i < resultJSONData.Dates.length; i++) {
+					date[i] = resultJSONData.Dates[i];
+					marketIncome[i] = resultJSONData.MarketIncome[i];
+					strategicIncome[i] = resultJSONData.StrategicIncome[i];
+				}
+				
+				var myChart = echarts.init(document
+						.getElementById('back-flow-graph1'));
+				option = {
+					color : colors,
+					backgroundColor : '#eee',
+					 title: {
+					        text: "累计收益率",
+					        x: 'center'
+					    },
+					tooltip : {
+						trigger : 'none',
+						axisPointer : {
+							type : 'cross'
+						}
+					},
+					legend : {
+						top : 10,
+						left : 'center',
+						data : ['基准收益率','策略收益率']
+					},
+					grid : {
+						top : 70,
+						bottom : 50
+					},
+					xAxis : [
+						{
+							type : 'category',
+							axisTick : {
+								alignWithLabel : true
+							},
+							axisLine : {
+								onZero : false,
+								lineStyle : {
+									color : colors[0]
+								}
+							},
+							axisPointer : {
+								label : {
+									formatter : function(params) {
+										return ' ' + params.value + (params.seriesData.length ? '：' 
+												+ params.seriesData[0].data : '')
+												+ ' ' + params.value + (params.seriesData.length ? '：' 
+														+ params.seriesData[1].data : '');
+									}
+								}
+							},
+							data : date
+						},
+
+					],
+					yAxis : [ {
+						scale: true,
+						type : 'value'
+					} ],
+					series : [
+							{
+								name : '基准收益率',
+								type : 'line',
+								smooth : true,
+								data : marketIncome
+							},
+							{
+								name : '策略收益率',
+								type : 'line',
+								smooth : true,
+								data : strategicIncome
+							},
+					]
+				}
+				myChart.setOption(option);
+			}
+		});
+	</script>
+	
+	<script src="theme/dark.js"></script>
+	<script type="text/javascript">
+
+		var date = new Array;
+		var values = new Array;
+
+		var colors = [ '#5793f3', '#d14a61', '#675bba' ];
+
+		$.ajax({
+			type : "GET",
+			url : "MeanReturnRateGraph",
+			dataType : "json",
+			success : function(obj) {
+				var resultJSONData = JSON.parse(obj);
+				for (i = 0; i < resultJSONData.Dates.length; i++) {
+					date[i] = resultJSONData.Dates[i];
+					values[i] = resultJSONData.Values[i];
+				}
+				
+				var myChart = echarts.init(document
+						.getElementById('back-flow-graph2'));
+				option = {
+					color : colors,
+					backgroundColor : '#eee',
+					title: {
+					        text: "超额收益",
+					        x: 'center'
+					    },
+					tooltip : {
+						trigger : 'none',
+						axisPointer : {
+							type : 'cross'
+						}
+					},
+					grid : {
+						top : 70,
+						bottom : 50
+					},
+					xAxis : [
+						{
+							type : 'category',
+							axisTick : {
+								alignWithLabel : true
+							},
+							axisLine : {
+								onZero : false,
+								lineStyle : {
+									color : colors[1]
+								}
+							},
+							axisPointer : {
+								label : {
+									formatter : function(params) {
+										return ' '
+												+ params.value
+												+ (params.seriesData.length ? '：'
+														+ params.seriesData[0].data
+														: '');
+									}
+								}
+							},
+							data : date
+						},
+
+					],
+					yAxis : [ {
+						scale: true,
+						type : 'value'
+					} ],
+					series : [
+							{
+								type : 'line',
+								smooth : true,
+								 areaStyle: {
+						                normal: {
+						                    color:  'rgb(255, 70, 131)'
+						                }
+						            },
+								data : values
+							} ]
+				}
+				myChart.setOption(option);
+			}
+		});
+	</script>
+	
+	<script src="theme/dark.js"></script>
+	<script type="text/javascript">
+
+		var date = new Array;
+		var values = new Array;
+
+		var colors = [ '#5793f3', '#d14a61', '#675bba' ];
+
+		$.ajax({
+			type : "GET",
+			url : "MeanWinningPercentageGraph",
+			dataType : "json",
+			success : function(obj) {
+				var resultJSONData = JSON.parse(obj);
+				for (i = 0; i < resultJSONData.Dates.length; i++) {
+					date[i] = resultJSONData.Dates[i];
+					values[i] = resultJSONData.Values[i];
+				}
+				
+				var myChart = echarts.init(document
+						.getElementById('back-flow-graph3'));
+				option = {
+					color : colors,
+					backgroundColor : '#eee',
+					title: {
+					        text: "超额收益",
+					        x: 'center'
+					    },
+					tooltip : {
+						trigger : 'none',
+						axisPointer : {
+							type : 'cross'
+						}
+					},
+					grid : {
+						top : 70,
+						bottom : 50
+					},
+					xAxis : [
+						{
+							type : 'category',
+							axisTick : {
+								alignWithLabel : true
+							},
+							axisLine : {
+								onZero : false,
+								lineStyle : {
+									color : colors[1]
+								}
+							},
+							axisPointer : {
+								label : {
+									formatter : function(params) {
+										return ' '
+												+ params.value
+												+ (params.seriesData.length ? '：'
+														+ params.seriesData[0].data
+														: '');
+									}
+								}
+							},
+							data : date
+						},
+
+					],
+					yAxis : [ {
+						scale: true,
+						type : 'value'
+					} ],
+					series : [
+							{
+								type : 'line',
+								smooth : true,
+								 areaStyle: {
+						                normal: {
+						                    color:  'rgb(255, 70, 131)'
+						                }
+						            },
+								data : values
+							} ]
+				}
+				myChart.setOption(option);
+			}
+		});
+	</script>
+	
+	<!-- 
 	<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 	<script src="theme/dark.js"></script>
 	<script type="text/javascript">
@@ -321,10 +605,14 @@ $(document).ready(function(){
 				name =  resultJSONData.Name;
 				
 				var myChart = echarts.init(document
-						.getElementById('back-flow-graph1'));
+						.getElementById('back-flow-graph2'));
 				option = {
 					color : colors,
 					backgroundColor : '#eee',
+					title: {
+					        text: "累计收益率",
+					        x: 'center'
+					    },
 					tooltip : {
 						trigger : 'none',
 						axisPointer : {
@@ -411,7 +699,7 @@ $(document).ready(function(){
 				name =  resultJSONData.Name;
 				
 				var myChart = echarts.init(document
-						.getElementById('back-flow-graph2'));
+						.getElementById('back-flow-graph3'));
 				option = {
 					color : colors,
 					backgroundColor : '#eee',
@@ -491,6 +779,6 @@ $(document).ready(function(){
 			}
 		});
 	</script>
-	
+	 -->
 </body>
 </html>

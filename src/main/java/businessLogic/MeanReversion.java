@@ -2,7 +2,11 @@ package businessLogic;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +29,7 @@ public class MeanReversion implements MeanReversionService{
 	static double beta;
 	static double sharpeRatio;
 
-	static ArrayList<Integer> calculationCycle = new ArrayList<>();
+	static ArrayList<String> calculationCycle = new ArrayList<>();
 	static ArrayList<String> excessIncome = new ArrayList<>();
 	static ArrayList<String> winningPercentage = new ArrayList<>();
 
@@ -33,9 +37,13 @@ public class MeanReversion implements MeanReversionService{
 	static double loseDays;
 	static double winPercentage;
 	
+	//偏离度
 	static Map<String,ArrayList<Double>> deviationDegree = new HashMap<>();
+	//选中的股票
 	static ArrayList<String> selectShares = new ArrayList<>();
+	//选中日期
 	static ArrayList<String> dates = new ArrayList<>();
+	//新股票池
 	static ArrayList<String> newStockPool = new ArrayList<>();
 	//市场收益率
 	static ArrayList<Double> marketIncome = new ArrayList<>();
@@ -54,11 +62,9 @@ public class MeanReversion implements MeanReversionService{
 	static String lastBegin = null;
 	static String lastEnd = null;
 	
-//	StockDataService sds = new StockData();
 	MeanReversionUtil util = new MeanReversionUtil();
 	MovingAverage movingAverage = new MovingAverage();
 	ParameterCalculation parameterCalculation = new ParameterCalculation(); 
-	GraphUtil graphUtil = new GraphUtil();
 
 	//注入股票查询的Dao
 	private StockDataService stockDataService;
@@ -67,8 +73,8 @@ public class MeanReversion implements MeanReversionService{
 	}
 	
 	/**
-	 * holdPeriod������
-	 * formingPeriod����
+	 * holdPeriod持有期
+	 * formingPeriod形成期
 	 */
 	public Map<String, ArrayList<String>> getMeanReversionGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end){
 		
@@ -83,7 +89,11 @@ public class MeanReversion implements MeanReversionService{
 		DecimalFormat df = new DecimalFormat("0.00%");
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		
+		//
+//		System.out.println("mean");
 		int daylong = stockDataService.getDate(begin, end).size();
+		//
+//		System.out.println(daylong);
 //		newStockPool = new ArrayList<>();
 //		for(int i=0; i<stockPool.size(); i++){
 //			ArrayList<stockPO> stock = getStockData(stockPool.get(i), begin, end);
@@ -96,7 +106,8 @@ public class MeanReversion implements MeanReversionService{
 		deviationDegree = new HashMap<>();
 		
 		getStockPoolDeviationDegree(stockPool, formingPeriod, begin, end, daylong);
-		
+		//
+//		System.out.println(deviationDegree.size());
 		
 		int standard = Integer.MIN_VALUE;
 		for (int i = 0; i < newStockPool.size(); i++) {
@@ -120,12 +131,14 @@ public class MeanReversion implements MeanReversionService{
 		for (int i = minStock.size() - 1; i >= 0; i--) {
 			dates.add(minStock.get(i).getDate());
 		}
+		//
+//		System.out.println(newStockPool.size()+" "+dates.size());
 
 		selectShares = new ArrayList<>();
 		selectShares = transferPositions(days, shares, holdPeriod, deviationDegree);
 		
-		String series1 = "����������";
-		String series2 = "��׼������";
+		String series1 = "marketIncome";
+		String series2 = "strategicIncome";
 
 		marketIncome = new ArrayList<>();
 		strategicIncome = new ArrayList<>();
@@ -145,6 +158,16 @@ public class MeanReversion implements MeanReversionService{
 			dataset.addValue(marketIncome.get(i), series2, dates.get(i));
 		}
 
+		ArrayList<String> sMarketIncome = new ArrayList<>();
+		ArrayList<String> sStrategicIncome = new ArrayList<>();
+		for(int i=0; i<marketIncome.size(); i++){
+			sMarketIncome.add(String.valueOf(marketIncome.get(i)));
+			sStrategicIncome.add(String.valueOf(strategicIncome.get(i)));
+		}
+		data.put("date", dates);
+		data.put("market", sMarketIncome);
+		data.put("strategic", sStrategicIncome);
+		
 		double mmoney = 0;
 		double smoney = 0;
 
@@ -378,7 +401,6 @@ public class MeanReversion implements MeanReversionService{
 	 */
 	public Map<String,ArrayList<Double>> getDeviationDegree(String condition, int formingPeriod, String begin, String end, int standard) {
 		
-		StockDataService sds = new StockData();
 		ArrayList<StockPO> stockList = new ArrayList<StockPO>();
 		//��ѯ����֮ǰ��������
 		int beforeDays = formingPeriod-1;
@@ -389,18 +411,18 @@ public class MeanReversion implements MeanReversionService{
 			code = Integer.parseInt(condition);
 		}
 		else{
-			code = sds.getCodeByName(condition);
+			code = stockDataService.getCodeByName(condition);
 		}
 		
 		for(int i=0;i<formingPeriod-1;i++){
-			isBegin = sds.JudgeIfTheLast(code, begin);
+			isBegin = stockDataService.JudgeIfTheLast(code, begin);
 			//���֮ǰû��������
 			if(isBegin==-1){
 				beforeDays = i;
 				break;
 			}
 			else{
-				begin = graphUtil.GetOrigin(String.valueOf(code),begin);
+				begin = GetOrigin(String.valueOf(code),begin);
 			}
 		}
 		stockList = getStockData(condition,begin,end);
@@ -455,7 +477,7 @@ public class MeanReversion implements MeanReversionService{
 	}
 	
 	/**
-	 * �����������벻ͬ�γ���/�����ڵĹ�ϵͼ
+	 * 超额收益
 	 * @param stockPool
 	 * @param shares
 	 * @param holdPeriod
@@ -464,10 +486,14 @@ public class MeanReversion implements MeanReversionService{
 	 * @param end
 	 * @return
 	 */
-	public DefaultCategoryDataset GetMeanReturnRateGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end){
+	public Map<String, ArrayList<String>> GetMeanReturnRateGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end){
 		
+		getMeanReversionGraphData(section, stockPool, shares, holdPeriod, formingPeriod, begin, end);
+		
+		Map<String, ArrayList<String>> data = new HashMap<>();
 		calculationCycle = new ArrayList<>();
 		excessIncome = new ArrayList<>();
+		ArrayList<String> excessGraph = new ArrayList<>();
 		
 		DecimalFormat df = new DecimalFormat("0.00%");
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
@@ -488,16 +514,20 @@ public class MeanReversion implements MeanReversionService{
 		for(int i=0; i<strategicIncome.size(); i++){
 			day.add(i+1);
 //			System.out.println(day.get(i));
-			calculationCycle.add(day.get(i));
+			calculationCycle.add(String.valueOf(day.get(i)));
 			excessIncome.add(df.format(strategicIncome.get(i)-marketIncome.get(i)));
+			excessGraph.add(String.valueOf(strategicIncome.get(i)-marketIncome.get(i)));
 			dataset.addValue(strategicIncome.get(i)-marketIncome.get(i), series, day.get(i));
 		}
 		
-		return dataset;
+		data.put("date", calculationCycle);
+		data.put("excessGraph", excessGraph);
+		data.put("excessData", excessIncome);
+		return data;
 	}
 	
 	/**
-	 * ����ʤ���벻ͬ�γ���/�����ڵĹ�ϵͼ
+	 * 策略胜率
 	 * @param stockPool
 	 * @param shares
 	 * @param holdPeriod
@@ -506,8 +536,13 @@ public class MeanReversion implements MeanReversionService{
 	 * @param end
 	 * @return
 	 */
-	public DefaultCategoryDataset GetMeanWinningPercentageGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end){
+	public Map<String, ArrayList<String>> GetMeanWinningPercentageGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end){
 
+		getMeanReversionGraphData(section, stockPool, shares, holdPeriod, formingPeriod, begin, end);
+		
+		Map<String, ArrayList<String>> data = new HashMap<>();
+		ArrayList<String> winning = new ArrayList<>();
+		
 		winningPercentage = new ArrayList<>();
 		DecimalFormat df = new DecimalFormat("0.00%");
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
@@ -525,24 +560,27 @@ public class MeanReversion implements MeanReversionService{
 		
 		double winDay = 0.0;
 		double loseDay = 0.0;
-		ArrayList<Integer> day = new ArrayList<>();
+		ArrayList<String> day = new ArrayList<>();
 
 		for(int i=0; i<strategicIncome.size(); i++){
-			day.add(i+1);
+			day.add(String.valueOf(i+1));
 			if(marketIncome.get(i)>strategicIncome.get(i)){
 				loseDay++;
 			}else{
 				winDay++;
 			}
+			winning.add(String.valueOf(winDay/(winDay+loseDay)));
 			winningPercentage.add(df.format(winDay/(winDay+loseDay)));
 			dataset.addValue(winDay/(winDay+loseDay), series, day.get(i));
 		}
 		
-		return dataset;
+		data.put("winningGraph", winning);
+		data.put("date", day);
+		return data;
 	}
 	
 	/**
-	 * �����ʷֲ�ֱ��ͼ�����������ں��γ��ڣ�
+	 * 收益分布直方图
 	 * @param stockPool
 	 * @param shares
 	 * @param holdPeriod
@@ -661,7 +699,7 @@ public class MeanReversion implements MeanReversionService{
 		ArrayList<MeanReturnRateVO> meanReturn = new ArrayList<>();
 		for(int i=0; i<calculationCycle.size(); i++){
 			MeanReturnRateVO m = new MeanReturnRateVO();
-			m.setCalculationCycle(calculationCycle.get(i));
+			m.setCalculationCycle(Integer.parseInt(calculationCycle.get(i)));
 			m.setExcessIncome(excessIncome.get(i));
 			m.setWinningPercentage(winningPercentage.get(i));
 			meanReturn.add(m);
@@ -684,6 +722,30 @@ public class MeanReversion implements MeanReversionService{
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * 获得指定日期的上一个有效日期
+	 */
+	public String GetOrigin(String Code,String Begin) {
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
+		String Origin = Begin;
+		int volume;
+		try {
+			do {
+				Date origin = time.parse(Origin);
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(origin);
+				cal.add(Calendar.DATE, -1);
+				Origin = (new SimpleDateFormat("yyyy-MM-dd")).format(cal.getTime());
+				int code = Integer.parseInt(Code);
+				volume = stockDataService.JudgeIfTheLast(code, Origin);
+			} while (volume == 0);
+
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return Origin;
 	}
 
 }

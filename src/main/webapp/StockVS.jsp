@@ -46,6 +46,7 @@
 					<li><a href="Stock.jsp">个股展示</a></li>
 					<li><a href="StockVS.jsp">股票比较</a></li>
 					<li><a href="Strategy.jsp">策略回测</a></li>
+					<li><a href="Plate.jsp">板块</a>	</li>
 				</ul>
 			</div>
 			<ul id="userul">
@@ -61,8 +62,23 @@
 	</nav>
 
 	<div class="divinput">
-		<input type="text" placeholder="输入股票代码/名称">
-		<button type="submit" class="search">搜索</button>
+		<input type="text" placeholder="输入股票代码/名称" id="code"> 
+		<a href="Stock.jsp" target="_blank" id="searchcode"><button type="submit" class="search">搜索</button></a>
+		<script type="text/javascript">
+		$("#searchcode").click(function(){ 
+			$.ajax({ 
+				type : "POST",
+				url : "SaveSearch",
+				data: {
+					code: $("#code").val()
+				},
+				dataType : "json",
+				success : function(obj) {
+					
+				}
+			});
+		});
+		</script>
 	</div>
 	
 	<div class="w1200">
@@ -79,20 +95,7 @@
 			$(document).ready(function(){ 
 				showVSGraph()
 				$("#searchVSGraph").click(function(){ 
-					$.ajax({ 
-					    type: "POST", 	
-						url: "VSGraph",
-						data: {
-							begindate: $("#begindate").val(),
-							enddate: $("#enddate").val(),
-							code1: $("#code1").val(),
-							code2: $("#code2").val()
-						},
-						dataType: "json",
-						success: function(data){
-							showVSGraph()
-						},
-					});
+					showVSGraph()	
 				});
 			});
 			</script>

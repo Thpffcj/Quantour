@@ -14,9 +14,9 @@ public interface MeanReversionService {
 
 	public Map<String, ArrayList<String>> getMeanReversionGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end) throws ParseException;
 
-	public DefaultCategoryDataset GetMeanReturnRateGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin,String end);
+	public Map<String, ArrayList<String>> GetMeanReturnRateGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin,String end);
 
-	public DefaultCategoryDataset GetMeanWinningPercentageGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end);
+	public Map<String, ArrayList<String>> GetMeanWinningPercentageGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end);
 	
 	public DefaultCategoryDataset GetDistributionHistogramGraphData(String section, ArrayList<String> stockPool, int shares,
 			int holdPeriod, int formingPeriod, String begin, String end);

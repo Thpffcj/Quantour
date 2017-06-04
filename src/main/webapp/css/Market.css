@@ -6,7 +6,7 @@ body {
 }
 
 .divinput {
-	padding: 12px 0px 0px 700px;
+	padding: 12px 0px 0px 800px;
 }
 
 .divinput input {
@@ -168,11 +168,13 @@ h2 {
 .plate-choose a {
 	font-size: 18px;
 	color: #fff;
+	cursor: pointer;
 }
 
 .plate-choose a.active {
 	color: #d75442;
 	font-weight: 700;
+	cursor: pointer;
 }
 
 .prestation {

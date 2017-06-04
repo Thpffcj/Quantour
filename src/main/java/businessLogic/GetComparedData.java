@@ -19,6 +19,8 @@ import po.StockPO;
 
 public class GetComparedData implements GetComparedDataService {
 
+	StockDataService stockDataService = new StockData();
+	
 	/**
 	 * 得到两个股票的每天最低值数据集
 	 * 
@@ -68,8 +70,8 @@ public class GetComparedData implements GetComparedDataService {
 			double low2 = sto2.getLow();
 			String date = sto1.getDate();
 
-			dataset.addValue(low1, sto1.getName(), date);
-			dataset.addValue(low2, sto2.getName(), date);
+			dataset.addValue(low1, stockDataService.getNameByCode(Integer.parseInt(sto1.getCode())), date);
+			dataset.addValue(low2, stockDataService.getNameByCode(Integer.parseInt(sto2.getCode())), date);
 			// System.out.println(low1+" "+sto1.getName()+" "+date);
 			// System.out.println(low2+" "+sto2.getName()+" "+date);
 		}
@@ -184,8 +186,8 @@ public class GetComparedData implements GetComparedDataService {
 			double high2 = sto2.getHigh();
 			String date = sto1.getDate();
 
-			dataset.addValue(high1, sto1.getName(), date);
-			dataset.addValue(high2, sto2.getName(), date);
+			dataset.addValue(high1, stockDataService.getNameByCode(Integer.parseInt(sto1.getCode())), date);
+			dataset.addValue(high2, stockDataService.getNameByCode(Integer.parseInt(sto2.getCode())), date);
 		}
 
 		return dataset;
@@ -299,13 +301,13 @@ public class GetComparedData implements GetComparedDataService {
 			sto2 = stockList1.get(i);
 			double change1 = (sto2.getAdjClose() - sto1.getAdjClose()) / sto1.getAdjClose() * 100;
 			change1 = Double.valueOf(df.format(change1));
-			dataset.addValue(change1, sto2.getName(), sto2.getDate());
+			dataset.addValue(change1, stockDataService.getNameByCode(Integer.parseInt(sto2.getCode())), sto2.getDate());
 
 			sto1 = stockList2.get(i + 1);
 			sto2 = stockList2.get(i);
 			double change2 = (sto2.getAdjClose() - sto1.getAdjClose()) / sto1.getAdjClose() * 100;
 			change2 = Double.valueOf(df.format(change2));
-			dataset.addValue(change2, sto2.getName(), sto2.getDate());
+			dataset.addValue(change2, stockDataService.getNameByCode(Integer.parseInt(sto2.getCode())), sto2.getDate());
 		}
 
 		return dataset;
@@ -416,8 +418,8 @@ public class GetComparedData implements GetComparedDataService {
 			double close2 = sto2.getClose();
 			String date = sto1.getDate();
 
-			dataset.addValue(close1, sto1.getName(), date);
-			dataset.addValue(close2, sto2.getName(), date);
+			dataset.addValue(close1, stockDataService.getNameByCode(Integer.parseInt(sto1.getCode())), date);
+			dataset.addValue(close2, stockDataService.getNameByCode(Integer.parseInt(sto2.getCode())), date);
 
 		}
 
@@ -481,13 +483,13 @@ public class GetComparedData implements GetComparedDataService {
 			sto2 = stockList1.get(i);
 			double return1 = Math.log(sto2.getAdjClose() / sto1.getAdjClose()) * 100;
 			return1 = Double.valueOf(df.format(return1));
-			dataset.addValue(return1, sto2.getName(), sto2.getDate());
+			dataset.addValue(return1, stockDataService.getNameByCode(Integer.parseInt(sto2.getCode())), sto2.getDate());
 
 			sto1 = stockList2.get(i + 1);
 			sto2 = stockList2.get(i);
 			double return2 = Math.log(sto2.getAdjClose() / sto1.getAdjClose()) * 100;
 			return2 = Double.valueOf(df.format(return2));
-			dataset.addValue(return2, sto2.getName(), sto2.getDate());
+			dataset.addValue(return2, stockDataService.getNameByCode(Integer.parseInt(sto2.getCode())), sto2.getDate());
 		}
 
 		return dataset;
@@ -609,7 +611,7 @@ public class GetComparedData implements GetComparedDataService {
 		StockDataService sds = new StockData();
 		SimpleDateFormat time = new SimpleDateFormat("MM/dd/yy");
 		String Origin = Begin;
-		int volume;
+		double volume;
 		try {
 
 			// SimpleDateFormat sdf = new SimpleDateFormat("EEEE");
@@ -643,7 +645,7 @@ public class GetComparedData implements GetComparedDataService {
 		StockDataService sds = new StockData();
 		SimpleDateFormat time = new SimpleDateFormat("MM/dd/yy");
 		String Origin = Begin;
-		int volume;
+		double volume;
 		try {
 
 			// SimpleDateFormat sdf = new SimpleDateFormat("EEEE");

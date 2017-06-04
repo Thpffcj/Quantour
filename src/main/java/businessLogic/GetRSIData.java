@@ -4,6 +4,8 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,35 +38,22 @@ public class GetRSIData implements GetRSIDataService{
 	}
 	
 //	static StockDataService stockDataService = new StockData();
-	static GraphUtil graphUtil = new GraphUtil();
+//	static GraphUtil graphUtil = new GraphUtil();
 	//计算所需的各种参数
 	ParameterCalculation parameterCalculation = new ParameterCalculation(); 
 	
 	Map<String, ArrayList<Double>> RSIDatas = new HashMap<>();
 	ArrayList<String> newStockPool = new ArrayList<>();
 	
-//	public static void main(String[] args) {
-//		
-//		Map<String, ArrayList<String>> data = new HashMap<>();
-//		ArrayList<String> date = new ArrayList<>();
-//		ArrayList<String> value = new ArrayList<>();
-//		
-//		data = GetRSIData.getRSIGraphData("1", "3/1/05","7/6/05");
-//		date = data.get("date");
-//		value = data.get("value");
-//		System.out.println(date.get(0));
-//	}
-	
 	/**
 	 * 获得指定时间内RSI图的数据
 	 */
 	public Map<String, ArrayList<String>> getRSIGraphData(String condition, String begin, String end) {
 
-		SimpleDateFormat time1 = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat time = new SimpleDateFormat("MM/dd/yy");
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
 		try {
-			begin = time.format(time1.parse(begin));
-			end = time.format(time1.parse(end));
+			begin = time.format(time.parse(begin));
+			end = time.format(time.parse(end));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -80,7 +69,7 @@ public class GetRSIData implements GetRSIDataService{
 			code = Integer.parseInt(condition);
 		} else {
 			stockList = stockDataService.getStockByNameAndDate(condition, begin, end);
-			code = stockList.get(0).getCode();
+			code = Integer.parseInt(stockList.get(0).getCode());
 		}
 
 		for (int i = 0; i < 20; i++) {
@@ -90,7 +79,7 @@ public class GetRSIData implements GetRSIDataService{
 				beforeDays = i;
 				break;
 			} else {
-				begin = graphUtil.GetOrigin(String.valueOf(code), begin);
+				begin = GetOrigin(String.valueOf(code), begin);
 //				System.out.println(begin);
 			}
 		}
@@ -378,5 +367,29 @@ public class GetRSIData implements GetRSIDataService{
 			stockList = stockDataService.getStockByNameAndDate(name, begin, end);
 		}
 		return stockList;
+	}
+	
+	/**
+	 * 获得指定日期的上一个有效日期
+	 */
+	public String GetOrigin(String Code,String Begin) {
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
+		String Origin = Begin;
+		int volume;
+		try {
+			do {
+				Date origin = time.parse(Origin);
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(origin);
+				cal.add(Calendar.DATE, -1);
+				Origin = (new SimpleDateFormat("yyyy-MM-dd")).format(cal.getTime());
+				int code = Integer.parseInt(Code);
+				volume = stockDataService.JudgeIfTheLast(code, Origin);
+			} while (volume == 0);
+
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return Origin;
 	}
 }

@@ -1,15 +1,17 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<!-- Generated 2017-5-30 15:59:02 by Hibernate Tools 3.5.0.Final -->
+<!-- Generated 2017-5-31 15:14:17 by Hibernate Tools 3.5.0.Final -->
 <hibernate-mapping>
-    <class name="po.NamelistPO" table="namelist">
-        <id name="code" type="java.lang.String">
+    <class name="po.IndustryClassifiedPO" table="industry_classified">
+      <id name="code" type="java.lang.String">
             <column name="code" />
         </id>
-        
         <property name="name" type="java.lang.String">
             <column name="name" />
+        </property>
+        <property name="cName" type="java.lang.String" access="field">
+            <column name="c_name" />
         </property>
     </class>
 </hibernate-mapping>

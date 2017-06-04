@@ -7,21 +7,23 @@ import po.StockPO;
 
 public interface StockDataService {
 
-	public ArrayList<StockPO> getStockByCodeAndDate(String Code,String Begin,String End);
+	public ArrayList<StockPO> getStockByCodeAndDate(int code,String begin,String end);
 	
 	public ArrayList<StockPO> getStockByNameAndDate(String Name,String Begin,String End);
 	
 	public ArrayList<StockPO> getStockByDate(String Begin);
 	
-	public int getVolumeByDateAndCode(int Code,String Begin);
+	public Double getVolumeByDateAndCode(int Code,String Begin);
 	
-	public int getVolumeByDateAndName(String Name,String Begin);
+	public Double getVolumeByDateAndName(String Name,String Begin);
 	
-	public int JudgeIfTheLast(String code, String Begin);
+	public int JudgeIfTheLast(int code, String Begin);
 	
 	public ArrayList<StockPO> getCodeAndName();
 	
-	public ArrayList<StockPO> getCodeAndNameByPlate(String plate);
+	public ArrayList<String> getPlate(String plate_type);
+	
+	public ArrayList<String> getCodeByPlate(String plate_type,String plate);
 	
 	public ArrayList<Double> getStockOpenBySection(String section, String begin, String end);
 	
@@ -30,6 +32,8 @@ public interface StockDataService {
 	public ArrayList<String> getDate(String begin, String end);
 	
 	public int getCodeByName(String name);
+	
+	public String getNameByCode(int code);
 	
 	public StockPO getStockByOneDay(String Name,Date day);
 

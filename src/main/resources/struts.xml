@@ -18,15 +18,17 @@
        <result name="query_success">/Stock.jsp</result>
      </action>
      
-      <action name="Stock_*" class="stockAction" method="{1}">
-       <result name="upsAndDowns_success">Stock.jsp</result>
-     </action>
-     
       <action name="UpsAndDownsGraph" class="UpsAndDownsGraphAction" method="getUpsAndDownsGraph">
      	<result type ="json">
      		<param name="root">result</param>
      	</result>  
      </action>   
+     
+     <action name="StockMessage" class="GetStockList" method="getStockMessage">
+     	<result type="json">
+     		<param name="root">result</param>
+     	</result>
+     </action>
      
      <action name="VSGraph" class="VSGraphAction" method="getVSGraph">
      	<result type ="json">
@@ -34,7 +36,13 @@
      	</result>  
      </action>   
      
-      <action name="KGraph" class="KGraphAction" method="getKGraph">
+     <action name="KGraph" class="KGraphAction" method="getKGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="SaveSearch" class="KGraphAction" method="saveSearchCode">
      	<result type ="json">
      		<param name="root">result</param>
      	</result>  
@@ -64,7 +72,35 @@
      	</result>  
      </action>
      
+     <action name="MeanReturnRateGraph" class="MeanReturnRateGraphAction" method="getMeanReturnRateGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
      
+     <action name="MeanWinningPercentageGraph" class="MeanWinningPercentageGraphAction" method="getMeanWinningPercentageGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="ConceptPlate" class="PlateAction" method="getConceptPlate">
+     	<result type="json">
+     		<param name="root">result</param>
+     	</result>
+     </action>
+     
+     <action name="IndustryPlate" class="PlateAction" method="getIndustryPlate">
+     	<result type="json">
+     		<param name="root">result</param>
+     	</result>
+     </action>
+     
+     <action name="AreaPlate" class="PlateAction" method="getAreaPlate">
+     	<result type="json">
+     		<param name="root">result</param>
+     	</result>
+     </action>
    </package>
    
 </struts>

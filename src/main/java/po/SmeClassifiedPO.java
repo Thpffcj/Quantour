@@ -2,7 +2,6 @@ package po;
 
 public class SmeClassifiedPO {
 
-	private int index;
 	private String code;
 	private String name;
 	
@@ -10,19 +9,10 @@ public class SmeClassifiedPO {
 		super();
 	}
 
-	public SmeClassifiedPO(int index, String code, String name) {
+	public SmeClassifiedPO(String code, String name) {
 		super();
-		this.index = index;
 		this.code = code;
 		this.name = name;
-	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
 	}
 
 	public String getCode() {

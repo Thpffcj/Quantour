@@ -24,12 +24,10 @@ public class MeanReturnRateGraph {
 
 	public ChartPanel GetMeanReturnRateGraph(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end) {
 		MeanReversionService ms = new MeanReversion();
-		DefaultCategoryDataset dataset = ms.GetMeanReturnRateGraphData(section, stockPool, shares, holdPeriod,formingPeriod, begin, end);
-		JFreeChart jfreechart = ChartFactory.createLineChart("超额收益率", "时间", "超额收益率", dataset,
-				PlotOrientation.VERTICAL, true, true, false);
+		DefaultCategoryDataset dataset = null;
 //		ArrayList<String> a = ms.getExcessIncome();
 //		System.out.println(a.get(5));
-		CategoryPlot plot = jfreechart.getCategoryPlot();
+		CategoryPlot plot = null;
 		plot.setBackgroundPaint(Color.WHITE);//设置曲线图背景色
         plot.setDomainGridlinesVisible(false);//不显示网格
         plot.setRangeGridlinePaint(Color.GRAY);//设置间距格线颜色为灰色
@@ -45,25 +43,23 @@ public class MeanReturnRateGraph {
 		ValueAxis rangeAxis = plot.getRangeAxis();
 		rangeAxis.setLabelFont(new Font("黑体", Font.BOLD, 15));
 		
-		jfreechart.getLegend().setItemFont(new Font("黑体", Font.BOLD, 15));
-		jfreechart.getTitle().setFont(new Font("宋体", Font.BOLD, 20));
+//		jfreechart.getLegend().setItemFont(new Font("黑体", Font.BOLD, 15));
+//		jfreechart.getTitle().setFont(new Font("宋体", Font.BOLD, 20));
+//		
+//		ChartPanel chartPanel = new ChartPanel(jfreechart,true);
+//		chartPanel.setPreferredSize(new Dimension(760,546));
 		
-		ChartPanel chartPanel = new ChartPanel(jfreechart,true);
-		chartPanel.setPreferredSize(new Dimension(760,546));
-		
-		return chartPanel;
+		return null;
 
 	}
 	
 	public ChartPanel GetMeanWinningPercentageGraph(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end) {
 		MeanReversionService ms = new MeanReversion();
-		DefaultCategoryDataset dataset = ms.GetMeanWinningPercentageGraphData(section,stockPool, shares, holdPeriod,formingPeriod, begin, end);
-		JFreeChart jfreechart = ChartFactory.createLineChart("策略胜率", "时间", "策略胜率", dataset,
-				PlotOrientation.VERTICAL, true, true, false);
+		DefaultCategoryDataset dataset = null;
 		
 //		ArrayList<String> a = ms.getWinningPercentage();
 //		System.out.println(a.get(5));
-		CategoryPlot plot = jfreechart.getCategoryPlot();
+		CategoryPlot plot = null;
 		plot.setBackgroundPaint(Color.WHITE);//设置曲线图背景色
         plot.setDomainGridlinesVisible(false);//不显示网格
         plot.setRangeGridlinePaint(Color.GRAY);//设置间距格线颜色为灰色
@@ -79,13 +75,13 @@ public class MeanReturnRateGraph {
 		ValueAxis rangeAxis = plot.getRangeAxis();
 		rangeAxis.setLabelFont(new Font("黑体", Font.BOLD, 15));
 		
-		jfreechart.getLegend().setItemFont(new Font("黑体", Font.BOLD, 15));
-		jfreechart.getTitle().setFont(new Font("宋体", Font.BOLD, 20));
+//		jfreechart.getLegend().setItemFont(new Font("黑体", Font.BOLD, 15));
+//		jfreechart.getTitle().setFont(new Font("宋体", Font.BOLD, 20));
+//		
+//		ChartPanel chartPanel = new ChartPanel(jfreechart,true);
+//		chartPanel.setPreferredSize(new Dimension(760,546));
 		
-		ChartPanel chartPanel = new ChartPanel(jfreechart,true);
-		chartPanel.setPreferredSize(new Dimension(760,546));
-		
-		return chartPanel;
+		return null;
 
 	}
 	

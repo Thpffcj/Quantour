@@ -31,32 +31,32 @@ public class ChooseStockFrameController {
 			{
 				setAlignment(Pos.CENTER);
 			}
-			cell.setOnAction(new EventHandler<ActionEvent>() {
-				@Override
-				public void handle(ActionEvent t) {
-					boolean ischosen = cell.isSelected();
-					stockVO vo = getTableView().getItems().get(getIndex());
-					if (ischosen) {
-						codelist.add(vo.getName());
-						updateListView();
-					} else {
-						String Name = vo.getName();
-						Iterator<String> iterator = codelist.iterator();
-						while (iterator.hasNext()) {
-							if (iterator.next().equals(Name)) {
-								iterator.remove();
-							}
-						}
-						updateListView();
-					}
-					number.setText("已选择：" + codelist.size() + "/100");
-					if (codelist.size() >= 100) {
-						button.setDisable(false);
-					} else {
-						button.setDisable(true);
-					}
-				}
-			});
+//			cell.setOnAction(new EventHandler<ActionEvent>() {
+//				@Override
+//				public void handle(ActionEvent t) {
+//					boolean ischosen = cell.isSelected();
+//					stockVO vo = getTableView().getItems().get(getIndex());
+//					if (ischosen) {
+//						codelist.add(vo.getName());
+//						updateListView();
+//					} else {
+//						String Name = vo.getName();
+//						Iterator<String> iterator = codelist.iterator();
+//						while (iterator.hasNext()) {
+//							if (iterator.next().equals(Name)) {
+//								iterator.remove();
+//							}
+//						}
+//						updateListView();
+//					}
+//					number.setText("已选择：" + codelist.size() + "/100");
+//					if (codelist.size() >= 100) {
+//						button.setDisable(false);
+//					} else {
+//						button.setDisable(true);
+//					}
+//				}
+//			});
 		}
 
 		@Override

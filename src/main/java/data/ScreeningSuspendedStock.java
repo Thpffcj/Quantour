@@ -26,7 +26,8 @@ public class ScreeningSuspendedStock{
 			if(stockList == null || stockList.size() != dayLong){
 				continue;
 			}
-			noSuspend.add(stockList.get(i).getName());
+			String code = stockList.get(i).getCode();
+			noSuspend.add(sds.getNameByCode(Integer.parseInt(code)));
 		}
 		return noSuspend;
 	}
@@ -83,7 +84,7 @@ public class ScreeningSuspendedStock{
 		char flag = condition.charAt(0);
 		ArrayList<StockPO> stockList = new ArrayList<>();
 		if (Character.isDigit(flag)) {
-			String code = condition;
+			int code = Integer.parseInt(condition);
 			stockList = sds.getStockByCodeAndDate(code, begin, end);
 		} else {
 			String name = condition;

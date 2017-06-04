@@ -14,7 +14,6 @@ public class StockPO implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private int index;
 	private String date;
 	private double open;
 	private double high;
@@ -29,7 +28,6 @@ public class StockPO implements Serializable {
 	}
 	
 	public StockPO(String code){
-		this.index = 0;
 		this.date = "";
 		this.open = 0;
 		this.high = 0;
@@ -41,10 +39,9 @@ public class StockPO implements Serializable {
 	
 	}
 	
-	public StockPO(int index, String date, double open, double high, double low, double close, String volume,
+	public StockPO(String date, double open, double high, double low, double close, String volume,
 			double adjClose, String code) {
 		super();
-		this.index = index;
 		this.date = date;
 		this.open = open;
 		this.high = high;
@@ -54,17 +51,6 @@ public class StockPO implements Serializable {
 		this.adjClose = adjClose;
 		this.code = code;
 	}
-
-
-	public int getIndex() {
-		return index;
-	}
-
-
-	public void setIndex(int index) {
-		this.index = index;
-	}
-
 
 	public String getDate() {
 		return date;
@@ -145,7 +131,6 @@ public class StockPO implements Serializable {
 		this.code = code;
 	}
 
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -159,7 +144,6 @@ public class StockPO implements Serializable {
 		result = prime * result + ((date == null) ? 0 : date.hashCode());
 		temp = Double.doubleToLongBits(high);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + index;
 		temp = Double.doubleToLongBits(low);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(open);
@@ -167,7 +151,6 @@ public class StockPO implements Serializable {
 		result = prime * result + ((volume == null) ? 0 : volume.hashCode());
 		return result;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -194,8 +177,6 @@ public class StockPO implements Serializable {
 			return false;
 		if (Double.doubleToLongBits(high) != Double.doubleToLongBits(other.high))
 			return false;
-		if (index != other.index)
-			return false;
 		if (Double.doubleToLongBits(low) != Double.doubleToLongBits(other.low))
 			return false;
 		if (Double.doubleToLongBits(open) != Double.doubleToLongBits(other.open))
@@ -207,5 +188,6 @@ public class StockPO implements Serializable {
 			return false;
 		return true;
 	}
+
 	
 }

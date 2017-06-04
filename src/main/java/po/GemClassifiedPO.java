@@ -2,7 +2,6 @@ package po;
 
 public class GemClassifiedPO {
 
-	private int index;
 	private String code;
 	private String name;
 	
@@ -10,19 +9,10 @@ public class GemClassifiedPO {
 		super();
 	}
 
-	public GemClassifiedPO(int index, String code, String name) {
+	public GemClassifiedPO(String code, String name) {
 		super();
-		this.index = index;
 		this.code = code;
 		this.name = name;
-	}
-
-	public int getIndex() {
-		return index;
-	}
-
-	public void setIndex(int index) {
-		this.index = index;
 	}
 
 	public String getCode() {

@@ -12,7 +12,7 @@ import po.StockPO;
 
 public class GraphUtil {
 
-	StockDataService sds = new StockData();
+	StockDataService stockDataService = new StockData();
 	
 	/**
 	 * 根据输入情况搜索数据
@@ -26,10 +26,10 @@ public class GraphUtil {
 		ArrayList<StockPO> stockList = new ArrayList<>();
 		if (Character.isDigit(flag)) {
 			int code = Integer.parseInt(condition);
-			stockList = sds.getStockByCodeAndDate(code, begin, end);
+			stockList = stockDataService.getStockByCodeAndDate(code, begin, end);
 		} else {
 			String name = condition;
-			stockList = sds.getStockByNameAndDate(name, begin, end);
+			stockList = stockDataService.getStockByNameAndDate(name, begin, end);
 		}
 		return stockList;
 	}
@@ -66,32 +66,6 @@ public class GraphUtil {
 			}
 		}
 		return Illegaldate;
-	}
-	
-	/**
-	 * 获得指定日期的上一个有效日期
-	 */
-	public String GetOrigin(String Code,String Begin) {
-		StockDataService sds = new StockData();
-		SimpleDateFormat time = new SimpleDateFormat("MM/dd/yy");
-//		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
-		String Origin = Begin;
-		int volume;
-		try {
-			do {
-				Date origin = time.parse(Origin);
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(origin);
-				cal.add(Calendar.DATE, -1);
-				Origin = (new SimpleDateFormat("MM/dd/yy")).format(cal.getTime());
-				int code = Integer.parseInt(Code);
-				volume = sds.JudgeIfTheLast(code, Origin);
-			} while (volume == 0);
-
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return Origin;
 	}
 	
 	public String dateTransform(String time){

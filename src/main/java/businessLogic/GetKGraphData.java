@@ -79,12 +79,12 @@ public class GetKGraphData implements GetKGraphDataService{
 	 * @param plate
 	 * @return
 	 */
-	public ArrayList<stockVO> getCodeAndNameByPlate(String plate){
+	public ArrayList<stockVO> getCodeAndNameByPlate(String plate_type,String plate){
 		StockDataService service = new StockData();
-		ArrayList<StockPO> list = service.getCodeAndNameByPlate(plate);
+		ArrayList<String> list = service.getCodeByPlate(plate_type,plate);
 		ArrayList<stockVO> result = new ArrayList<>();
 		for(int i=0;i<list.size();i++){
-			result.add(new stockVO(list.get(i)));
+			result.add(new stockVO(new StockPO(list.get(i))));
 		}
 		return result;
 	}
@@ -100,12 +100,20 @@ public class GetKGraphData implements GetKGraphDataService{
 		char flag = condition.charAt(0);
 		ArrayList<StockPO> stockList = new ArrayList<>();
 		if (Character.isDigit(flag)) {
-//			int code = Integer.parseInt(condition);
-			stockList = stockDataService.getStockByCodeAndDate(condition, begin, end);
+			int code = Integer.parseInt(condition);
+			stockList = stockDataService.getStockByCodeAndDate(code, begin, end);
 		} else {
 			String name = condition;
 			stockList = stockDataService.getStockByNameAndDate(name, begin, end);
 		}
 		return stockList;
+	}
+	
+	public String getNameByCode(String code){
+		if(code==null||code.equals("")){
+			return "平安银行";
+		}
+		String name = stockDataService.getNameByCode(Integer.valueOf(code));
+		return name;
 	}
 }

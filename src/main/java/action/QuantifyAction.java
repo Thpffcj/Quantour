@@ -1,5 +1,6 @@
 package action;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,133 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 
 	public void setResult(String result) {
 		this.result = result;
+	}
+	
+	public String getMeanReversionGraph(){
+		
+		ArrayList<String> name = new ArrayList<>();
+		name.add("1");
+		name.add("2151");
+		name.add("21");
+		name.add("37");
+		name.add("2229");
+		name.add("2308");
+		name.add("39");
+		name.add("2249");
+		name.add("2191");
+		name.add("18");
+		
+		Map<String, ArrayList<String>> data = new HashMap<>();
+		try {
+			data = meanReversionService.getMeanReversionGraphData(null, name, 3, 1, 20, "2014-02-01", "2014-04-20");
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		ArrayList<String> date = new ArrayList<>();
+		ArrayList<String> market = new ArrayList<>();
+		ArrayList<String> strategic = new ArrayList<>();
+		date = data.get("date");
+		market = data.get("market");
+		strategic = data.get("strategic");
+		
+		int days = market.size();
+		String[] dates = new String[days];
+		Double[] marketIncome = new Double[days];
+		Double[] strategicIncome = new Double[days];
+		
+		for(int i=0; i<days; i++){
+			dates[i] = date.get(i);
+			marketIncome[i] = Double.parseDouble(market.get(i));
+			strategicIncome[i] = Double.parseDouble(strategic.get(i));
+		}
+		
+		JSONObject json = new JSONObject();
+		json.put("Dates", dates);
+		json.put("MarketIncome", marketIncome);
+		json.put("StrategicIncome", strategicIncome);
+		result = json.toString();
+		return SUCCESS;
+	}
+	
+	public String getMeanReturnRateGraph(){
+		
+		ArrayList<String> name = new ArrayList<>();
+		name.add("1");
+		name.add("2151");
+		name.add("21");
+		name.add("37");
+		name.add("2229");
+		name.add("2308");
+		name.add("39");
+		name.add("2249");
+		name.add("2191");
+		name.add("18");
+		
+		Map<String, ArrayList<String>> data = new HashMap<>();
+		data = meanReversionService.GetMeanReturnRateGraphData(null, name, 3, 1, 20, "2014-02-01", "2014-04-20");
+		
+		ArrayList<String> date = new ArrayList<>();
+		ArrayList<String> excess = new ArrayList<>();
+		date = data.get("date");
+		excess = data.get("excessGraph");
+		
+		int days = excess.size();
+		//
+		System.out.println(days);
+		String[] dates = new String[days];
+		String[] value = new String[days];
+		
+		for(int i=0; i<days; i++){
+			dates[i] = date.get(i);
+			value[i] = excess.get(i);
+		}
+		
+		JSONObject json = new JSONObject();
+		json.put("Dates", dates);
+		json.put("Values", value);
+		result = json.toString();
+		return SUCCESS;
+	}
+	
+	public String getMeanWinningPercentageGraph(){
+		
+		ArrayList<String> name = new ArrayList<>();
+		name.add("1");
+		name.add("2151");
+		name.add("21");
+		name.add("37");
+		name.add("2229");
+		name.add("2308");
+		name.add("39");
+		name.add("2249");
+		name.add("2191");
+		name.add("18");
+		
+		Map<String, ArrayList<String>> data = new HashMap<>();
+		data = meanReversionService.GetMeanWinningPercentageGraphData(null, name, 3, 1, 20, "2014-02-01", "2014-04-20");
+		
+		ArrayList<String> date = new ArrayList<>();
+		ArrayList<String> winning = new ArrayList<>();
+		date = data.get("date");
+		winning = data.get("winningGraph");
+		
+		int days = winning.size();
+		//
+		System.out.println(days);
+		String[] dates = new String[days];
+		String[] value = new String[days];
+		
+		for(int i=0; i<days; i++){
+			dates[i] = date.get(i);
+			value[i] = winning.get(i);
+		}
+		
+		JSONObject json = new JSONObject();
+		json.put("Dates", dates);
+		json.put("Values", value);
+		result = json.toString();
+		return SUCCESS;
 	}
 	
 	public String getRSIGraphData(){
@@ -155,21 +283,6 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		json.put("Lowest", KLowest);
 		json.put("Highest", KHighest);
 		json.put("Volumn", KVolumn);
-		result = json.toString();
-		return SUCCESS;
-	}
-	
-	public String getMeanReversionGraph(){
-		
-		int days = 0;
-		String[] date = new String[days];
-		Double[] marketIncome = new Double[days];
-		Double[] KClostrategicIncome = new Double[days];
-		
-		JSONObject json = new JSONObject();
-		json.put("data1", new String[]{"-10%", "-7%", "-5%", "-2%", "0", "2%", "5%",
-				"7%", "10%"});
-		json.put("data2", new Integer[]{5, 10, 20, 30, 40, 20, 10, 10, 5});
 		result = json.toString();
 		return SUCCESS;
 	}

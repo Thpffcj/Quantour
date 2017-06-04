@@ -76,6 +76,7 @@
 					<li><a href="Stock.jsp">个股展示</a></li>
 					<li><a href="StockVS.jsp">股票比较</a></li>
 					<li><a href="Strategy.jsp">策略回测</a></li>
+					<li><a href="Plate.jsp">板块</a>	</li>
 				</ul>
 			</div>
 			<ul id="userul">
@@ -91,8 +92,23 @@
 	</nav>
 	
 	<div class="divinput">
-		<input type="text" placeholder="输入股票代码/名称" id=> 
-		<button type="submit" class="search">搜索</button>
+		<input type="text" placeholder="输入股票代码/名称" id="code"> 
+		<a href="Stock.jsp" target="_blank" id="searchcode"><button type="submit" class="search">搜索</button></a>
+		<script type="text/javascript">
+		$("#searchcode").click(function(){ 
+			$.ajax({ 
+				type : "POST",
+				url : "SaveSearch",
+				data: {
+					code: $("#code").val()
+				},
+				dataType : "json",
+				success : function(obj) {
+					
+				}
+			});
+		});
+		</script>
 	</div>
 
 	<div class="w1200">
@@ -107,13 +123,12 @@
 						<td id="LOpen"></td>
 						<td id="LHighest"></td>
 						<td id="LVolumn"></td>
-						<td>涨跌幅:</td>
+						<td id="LFluct"></td>
 					</tr>
 					<tr>
 						<td id="LClose"></td>
 						<td id="LLowest"></td>
 						<td id="LMoney"></td>
-						<td>振幅:</td>
 					</tr>
 				</table>
 			</div>
@@ -124,27 +139,16 @@
 		<div class="stockpre">
 			<form action="">
 				<label>调整K线图时间:</label>
-					<input type="text" id="begindate" value = "2005-04-28" placeholder = "请选择开始日期">
+					<input type="text" id="begindate" value = "2016-05-25" placeholder = "请选择开始日期">
 				<label>---</label>
-					<input type="text" id="enddate" value = "2005-04-29" placeholder = "请选择结束日期">
+					<input type="text" id="enddate" value = "2017-05-25" placeholder = "请选择结束日期">
 				<button type = "button" class = "btn" id="searchKGraph">确定</button>
 			</form>
 			<script type="text/javascript">
 			$(document).ready(function(){ 
 				showKGraph()
 				$("#searchKGraph").click(function(){ 
-					$.ajax({ 
-					    type: "POST", 	
-						url: "KGraph",
-						data: {
-							begindate: $("#begindate").val(), 
-							enddate: $("#enddate").val()
-						},
-						dataType: "json",
-						success: function(data){
-							showKGraph()
-						},
-					});
+					showKGraph()
 				});
 			});
 			</script>
@@ -194,11 +198,12 @@
 
 			
 			$.ajax({
-				type : "GET",
+				type : "POST",
 				url : "KGraph",
 				data: {
 					begindate: $("#begindate").val(), 
-					enddate: $("#enddate").val()
+					enddate: $("#enddate").val(),
+					code: $("#code").val()
 				},
 				dataType : "json",
 				success : function(obj) {
@@ -211,6 +216,7 @@
 					$("#LLowest").html("最低:"+resultJSONData.LLowest);
 					$("#LVolumn").html("成交量:"+resultJSONData.LVolumn);
 					$("#LMoney").html("成交额:"+resultJSONData.LMoney+"万元");
+					$("#LFluct").html("涨跌幅:"+resultJSONData.LFluct+"%");
 					
 					for (i = 0; i < resultJSONData.Date.length; i++) {
 						KData[i] = new Array;

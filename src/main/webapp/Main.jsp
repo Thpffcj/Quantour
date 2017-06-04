@@ -1,8 +1,10 @@
-<%@ page language="java" import="java.util.*" contentType="text/html; charset=utf-8" %>
+<%@ page language="java" import="java.util.*"
+	contentType="text/html; charset=utf-8"%>
 <%@ taglib prefix="s" uri="/struts-tags"%>
 <%
-String path = request.getContextPath();
-String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+path+"/";
+	String path = request.getContextPath();
+	String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort()
+			+ path + "/";
 %>
 <!DOCTYPE html>
 <html lang = "en">
@@ -14,6 +16,9 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <link rel="stylesheet" type="text/css" href = "css/index.css"> 
 <link rel="stylesheet" type="text/css" href = "css/Main.css">
+<link rel="stylesheet" href="//apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+<script src="//apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 </head>
 <body>
 	<nav id = "navbar">
@@ -26,6 +31,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 					<li><a href="Stock.jsp">个股展示</a></li>
 					<li><a href="StockVS.jsp">股票比较</a></li>
 					<li><a href="Strategy.jsp">策略回测</a></li>
+					<li><a href="Plate.jsp">板块</a>	</li>
 				</ul>
 			</div>
 			<ul id = "rightul">
@@ -45,8 +51,23 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 	</nav>
 	
 	<div class="divinput">
-		<input type="text" placeholder="输入股票代码/名称">
-		<button type="submit" class="search">搜索</button>
+		<input type="text" placeholder="输入股票代码/名称" id="code"> 
+		<a href="Stock.jsp" target="_blank" id="searchcode"><button type="submit" class="search">搜索</button></a>
+		<script type="text/javascript">
+		$("#searchcode").click(function(){ 
+			$.ajax({ 
+				type : "POST",
+				url : "SaveSearch",
+				data: {
+					code: $("#code").val()
+				},
+				dataType : "json",
+				success : function(obj) {
+					
+				}
+			});
+		});
+		</script>
 	</div>
 	
 	<div id = "introduction">

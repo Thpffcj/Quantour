@@ -4,7 +4,9 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +28,7 @@ public class GetKDJStochasticData implements GetKDJStochasticDataService{
 	static double sharpeRatio;
 	
 //	StockDataService sds = new StockData();
-	GraphUtil graphUtil = new GraphUtil();
+//	GraphUtil graphUtil = new GraphUtil();
 	//计算所需的各种参数
 	ParameterCalculation parameterCalculation = new ParameterCalculation(); 
 	
@@ -48,11 +50,10 @@ public class GetKDJStochasticData implements GetKDJStochasticDataService{
 	 */
 	public Map<String, ArrayList<String>> getKDJStochasticData(String condition, String begin, String end) {
 		
-		SimpleDateFormat time1 = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat time = new SimpleDateFormat("MM/dd/yy");
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
 		try {
-			begin = time.format(time1.parse(begin));
-			end = time.format(time1.parse(end));
+			begin = time.format(time.parse(begin));
+			end = time.format(time.parse(end));
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -69,7 +70,7 @@ public class GetKDJStochasticData implements GetKDJStochasticDataService{
 		}
 		else{
 			stockList = stockDataService.getStockByNameAndDate(condition, begin, end);
-			code = stockList.get(0).getCode();
+			code = Integer.parseInt(stockList.get(0).getCode());
 		}
 		
 		for(int i=0;i<cycle;i++){
@@ -80,7 +81,7 @@ public class GetKDJStochasticData implements GetKDJStochasticDataService{
 				break;
 			}
 			else{
-				begin = graphUtil.GetOrigin(String.valueOf(code),begin);
+				begin = GetOrigin(String.valueOf(code),begin);
 			}
 		}
 		stockList = getStockData(condition, begin, end);
@@ -423,5 +424,29 @@ public class GetKDJStochasticData implements GetKDJStochasticDataService{
 			stockList = stockDataService.getStockByNameAndDate(name, begin, end);
 		}
 		return stockList;
+	}
+	
+	/**
+	 * 获得指定日期的上一个有效日期
+	 */
+	public String GetOrigin(String Code,String Begin) {
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
+		String Origin = Begin;
+		int volume;
+		try {
+			do {
+				Date origin = time.parse(Origin);
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(origin);
+				cal.add(Calendar.DATE, -1);
+				Origin = (new SimpleDateFormat("yyyy-MM-dd")).format(cal.getTime());
+				int code = Integer.parseInt(Code);
+				volume = stockDataService.JudgeIfTheLast(code, Origin);
+			} while (volume == 0);
+
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return Origin;
 	}
 }

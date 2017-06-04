@@ -33,6 +33,7 @@
 					<li><a href="Stock.jsp">个股展示</a></li>
 					<li><a href="StockVS.jsp">股票比较</a></li>
 					<li><a href="Strategy.jsp">策略回测</a></li>
+					<li><a href="Plate.jsp">板块</a>	</li>
 				</ul>
 			</div>
 			<ul id="userul">
