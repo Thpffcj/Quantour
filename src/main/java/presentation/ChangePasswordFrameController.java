@@ -30,15 +30,15 @@ public class ChangePasswordFrameController {
 		}else{
 			word.setVisible(false);
 			UsersService service = new Users();
-			boolean result = service.ChangePassword(StageRepertory.getusername(), oldpw, newpw1);
-			if(result){
-				frame.getPrimaryStage().close();
-				StageRepertory.getStage().close();
-				new LogFrame().start(new Stage());
-			}else{
-				StageRepertory.settext("密码修改失败");
-				new PopFrame().start(new Stage());
-			}
+//			boolean result = service.ChangePassword(StageRepertory.getusername(), oldpw, newpw1);
+//			if(result){
+//				frame.getPrimaryStage().close();
+//				StageRepertory.getStage().close();
+//				new LogFrame().start(new Stage());
+//			}else{
+//				StageRepertory.settext("密码修改失败");
+//				new PopFrame().start(new Stage());
+//			}
 			
 		}
 	}

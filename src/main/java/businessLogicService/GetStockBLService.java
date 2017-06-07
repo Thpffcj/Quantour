@@ -13,6 +13,8 @@ public interface GetStockBLService {
 	
 	public Map<String, ArrayList<Double>> getVSData(String stock1, String stock2, String beginDate, String endDate);
 	
+	public Map<String, ArrayList<String>> getBenchmark(String code);
+	
 	public UpsAndDownsPO getDistributionOfUpsAndDowns(String Date);
 	
 	public ArrayList<StockPO> getStockMessage();

@@ -8,14 +8,45 @@
 <struts>
    
    <package name="default" namespace="/" extends="struts-default,json-default" strict-method-invocation="false">
-     
+     <!--  
      <action name="Users_*" class="usersAction" method="{1}">
        <result name="login_success">Stock.jsp</result>
        <result name="login_failure">/users/Login.jsp</result>
-       <result name="logout_success">/users/Login.jsp</result>
        <result name="input">/users/Login.jsp</result>
        <result name="register_success">Login.jsp</result>
        <result name="query_success">/Stock.jsp</result>
+     </action>
+     
+     -->
+     
+     <action name="Login" class="usersAction" method="login">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="Register" class="usersAction" method="register">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="Logout" class="usersAction" method="logout">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="ChangeName" class="usersAction" method="ChangeName">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="ChangePassword" class="usersAction" method="ChangePassword">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
      </action>
      
       <action name="UpsAndDownsGraph" class="UpsAndDownsGraphAction" method="getUpsAndDownsGraph">
@@ -43,6 +74,12 @@
      </action>
      
      <action name="SaveSearch" class="KGraphAction" method="saveSearchCode">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="getMatch" class="KGraphAction" method="getMatchList">
      	<result type ="json">
      		<param name="root">result</param>
      	</result>  
@@ -84,6 +121,12 @@
      	</result>  
      </action>
      
+      <action name="BenchmarkGraph" class="BenchmarkGraphAction" method="getBenchmark">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
      <action name="ConceptPlate" class="PlateAction" method="getConceptPlate">
      	<result type="json">
      		<param name="root">result</param>
@@ -101,6 +144,25 @@
      		<param name="root">result</param>
      	</result>
      </action>
+     
+     <action name="SavePlate" class="PlateAction" method="SavePlateName">
+     	<result type="json">
+     		<param name="root">result</param>
+     	</result>
+     </action>
+     
+     <action name="PlateKGraph" class="PlateAction" method="getPlateKGraphData">
+     	<result type="json">
+     		<param name="root">result</param>
+     	</result>
+     </action>
+     
+     <action name="ChildrenMessage" class="PlateAction" method="getPlateChildrenData">
+     	<result type="json">
+     		<param name="root">result</param>
+     	</result>
+     </action>
+    
    </package>
    
 </struts>

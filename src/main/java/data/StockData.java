@@ -18,6 +18,7 @@ import org.hibernate.query.Query;
 import dataService.DateProcessingService;
 import dataService.StockDataService;
 import po.AreaClassifiedPO;
+import po.BasePO;
 import po.ConceptClassifiedPO;
 import po.IndustryClassifiedPO;
 import po.NamelistPO;
@@ -150,11 +151,13 @@ public class StockData implements StockDataService {
 				query.setParameter(0, Tran(String.valueOf(code)));
 				query.setParameter(1, days.get(i));
 				StockPO spo = new StockPO();
-				spo = (StockPO) query.getSingleResult();
-				if(spo != null){
+				try {
+					spo = (StockPO) query.getSingleResult();
 					stockList.add(spo);
+					transaction.commit();
+				} catch (Exception e) {
+					continue;
 				}
-				transaction.commit();
 			}
 			session.close();
 		} catch (ParseException e) {
@@ -165,6 +168,29 @@ public class StockData implements StockDataService {
 		return stockList;
 	}
 
+	/**
+	 * 根据版块编号获得版块数据
+	 * @param code
+	 * @return
+	 */
+	public ArrayList<BasePO> getBenchmark(String code){
+		
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		
+		ArrayList<BasePO> benchmark = new ArrayList<>();
+		
+		transaction = session.beginTransaction();
+		String hql = "from BasePO where code=?";
+		Query query = session.createQuery(hql);
+		query.setParameter(0, code);
+		benchmark = (ArrayList<BasePO>) query.getResultList();
+//		System.out.println(stockList.size());
+		transaction.commit();
+		session.close();
+		return benchmark;
+	}
+	
 	/**
 	 * 根据开始日期、结束日期和股票名称得到股票列表
 	 */
@@ -190,6 +216,34 @@ public class StockData implements StockDataService {
 	}
 	
 	/**
+	 * 得到所有股票代码
+	 * @return
+	 */
+	public ArrayList<String> GetAllCode(){
+		Session session = sessionFactory.openSession();
+		
+		ArrayList<String> namelist = new ArrayList<>();
+		String hql = "select code from NamelistPO";
+		Query query = session.createQuery(hql);
+		namelist = (ArrayList<String>) query.getResultList();
+		return namelist;
+	}
+	
+	/**
+	 * 得到所有股票名称
+	 * @return
+	 */
+	public ArrayList<String> GetAllName(){
+		Session session = sessionFactory.openSession();
+		
+		ArrayList<String> namelist = new ArrayList<>();
+		String hql = "select name from NamelistPO";
+		Query query = session.createQuery(hql);
+		namelist = (ArrayList<String>) query.getResultList();
+		return namelist;
+	}
+	
+	/**
 	 * 根据股票编号获得名称
 	 * @param code
 	 * @return
@@ -204,6 +258,9 @@ public class StockData implements StockDataService {
 		String hql = "select name from NamelistPO where code=?";
 		Query query = session.createQuery(hql);
 		query.setParameter(0, Tran(String.valueOf(code)));
+		if(String.valueOf(code).equals("603580")){
+			System.out.println("----------------");
+		}
 		try {
 			name = (String) query.getSingleResult();
 			transaction.commit();
@@ -333,18 +390,19 @@ public class StockData implements StockDataService {
 	 * 得到所有股票编号和名称
 	 */
 	public ArrayList<StockPO> getCodeAndName(){
-		
-		Session session = sessionFactory.openSession();
-		Transaction transaction = null;
-		
-		ArrayList<StockPO> list = new ArrayList<>();
-		transaction = session.beginTransaction();
-		String hql = "from StockPO";
-		Query query = session.createQuery(hql);
-		list = (ArrayList<StockPO>)query.getResultList();
-		transaction.commit();
-		session.close();
-		return list;
+//		此方法已废除
+//		Session session = sessionFactory.openSession();
+//		Transaction transaction = null;
+//		
+//		ArrayList<StockPO> list = new ArrayList<>();
+//		transaction = session.beginTransaction();
+//		String hql = "from StockPO";
+//		Query query = session.createQuery(hql);
+//		list = (ArrayList<StockPO>)query.getResultList();
+//		transaction.commit();
+//		session.close();
+//		return list;
+		return null;
 	}
 	
 	public ArrayList<String> getPlate(String plate_type){

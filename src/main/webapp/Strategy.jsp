@@ -13,7 +13,6 @@
 <link rel="stylesheet" type="text/css" href = "css/index.css"> 
 <link rel = "stylesheet" href = "css/Strategy.css">
 <link rel="stylesheet" href="//apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
-<script src="//apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 <script src="theme/echarts.js"></script>
 <script>
@@ -42,6 +41,18 @@ $(document).ready(function(){
         }
     });  
     $("#enddate2").datepicker( "option", "showAnim", "clip");
+    $("#begindate3").datepicker({
+    	onSelect: function(selected) {
+          $("#enddate3").datepicker("option","minDate", selected)
+        }
+    });
+    $("#begindate3").datepicker( "option", "showAnim", "clip");
+    $("#enddate3").datepicker({ 
+        onSelect: function(selected) {
+           $("#begindate3").datepicker("option","maxDate", selected)
+        }
+    });  
+    $("#enddate3").datepicker( "option", "showAnim", "clip");
     $("#slider1").slider({
         min: 1,
         max: 100,
@@ -115,7 +126,7 @@ $(document).ready(function(){
 				<li class="firstli"><a href="javascript:void(0)">${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
-						<li><a href="Main.jsp">退出登录</a></li>
+						<li><a href="Main.jsp" onclick="logout()">退出登录</a></li>
 					</ul>
 				</li>
 			</ul>
@@ -123,9 +134,41 @@ $(document).ready(function(){
 	</nav>
 	
 	<div class="divinput">
-		<input type="text" placeholder="输入股票代码/名称" id="code"> 
-		<a href="Stock.jsp" target="_blank" id="searchcode"><button type="submit" class="search">搜索</button></a>
+		<div class="stock-drop-list">
+			<input type="text" placeholder="输入股票代码/名称" id="code">
+			<ul id="match-list">
+			</ul>
+		</div>
+		<a href="javascript:void(0)" target="_blank" id="searchcode"><button type="button" class="search">搜索</button></a>
+		
 		<script type="text/javascript">
+		$("#code").bind('input propertychange', function() {
+			$.ajax({
+				type: "POST",
+				url: "getMatch",
+				data: {
+					enter: $("#code").val(),
+				},
+				dataType: "json",
+				success: function(obj){
+					var result = JSON.parse(obj);
+					var s = "";
+					for(var i=0;i<5;i++){
+						if(result.name[i]!=null){
+							s = s+"<li onclick=\"getStock('"+result.code[i]+"')\">"+result.code[i]+"&emsp;&emsp;"+result.name[i]+"</li>";
+						}
+					}
+					$("#match-list").attr("style","");
+					$("#match-list").html(s);
+				}
+			});
+		});
+		
+		function getStock(code){
+			$("#code").val(code);
+			$("#match-list").attr("style","display:none;");
+		}
+		
 		$("#searchcode").click(function(){ 
 			$.ajax({ 
 				type : "POST",
@@ -135,15 +178,49 @@ $(document).ready(function(){
 				},
 				dataType : "json",
 				success : function(obj) {
-					
+					var result = JSON.parse(obj);
+					console.log(result.result);
+					if(result.result=="unknow"){
+						$("#search-modal-prompt").html("无效的股票代码/名称!");
+						$("#search-modal").modal('show');
+					}else if(result.result=="null"){
+						$("#search-modal-prompt").html("搜索内容为空!");
+						$("#search-modal").modal('show');
+					}else{
+						window.open("Stock.jsp");
+					}
 				}
 			});
 		});
 		</script>
 	</div>
 	
+	<div class="modal fade" id="search-modal" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h4 class="modal-title" id="myModalLabel">提示</h4>
+				</div>
+				<div class="modal-body">
+					<label>按下 ESC 按钮退出。</label>
+					<br>
+					<strong id="search-modal-prompt">无效的股票代码/名称!</strong>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary" data-dismiss="modal">确定</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
 	<div class="w1200">
 		<div class="head">
+			<h2>多股回测</h2>
+		</div>
+		<div class="choose">
 			<a class="active" id="strategy1" onclick="way1()">动量策略</a>
 			<a class="normal" id="strategy2" onclick="way2()">均值回归</a>
 			<br>
@@ -160,16 +237,16 @@ $(document).ready(function(){
 				<label>回测时间:&emsp;</label>
 				<input type = "text" id = "begindate1" value="2016-05-25" placeholder="请选择开始日期">
 				<label>---</label>
-				<input type = "text" id = "enddate1" value="2017-05-25" placeholder="请选择结束日期">
+				<input type = "text" id = "enddate1" value="2016-10-25" placeholder="请选择结束日期">
 				<label>持有股票数:</label>
 				<input type = "number" id = "number" placeholder="请输入持有股票数">
 				<br><br>
 				<label>形成期:</label>
 				<label id="hold">持有期:</label>
 				<div id="slider1"></div>
-				<output id="formation" style="color:#f6931f; font-weight:bold;position:relative;left:265px;top:-44px;width:100px;"></output>
+				<output id="formation" style="color:#e0ffff; font-weight:bold;position:relative;left:265px;top:-44px;width:100px;"></output>
 				<div id="slider2"></div>
-				<output id="holding"  style="color:#f6931f; font-weight:bold;position:relative;left:565px;top:-85px;width:100px;"></output>
+				<output id="holding"  style="color:#e0ffff; font-weight:bold;position:relative;left:565px;top:-85px;width:100px;"></output>
 				<br>
 				<button type="submit" class="btn" style="position:relative;left: 700px;top: -134px;">开始回测</button>
 			</form>
@@ -194,11 +271,26 @@ $(document).ready(function(){
 				</select>
 				<label>持有期:</label>
 				<div id="slider3"></div>
-				<output id="holding2" style="color:#f6931f;font-weight:bold;position:relative;left:565px;top:-45px;width:100px;"></output>
+				<output id="holding2" style="color:#e0ffff;font-weight:bold;position:relative;left:565px;top:-45px;width:100px;"></output>
 				<br>
-				<button type="submit" class="btn" style="position:relative;left: 700px;top: -94px;">开始回测</button>
+				<button type="submit" class="btn" style="position:relative;left: 700px;top: -94px;" id="searchMean">开始回测</button>
 			</form>
 			<br><br>
+			
+			<script type="text/javascript">
+				$(document).ready(function(){ 
+					showMeanReversionGraph()
+					showMeanReturnRateGraph()
+					showMeanWinningPercentageGraph()
+					
+					$("#searchMean").click(function(){ 
+						showMeanReversionGraph()
+						showMeanReturnRateGraph()
+						showMeanWinningPercentageGraph()
+					});
+				});
+			</script>
+			
 		</div>
 		<div class="graph1">
 		<!-- 此处显示回测图标 -->
@@ -212,9 +304,6 @@ $(document).ready(function(){
 				<div class="item" id="item3" onMouseOver="mouse3()">
 					<h3>策略胜率</h3>
 				</div>
-				<div class="item" id="item4" onMouseOver="mouse4()">
-					<h3>收益分布</h3>
-				</div>
 			</div>
 			<div class="result">
 				<div class="graph active" id="back-flow-graph1">
@@ -223,11 +312,55 @@ $(document).ready(function(){
 				</div>
 				<div class="graph" id="back-flow-graph3">
 				</div>
-				<div class="graph" id="back-flow-graph4">
-				</div>
 			</div>
 		</div>
+		
+		<div class="head" style="position: relative; top: -40px;">
+			<h2>个股分析</h2>
+		</div>
+		<div class="choose">
+			<a class="active" id="Boll">Boll指标</a>
+			<a class="normal" id="KDJ">KDJ指标</a>
+			<a class="normal" id="RSI">RSI指标</a>
+			<br>
+		</div>
+		<div class="input-quota">
+			<label>时间:</label>
+			<input type = "text" id = "begindate3" value="2016-05-25" placeholder="请选择开始日期">
+			<label>---</label>
+			<input type = "text" id = "enddate3" value="2017-05-25" placeholder="请选择结束日期">
+			<label>股票代码/名称:</label>
+			<input type="text" id="code" placeholder="请输入股票代码/名称">
+			<button type="button" id="begin-quota" class="btn" onclick="Quota('Boll')" style="margin-left:80px;">开始分析</button>
+		</div>
+		<div class="quota-result" id="strategyGraph">
+		</div>
+		<p id="suggestion1"></p>
+		<p id="suggestion2"></p>
+		
+		<script type="text/javascript">
+		function Quota(type){
+			if(type == 'Boll'){
+				$("#begin-quota").click(function(){ 
+					showBollGraph()
+				});
+			}
+			if(type == 'KDJ'){
+				$("#begin-quota").click(function(){ 
+					showKDJGraph()
+				});
+			}
+			if(type == 'RSI'){
+				$("#begin-quota").click(function(){ 
+					showRSIGraph()
+				});
+			}
+		}
+			</script>
+		
+		<br><br><br>
 	</div>
+	
 	
 	<!-- 模态框（Modal） -->
 	<div class="modal fade" id="addpool" tabindex="-1" role="dialog"
@@ -273,49 +406,57 @@ $(document).ready(function(){
 		document.getElementById("item1").className = "item active";
 		document.getElementById("item2").className = "item";
 		document.getElementById("item3").className = "item";
-		document.getElementById("item4").className = "item";
 		document.getElementById("back-flow-graph1").className = "graph active";
 		document.getElementById("back-flow-graph2").className = "graph";
 		document.getElementById("back-flow-graph3").className = "graph";
-		document.getElementById("back-flow-graph4").className = "graph";
 	}
 	function mouse2(){
 		document.getElementById("item1").className = "item";
 		document.getElementById("item2").className = "item active";
 		document.getElementById("item3").className = "item";
-		document.getElementById("item4").className = "item";
 		document.getElementById("back-flow-graph1").className = "graph";
 		document.getElementById("back-flow-graph2").className = "graph active";
 		document.getElementById("back-flow-graph3").className = "graph";
-		document.getElementById("back-flow-graph4").className = "graph";
 	}
 	function mouse3(){
 		document.getElementById("item1").className = "item";
 		document.getElementById("item2").className = "item";
 		document.getElementById("item3").className = "item active";
-		document.getElementById("item4").className = "item";
 		document.getElementById("back-flow-graph1").className = "graph";
 		document.getElementById("back-flow-graph2").className = "graph";
 		document.getElementById("back-flow-graph3").className = "graph active";
-		document.getElementById("back-flow-graph4").className = "graph";
-	}
-	function mouse4(){
-		document.getElementById("item1").className = "item";
-		document.getElementById("item2").className = "item";
-		document.getElementById("item3").className = "item";
-		document.getElementById("item4").className = "item active";
-		document.getElementById("back-flow-graph1").className = "graph";
-		document.getElementById("back-flow-graph2").className = "graph";
-		document.getElementById("back-flow-graph3").className = "graph";
-		document.getElementById("back-flow-graph4").className = "graph active";
 	}
 	</script>
 	<script>
 		$(function () { $("[data-toggle='tooltip']").tooltip(); });
 	</script>
 	
+	<script type="text/javascript">
+	$("#Boll").click(function(){
+		$("#Boll").attr("class","active");
+		$("#KDJ").attr("class","normal");
+		$("#RSI").attr("class","normal");
+		$("#begin-quota").attr("onclick","Quota('Boll')");
+	});
+	$("#KDJ").click(function(){
+		$("#Boll").attr("class","normal");
+		$("#KDJ").attr("class","active");
+		$("#RSI").attr("class","normal");
+		$("#begin-quota").attr("onclick","Quota('KDJ')");
+	});
+	$("#RSI").click(function(){
+		$("#Boll").attr("class","normal");
+		$("#KDJ").attr("class","normal");
+		$("#RSI").attr("class","active");
+		$("#begin-quota").attr("onclick","Quota('RSI')");
+	});
+	</script>
+	
+	<!--  
 	<script src="theme/dark.js"></script>
 	<script type="text/javascript">
+
+	function showMeanReversionGraph(){
 
 		var date = new Array;
 		var marketIncome = new Array;
@@ -326,6 +467,10 @@ $(document).ready(function(){
 		$.ajax({
 			type : "GET",
 			url : "MeanReversionGraph",
+			data: {
+				begin: $("#begindate2").val(),
+				end: $("#enddate2").val()
+			},
 			dataType : "json",
 			success : function(obj) {
 				var resultJSONData = JSON.parse(obj);
@@ -351,7 +496,7 @@ $(document).ready(function(){
 						}
 					},
 					legend : {
-						top : 10,
+						top : 25,
 						left : 'center',
 						data : ['基准收益率','策略收益率']
 					},
@@ -407,11 +552,14 @@ $(document).ready(function(){
 				myChart.setOption(option);
 			}
 		});
+	}
 	</script>
 	
 	<script src="theme/dark.js"></script>
 	<script type="text/javascript">
 
+	function showMeanReturnRateGraph(){
+		
 		var date = new Array;
 		var values = new Array;
 
@@ -420,6 +568,10 @@ $(document).ready(function(){
 		$.ajax({
 			type : "GET",
 			url : "MeanReturnRateGraph",
+			data: {
+				begin: $("#begindate2").val(),
+				end: $("#enddate2").val()
+			},
 			dataType : "json",
 			success : function(obj) {
 				var resultJSONData = JSON.parse(obj);
@@ -493,11 +645,14 @@ $(document).ready(function(){
 				myChart.setOption(option);
 			}
 		});
+	}
 	</script>
 	
 	<script src="theme/dark.js"></script>
 	<script type="text/javascript">
 
+	function showMeanWinningPercentageGraph(){
+		
 		var date = new Array;
 		var values = new Array;
 
@@ -506,6 +661,10 @@ $(document).ready(function(){
 		$.ajax({
 			type : "GET",
 			url : "MeanWinningPercentageGraph",
+			data: {
+				begin: $("#begindate2").val(),
+				end: $("#enddate2").val()
+			},
 			dataType : "json",
 			success : function(obj) {
 				var resultJSONData = JSON.parse(obj);
@@ -579,13 +738,265 @@ $(document).ready(function(){
 				myChart.setOption(option);
 			}
 		});
+	}
 	</script>
-	
-	<!-- 
+	 -->
+	 
 	<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 	<script src="theme/dark.js"></script>
 	<script type="text/javascript">
 
+		function showBollGraph(){
+		
+			var KData = new Array;
+
+			function splitData(rawData) {
+				var categoryData = [];
+				var values = [];
+				var volumns = [];
+				for (var i = 0; i < rawData.length; i++) {
+					categoryData.push(rawData[i].splice(0, 1)[0]);
+					values.push(rawData[i]);
+					volumns.push(rawData[i][4]);
+				}
+				return {
+					categoryData : categoryData,
+					values : values,
+					volumns : volumns
+				};
+			}
+
+			$.ajax({
+				type : "POST",
+				url : "BollGraph",
+				dataType : "json",
+				success : function(obj) {
+					var resultJSONData = JSON.parse(obj);
+					$("#suggestion1").html(resultJSONData.Suggestion[0]);
+					$("#suggestion2").html(resultJSONData.Suggestion[1]);
+					
+					for (i = 0; i < resultJSONData.Date.length; i++) {
+						KData[i] = new Array;
+						KData[i][0] = resultJSONData.Date[i];
+						KData[i][1] = resultJSONData.Open[i];
+						KData[i][2] = resultJSONData.Close[i];
+						KData[i][3] = resultJSONData.Lowest[i];
+						KData[i][4] = resultJSONData.Highest[i];
+						KData[i][5] = resultJSONData.Volumn[i];
+					}
+
+					var data = splitData(KData);
+
+					var myChart = echarts.init(document
+							.getElementById('strategyGraph'));
+
+					var option = {
+						backgroundColor : '#eee',
+						animation : false,
+						legend : {
+							top : 10,
+							left : 'center',
+							data : [ 'Dow-Jones index']
+						},
+						tooltip : {
+							trigger : 'axis',
+							axisPointer : {
+								type : 'cross'
+							},
+							backgroundColor : 'rgba(245, 245, 245, 0.8)',
+							borderWidth : 1,
+							borderColor : '#ccc',
+							padding : 10,
+							textStyle : {
+								color : '#000'
+							},
+							position : function(pos, params, el, elRect,
+									size) {
+								var obj = {
+									top : 10
+								};
+								obj[[ 'left', 'right' ][+(pos[0] < size.viewSize[0] / 2)]] = 30;
+								return obj;
+							},
+							extraCssText : 'width: 170px'
+						},
+						axisPointer : {
+							link : {
+								xAxisIndex : 'all'
+							},
+							label : {
+								backgroundColor : '#777'
+							}
+						},
+						toolbox : {
+							feature : {
+								dataZoom : {
+									yAxisIndex : false
+								},
+								brush : {
+									type : [ 'lineX', 'clear' ]
+								}
+							}
+						},
+						brush : {
+							xAxisIndex : 'all',
+							brushLink : 'all',
+							outOfBrush : {
+								colorAlpha : 0.1
+							}
+						},
+						grid : [ {
+							left : '10%',
+							right : '8%',
+							height : '50%'
+						}, {
+							left : '10%',
+							right : '8%',
+							top : '63%',
+							height : '16%'
+						} ],
+						xAxis : [
+								{
+									type : 'category',
+									data : data.categoryData,
+									scale : true,
+									boundaryGap : false,
+									axisLine : {
+										onZero : false
+									},
+									splitLine : {
+										show : false
+									},
+									splitNumber : 20,
+									min : 'dataMin',
+									max : 'dataMax',
+									axisPointer : {
+										z : 100
+									}
+								},
+								{
+									type : 'category',
+									gridIndex : 1,
+									data : data.categoryData,
+									scale : true,
+									boundaryGap : false,
+									axisLine : {
+										onZero : false
+									},
+									axisTick : {
+										show : false
+									},
+									splitLine : {
+										show : false
+									},
+									axisLabel : {
+										show : false
+									},
+									splitNumber : 20,
+									min : 'dataMin',
+									max : 'dataMax',
+									axisPointer : {
+										label : {
+											formatter : function(params) {
+												var seriesValue = (params.seriesData[0] || {}).value;
+												return params.value
+														+ (seriesValue != null ? '\n'
+																+ echarts.format
+																		.addCommas(seriesValue)
+																: '');
+											}
+										}
+									}
+								} ],
+						yAxis : [ {
+							scale : true,
+							splitArea : {
+								show : true
+							}
+						}, {
+							scale : true,
+							gridIndex : 1,
+							splitNumber : 2,
+							axisLabel : {
+								show : false
+							},
+							axisLine : {
+								show : false
+							},
+							axisTick : {
+								show : false
+							},
+							splitLine : {
+								show : false
+							}
+						} ],
+						dataZoom : [ {
+							type : 'inside',
+							xAxisIndex : [ 0, 1 ],
+							start : 50,
+							end : 100
+						}, {
+							show : true,
+							xAxisIndex : [ 0, 1 ],
+							type : 'slider',
+							top : '85%',
+							start : 50,
+							end : 100
+						} ],
+						series : [
+								{
+									name : 'Dow-Jones index',
+									type : 'candlestick',
+									data : data.values,
+									itemStyle : {
+										normal : {
+											borderColor : null,
+											borderColor0 : null
+										}
+									},
+									tooltip : {
+										formatter : function(param) {
+											param = param[0];
+											return [
+													'Date: '
+															+ param.name
+															+ '<hr size=1 style="margin: 3px 0">',
+													'Open: '
+															+ param.data[0]
+															+ '<br/>',
+													'Close: '
+															+ param.data[1]
+															+ '<br/>',
+													'Lowest: '
+															+ param.data[2]
+															+ '<br/>',
+													'Highest: '
+															+ param.data[3]
+															+ '<br/>' ]
+													.join('');
+										}
+									}
+								},  {
+									name : 'Volumn',
+									type : 'bar',
+									xAxisIndex : 1,
+									yAxisIndex : 1,
+									data : data.volumns
+								} ]
+					}
+					myChart.setOption(option);
+				}
+			});	
+		}	
+	</script>
+	
+	  
+	<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
+	<script src="theme/dark.js"></script>
+	<script type="text/javascript">
+
+	function showRSIGraph(){
+		
 		var date = new Array;
 		var value = new Array;
 		var sname;
@@ -605,7 +1016,7 @@ $(document).ready(function(){
 				name =  resultJSONData.Name;
 				
 				var myChart = echarts.init(document
-						.getElementById('back-flow-graph2'));
+						.getElementById('strategyGraph'));
 				option = {
 					color : colors,
 					backgroundColor : '#eee',
@@ -670,12 +1081,15 @@ $(document).ready(function(){
 				myChart.setOption(option);
 			}
 		});
+	}
 	</script>
 	
 	<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 	<script src="theme/dark.js"></script>
 	<script type="text/javascript">
 
+	function showKDJGraph(){
+		
 		var date = new Array;
 		var K = new Array;
 		var D = new Array;
@@ -699,7 +1113,7 @@ $(document).ready(function(){
 				name =  resultJSONData.Name;
 				
 				var myChart = echarts.init(document
-						.getElementById('back-flow-graph3'));
+						.getElementById('strategyGraph'));
 				option = {
 					color : colors,
 					backgroundColor : '#eee',
@@ -778,7 +1192,20 @@ $(document).ready(function(){
 				myChart.setOption(option);
 			}
 		});
+	}
 	</script>
-	 -->
+	
+	<script>
+	function logout(){
+		$.ajax({
+			type : "GET",
+			url : "Logout",
+			dataType : "json",
+			success: function(obj) {
+				
+			}
+		});
+	}
+	</script>
 </body>
 </html>

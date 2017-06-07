@@ -1,6 +1,8 @@
 package businessLogic;
 
+import java.awt.Adjustable;
 import java.math.RoundingMode;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -17,13 +19,12 @@ import com.opensymphony.xwork2.validator.annotations.DoubleRangeFieldValidator;
 import businessLogicService.GetStockBLService;
 import data.StockData;
 import dataService.StockDataService;
+import po.BasePO;
 import po.StockNameAndUpsPO;
 import po.StockPO;
 import po.UpsAndDownsPO;
 
 public class GetStockBL implements GetStockBLService {
-
-	int flag = 0;
 
 	// 注入股票查询的Dao
 	private StockDataService stockDataService;
@@ -71,10 +72,7 @@ public class GetStockBL implements GetStockBLService {
 				day++;
 			}
 		}
-		// System.out.println(Integer.parseInt(stock1.get(0).getCode())+"
-		// "+Integer.parseInt(stock2.get(0).getCode()));
-		// System.out.println(stockDataService.getNameByCode(Integer.parseInt(stock1.get(0).getCode()))+"
-		// "+stockDataService.getNameByCode(Integer.parseInt(stock2.get(0).getCode())));
+
 		VSDatas.put(stockDataService.getNameByCode(Integer.parseInt(stock1.get(0).getCode())), newStock1);
 		VSDatas.put(stockDataService.getNameByCode(Integer.parseInt(stock2.get(0).getCode())), newStock2);
 		return VSDatas;
@@ -104,6 +102,35 @@ public class GetStockBL implements GetStockBLService {
 			e.printStackTrace();
 		}
 		return date;
+	}
+
+	/**
+	 * 获得版块基准收益率
+	 * 
+	 * @param code
+	 * @return
+	 */
+	public Map<String, ArrayList<String>> getBenchmark(String code) {
+
+		Map<String, ArrayList<String>> data = new HashMap<>();
+
+		ArrayList<BasePO> benchmark = new ArrayList<>();
+		BasePO base = new BasePO();
+		benchmark = stockDataService.getBenchmark(code);
+
+		ArrayList<String> date = new ArrayList<>();
+		ArrayList<String> adjClose = new ArrayList<>();
+		// System.out.println("benchmark "+benchmark.size());
+		for (int i = 0; i < benchmark.size(); i++) {
+			base = benchmark.get(i);
+			date.add(base.getDate());
+			adjClose.add(String.valueOf(base.getAdjClose()));
+		}
+		// System.out.println(adjClose.get(0)+" "+adjClose.get(1));
+		// System.out.println(date.get(0)+" "+date.get(1));
+		data.put("date", date);
+		data.put("adjClose", adjClose);
+		return data;
 	}
 
 	/**
@@ -139,64 +166,61 @@ public class GetStockBL implements GetStockBLService {
 		for (int i = 0; i < distribution.length; i++) {
 			distribution[i] = 0;
 		}
-		DecimalFormat df = (DecimalFormat) NumberFormat.getInstance();
-		// 设置几位小数
-		df.setMaximumFractionDigits(6);
-		// 设置舍入模式
-		df.setRoundingMode(RoundingMode.HALF_UP);
+		DecimalFormat df = new DecimalFormat("0.00");
+		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
+		
 		ArrayList<StockPO> stockList = stockDataService.getStockByDate(Date);
-		// System.out.println(stockList.size());
 		for (StockPO po : stockList) {
-			if (Double.parseDouble(po.getVolume()) != 0.0) {
-				// System.out.println("A");
-				Date yesterday = getDayBefore(Date, Integer.parseInt(po.getCode()));
-				// System.out.println("B");
-				StockPO po_1 = stockDataService
-						.getStockByOneDay(stockDataService.getNameByCode(Integer.parseInt(po.getCode())), yesterday);
-				// System.out.println("C");
-				double upsAndDowns = Double
-						.valueOf(df.format((po.getAdjClose() - po_1.getAdjClose()) / (po_1.getAdjClose())));
-
-				for (int i = 0; i < distribution.length; i++) {
-					if (upsAndDowns >= changes[i] && upsAndDowns <= changes[i + 1]) {
-						distribution[i]++;
-						break;
-					}
+			Date yesterday = getDayBefore(Date, Integer.valueOf(po.getCode()));
+			if(Date.equals(time.format(yesterday))){
+				continue;
+			}
+			StockPO po_1 = stockDataService.getStockByCodeAndDate(Integer.valueOf(po.getCode()), time.format(yesterday), time.format(yesterday)).get(0);
+					
+			double upsAndDowns = (po.getClose()-po_1.getClose())/po_1.getClose();
+			
+			if(upsAndDowns>0.15||upsAndDowns<-0.15){
+				continue;
+			}
+			for (int i = 0; i < distribution.length; i++) {
+				if (upsAndDowns >= changes[i] && upsAndDowns <= changes[i + 1]) {
+					distribution[i]++;
+					break;
 				}
-				StockNameAndUpsPO namePO = new StockNameAndUpsPO(
-						stockDataService.getNameByCode(Integer.parseInt(po.getCode())), upsAndDowns);
-				if (upsAndDowns >= 0) {
-					if (ups_Max.size() > 0) {
-						for (int i = 0; i < ups_Max.size(); i++) {
-							if (namePO.getUps() >= ups_Max.get(i).getUps()) {
-								ups_Max.add(i, namePO);
-								if (ups_Max.size() > 5) {
-									ups_Max.remove(5);
-								}
-								break;
+			}
+			StockNameAndUpsPO namePO = new StockNameAndUpsPO(stockDataService.getNameByCode(Integer.valueOf(po.getCode())), upsAndDowns);
+			if (upsAndDowns >= 0) {
+				if (ups_Max.size() > 0) {
+					for (int i = 0; i < ups_Max.size(); i++) {
+						if (namePO.getUps() >= ups_Max.get(i).getUps()) {
+							ups_Max.add(i, namePO);
+							if (ups_Max.size() > 5) {
+								ups_Max.remove(5);
 							}
+							break;
 						}
-					} else {
-						ups_Max.add(namePO);
 					}
-				} else {
-					if (downs_Max.size() > 0) {
-						for (int i = 0; i < downs_Max.size(); i++) {
-							if (namePO.getUps() <= downs_Max.get(i).getUps()) {
-								downs_Max.add(i, namePO);
-								if (downs_Max.size() > 5)
-									downs_Max.remove(5);
-								break;
-							}
+				} 
+				else {
+					ups_Max.add(namePO);
+				}
+			} 
+			else {
+				if (downs_Max.size() > 0) {
+					for (int i = 0; i < downs_Max.size(); i++) {
+						if (namePO.getUps() <= downs_Max.get(i).getUps()) {
+							downs_Max.add(i, namePO);
+							if (downs_Max.size() > 5)
+								downs_Max.remove(5);
+							break;
 						}
-					} else {
-						downs_Max.add(namePO);
 					}
+				} 
+				else {
+					downs_Max.add(namePO);
 				}
 			}
 		}
-//		System.out.println("D");
-//		System.out.println(ups_Max.size());
 		UpsAndDownsPO po = new UpsAndDownsPO(distribution, ups_Max, downs_Max);
 		return po;
 	}
@@ -209,6 +233,14 @@ public class GetStockBL implements GetStockBLService {
 	 */
 	private Date getDayBefore(String today, int code) {
 		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
+		if (code == 603580||code==2876) {
+			try {
+				return time.parse(today);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		String yesterday = today;
 		Date dayBefore = new Date();
 		double volume;
@@ -221,39 +253,37 @@ public class GetStockBL implements GetStockBLService {
 				yesterday = (new SimpleDateFormat("yyyy-MM-dd")).format(cal.getTime());
 				dayBefore = time.parse(yesterday);
 				volume = stockDataService.getVolumeByDateAndCode(code, yesterday);
-				// System.out.println(volume);
 			} while (volume == 0.0);
 
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
-		// System.out.println(dayBefore);
 		return dayBefore;
 	}
-	
-	public ArrayList<StockPO> getStockMessage(){
+
+	public ArrayList<StockPO> getStockMessage() {
 		return stockDataService.getStockByDate("2017-05-25");
 	}
-	
-	public String getNameByCode(String code){
+
+	public String getNameByCode(String code) {
 		return stockDataService.getNameByCode(Integer.valueOf(code));
 	}
-	
-	public ArrayList<StockPO> getLastStockByCode(String code){
+
+	public ArrayList<StockPO> getLastStockByCode(String code) {
 		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
-		System.out.println("getLastStockByCode--------enter---------");
+		// System.out.println("getLastStockByCode--------enter---------");
 		String date = time.format(getDayBefore("2017-05-25", Integer.valueOf(code)));
-		System.out.println("getLastStockByCode--------end-------");
+		// System.out.println("getLastStockByCode--------end-------");
 		return stockDataService.getStockByCodeAndDate(Integer.valueOf(code), date, date);
 	}
 
-	public static void main(String[] args) {
-		GetStockBL bl = new GetStockBL();
-		StockDataService stockDataService = new StockData();
-		bl.setStockDataService(stockDataService);
-		UpsAndDownsPO a = bl.getDistributionOfUpsAndDowns("2011-05-11");
-		for (int i = 0; i < 5; i++)
-			System.out.println(a.getDowns_Max().get(i).getName() + ' ' + a.getDowns_Max().get(i).getUps());
-
-	}
+//	public static void main(String[] args) {
+//		GetStockBL bl = new GetStockBL();
+//		StockDataService stockDataService = new StockData();
+//		bl.setStockDataService(stockDataService);
+//		UpsAndDownsPO a = bl.getDistributionOfUpsAndDowns("2011-05-11");
+//		for (int i = 0; i < 5; i++)
+//			System.out.println(a.getDowns_Max().get(i).getName() + ' ' + a.getDowns_Max().get(i).getUps());
+//
+//	}
 }

@@ -19,5 +19,5 @@ public interface GetBollDataService {
 	
 	public MeanReversionVO getParameter();
 	
-	public ArrayList<String> getSuggest();
+	public String[] getSuggest();
 }

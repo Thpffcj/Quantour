@@ -3,6 +3,7 @@ package dataService;
 import java.util.ArrayList;
 import java.util.Date;
 
+import po.BasePO;
 import po.StockPO;
 
 public interface StockDataService {
@@ -12,6 +13,8 @@ public interface StockDataService {
 	public ArrayList<StockPO> getStockByNameAndDate(String Name,String Begin,String End);
 	
 	public ArrayList<StockPO> getStockByDate(String Begin);
+	
+	public ArrayList<BasePO> getBenchmark(String code);
 	
 	public Double getVolumeByDateAndCode(int Code,String Begin);
 	
@@ -31,10 +34,14 @@ public interface StockDataService {
 	
 	public ArrayList<String> getDate(String begin, String end);
 	
+	public ArrayList<String> GetAllCode();
+	
+	public ArrayList<String> GetAllName();
+	
 	public int getCodeByName(String name);
 	
 	public String getNameByCode(int code);
 	
-	public StockPO getStockByOneDay(String Name,Date day);
+//	public StockPO getStockByOneDay(String Name,Date day);
 
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 2017-6-7 10:27:06 by Hibernate Tools 3.5.0.Final -->
+<hibernate-mapping>
+    <class name="po.BasePO" table="base">
+        <composite-id>
+        	<key-property name="date" type="java.lang.String">
+            	<column name="date" />
+        	</key-property>
+         	<key-property name="code" type="java.lang.String">
+            	<column name="code" />
+       		</key-property>
+        </composite-id>
+        
+         <property name="adjOpen" type="double">
+            <column name="adjopen" />
+        </property>
+        <property name="adjClose" type="double">
+            <column name="adjclose" />
+        </property>
+    </class>
+</hibernate-mapping>

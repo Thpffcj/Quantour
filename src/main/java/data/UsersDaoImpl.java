@@ -1,5 +1,6 @@
 package data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -49,6 +50,89 @@ public class UsersDaoImpl implements UsersDao{
 		tx.commit();
 		if(tx != null){
 			tx = null;
+		}
+		return true;
+	}
+	
+	/**
+	 * 修改昵称
+	 */
+	public boolean ChangeName(String newname, String oldname){
+		Session session = sessionFactory.openSession();
+		String h = "select u.username from UserPO u";
+		Query q = session.createQuery(h);
+		ArrayList<String> namelist = new ArrayList<>();
+		namelist = (ArrayList<String>) q.getResultList();
+		for(int i=0;i<namelist.size();i++){
+			if(newname.equals(namelist.get(i))){
+				return false;
+			}
+		}
+		
+		Transaction tx = session.beginTransaction();
+		String hql = "update UserPO u set u.username='"+newname+"'where u.username=?";
+		Query query = session.createQuery(hql);
+		query.setParameter(0, oldname);
+		int num = query.executeUpdate();
+		System.out.println(num);
+		tx.commit();
+		if(num<=0){
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 根据用户名得到密码
+	 * @param username
+	 * @return
+	 */
+	public String getPasswordByUsername(String username){
+		String hql = "";
+		try{
+			Session session = sessionFactory.openSession();
+			hql = "select password from UserPO where username=?";
+			Query query = session.createQuery(hql);
+			query.setParameter(0, username);
+			String password = (String) query.getSingleResult();
+			return password;
+		}
+		catch(Exception ex){
+			ex.printStackTrace();
+			return "";
+		}
+	}
+	
+	/**
+	 * 得到所有用户名
+	 * @return
+	 */
+	public ArrayList<String> getAllUsername(){
+		Session session = sessionFactory.openSession();
+		String h = "select u.username from UserPO u";
+		Query q = session.createQuery(h);
+		ArrayList<String> namelist = new ArrayList<>();
+		namelist = (ArrayList<String>) q.getResultList();
+		return namelist;
+	}
+	
+	/**
+	 * 修改密码
+	 * @param username
+	 * @param password
+	 * @return
+	 */
+	public boolean ChangePassword(String username,String password){
+		Session session = sessionFactory.openSession();
+		Transaction tx = session.beginTransaction();
+		String hql = "update UserPO u set u.password='"+password+"'where u.username=?";
+		Query query = session.createQuery(hql);
+		query.setParameter(0, username);
+		int num = query.executeUpdate();
+		System.out.println(num);
+		tx.commit();
+		if(num<=0){
+			return false;
 		}
 		return true;
 	}

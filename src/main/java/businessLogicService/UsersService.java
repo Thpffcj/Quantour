@@ -4,16 +4,18 @@ import po.UserPO;
 
 public interface UsersService {
 	
-	public boolean Login(UserPO user);
+	public String Login(String username, String password);
 	
-	public boolean Register(UserPO user);
+	public String Register(String username, String password1, String password2);
 	
-	public boolean ChangePassword(String username,String oldpw,String newpw);
+	public boolean ChangeName(String newname, String oldname);
 	
-	public String GetPhoto(String username);
+	public String ChangePassword(String username,String oldpw,String newpw1,String newpw2);
 	
-	public void UploadPhoto(String username,String imagename);
-	
+//	public String GetPhoto(String username);
+//	
+//	public void UploadPhoto(String username,String imagename);
+//	
 	public boolean Logout(String username);
 
 }

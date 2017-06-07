@@ -3,6 +3,7 @@ package businessLogicService;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 
 import org.jfree.data.category.DefaultCategoryDataset;
 
@@ -12,11 +13,11 @@ import vo.quantify.MeanReversionVO;
 
 public interface MomentumStrategyService {
 
-	public DefaultCategoryDataset getMStrategyComparedGraph(String Begin, String End, int existTime, int holdTime) throws ParseException;
+	public Map<String, ArrayList<String>> getMStrategyComparedGraph(String Begin, String End, int existTime, int holdTime) throws ParseException;
 
-	public DefaultCategoryDataset getMStrategyWinningGraph(boolean isHold, int Time, String Begin, String End) throws ParseException;
+	public Map<String, ArrayList<String>> getMStrategyWinningGraph(boolean isHold, int Time, String Begin, String End) throws ParseException;
 
-	public DefaultCategoryDataset getMStrategyExtraProfitGraph(boolean isHold, int Time, String Begin, String End) throws ParseException;
+	public Map<String, ArrayList<String>> getMStrategyExtraProfitGraph(boolean isHold, int Time, String Begin, String End) throws ParseException;
 
 	public DefaultCategoryDataset getMStrategyYieldGraph(String Begin, String End, int holdTime, int existTime) throws ParseException;
 

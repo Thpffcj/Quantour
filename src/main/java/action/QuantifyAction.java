@@ -13,6 +13,7 @@ import businessLogicService.GetBollDataService;
 import businessLogicService.GetKDJStochasticDataService;
 import businessLogicService.GetRSIDataService;
 import businessLogicService.MeanReversionService;
+import businessLogicService.MomentumStrategyService;
 import po.StockPO;
 
 public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
@@ -44,6 +45,11 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		this.meanReversionService = meanReversionService;
 	}
 
+	private MomentumStrategyService momentumStrategyService;
+	public void setMomentumStrategyService(MomentumStrategyService momentumStrategyService){
+		this.momentumStrategyService = momentumStrategyService;
+	}
+	
 	public String result;
 	public String getResult() {
 		return result;
@@ -66,10 +72,19 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		name.add("2249");
 		name.add("2191");
 		name.add("18");
+//		int shares = Integer.parseInt(request.getParameter("shares"));
+//		int holdPeriod = Integer.parseInt(request.getParameter("holdPeriod"));
+//		int formingPeriod = Integer.parseInt(request.getParameter("formingPeriod"));
+		String begin = request.getParameter("begin");
+		String end = request.getParameter("end");
 		
 		Map<String, ArrayList<String>> data = new HashMap<>();
 		try {
-			data = meanReversionService.getMeanReversionGraphData(null, name, 3, 1, 20, "2014-02-01", "2014-04-20");
+			if(begin.equals("") || begin == null){
+				data = meanReversionService.getMeanReversionGraphData(null, name, 3, 1, 20, "2014-01-20", "2014-04-29");
+			}else{
+				data = meanReversionService.getMeanReversionGraphData(null, name, 3, 1, 20, begin, end);
+			}
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
@@ -113,9 +128,18 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		name.add("2249");
 		name.add("2191");
 		name.add("18");
+//		int shares = Integer.parseInt(request.getParameter("shares"));
+//		int holdPeriod = Integer.parseInt(request.getParameter("holdPeriod"));
+//		int formingPeriod = Integer.parseInt(request.getParameter("formingPeriod"));
+		String begin = request.getParameter("begin");
+		String end = request.getParameter("end");
 		
 		Map<String, ArrayList<String>> data = new HashMap<>();
-		data = meanReversionService.GetMeanReturnRateGraphData(null, name, 3, 1, 20, "2014-02-01", "2014-04-20");
+		if(begin.equals("") || begin == null){
+			data = meanReversionService.GetMeanReturnRateGraphData(null, name, 3, 1, 20, "2014-01-20", "2014-04-29");
+		}else{
+			data = meanReversionService.GetMeanReturnRateGraphData(null, name, 3, 1, 20, begin, end);
+		}
 		
 		ArrayList<String> date = new ArrayList<>();
 		ArrayList<String> excess = new ArrayList<>();
@@ -153,9 +177,18 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		name.add("2249");
 		name.add("2191");
 		name.add("18");
+//		int shares = Integer.parseInt(request.getParameter("shares"));
+//		int holdPeriod = Integer.parseInt(request.getParameter("holdPeriod"));
+//		int formingPeriod = Integer.parseInt(request.getParameter("formingPeriod"));
+		String begin = request.getParameter("begin");
+		String end = request.getParameter("end");
 		
 		Map<String, ArrayList<String>> data = new HashMap<>();
-		data = meanReversionService.GetMeanWinningPercentageGraphData(null, name, 3, 1, 20, "2014-02-01", "2014-04-20");
+		if(begin.equals("") || begin == null){
+			data = meanReversionService.GetMeanWinningPercentageGraphData(null, name, 3, 1, 20, "2014-01-20", "2014-04-29");
+		}else{
+			data = meanReversionService.GetMeanWinningPercentageGraphData(null, name, 3, 1, 20, begin, end);
+		}
 		
 		ArrayList<String> date = new ArrayList<>();
 		ArrayList<String> winning = new ArrayList<>();
@@ -181,7 +214,7 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 	}
 	
 	public String getRSIGraphData(){
-		
+		System.out.println("RSI");
 		Map<String, ArrayList<String>> data = new HashMap<>();
 		ArrayList<String> date = new ArrayList<>();
 		ArrayList<String> value = new ArrayList<>();
@@ -208,7 +241,7 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 	}
 	
 	public String getKDJStochasticGraph(){
-		
+		System.out.println("KDJ");
 		Map<String, ArrayList<String>> data = new HashMap<>();
 		ArrayList<String> K = new ArrayList<>();
 		ArrayList<String> D = new ArrayList<>();
@@ -245,27 +278,27 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 	}
 	
 	public String getBollGraph(){
-		
+		System.out.println("Boll");
 //		String beginDate = request.getParameter("begindate"); 
 //		String endDate = request.getParameter("enddate"); 
 //		int code = Integer.parseInt(request.getParameter("code")); 
 		
-		Map<String, ArrayList<String>> data = new HashMap<>();
-//		KData = getKGraphDataService.getKData("1","2/1/05","7/6/05");
-		ArrayList<String> date = data.get("KDate");
-		ArrayList<String> open = data.get("KOpen");
-		ArrayList<String> close = data.get("KClose");
-		ArrayList<String> lowest = data.get("KLowest");
-		ArrayList<String> highest = data.get("KHighest");
-		ArrayList<String> volumn = data.get("KVolumn");
+		Map<String, ArrayList<String>> bollData = new HashMap<>();
+		bollData = getBollDataService.getBollData("1", "2005-05-01","2005-07-01");
+		ArrayList<String> date = bollData.get("KDate");
+		ArrayList<String> open = bollData.get("KOpen");
+		ArrayList<String> close = bollData.get("KClose");
+		ArrayList<String> lowest = bollData.get("KLowest");
+		ArrayList<String> highest = bollData.get("KHighest");
+		ArrayList<String> volumn = bollData.get("KVolumn");
 		
-		int days = data.get("KDate").size();
+		int days = bollData.get("KDate").size();
 		String[] KDate = new String[days];
 		Double[] KOpen = new Double[days];
 		Double[] KClose = new Double[days];
 		Double[] KLowest = new Double[days];
 		Double[] KHighest = new Double[days];
-		Integer[] KVolumn = new Integer[days];
+		String[] KVolumn = new String[days];
 		
 		for(int i=0; i<days; i++){
 			KDate[i] = date.get(i);
@@ -273,9 +306,10 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 			KClose[i] = Double.valueOf(close.get(i));
 			KLowest[i] = Double.valueOf(lowest.get(i));
 			KHighest[i] = Double.valueOf(highest.get(i));
-			KVolumn[i] = Integer.valueOf(volumn.get(i));
+			KVolumn[i] = volumn.get(i);
 		}
 		
+		String[] suggestion = getBollDataService.getSuggest();
 		JSONObject json = new JSONObject();
 		json.put("Date", KDate);
 		json.put("Open", KOpen);
@@ -283,6 +317,7 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		json.put("Lowest", KLowest);
 		json.put("Highest", KHighest);
 		json.put("Volumn", KVolumn);
+		json.put("Suggestion", suggestion);
 		result = json.toString();
 		return SUCCESS;
 	}

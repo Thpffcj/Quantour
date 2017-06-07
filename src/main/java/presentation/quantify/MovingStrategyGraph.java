@@ -46,12 +46,12 @@ public class MovingStrategyGraph {
 			int formingPeriod, String begin, String end) {
 		MomentumStrategyService service = new MomentumStrategy(stockPool, section);
 		DefaultCategoryDataset dataset = null;
-		try {
-			dataset = service.getMStrategyComparedGraph(begin, end, formingPeriod, holdPeriod);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			dataset = service.getMStrategyComparedGraph(begin, end, formingPeriod, holdPeriod);
+//		} catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		JFreeChart jfreechart = ChartFactory.createLineChart("收益曲线", "日期", "收益率", dataset, PlotOrientation.VERTICAL,
 				true, true, false);
 
@@ -104,12 +104,12 @@ public class MovingStrategyGraph {
 			String begin, String end) {
 		MomentumStrategyService service = new MomentumStrategy(stockPool, section);
 		DefaultCategoryDataset dataset = null;
-		try {
-			dataset = service.getMStrategyExtraProfitGraph(isHold, Period, begin, end);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			dataset = service.getMStrategyExtraProfitGraph(isHold, Period, begin, end);
+//		} catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		JFreeChart jfreechart = ChartFactory.createLineChart("超额收益率", "计算周期", "超额收益", dataset, PlotOrientation.VERTICAL,
 				true, true, false);
 
@@ -160,12 +160,12 @@ public class MovingStrategyGraph {
 			boolean isHold, String begin, String end) {
 		MomentumStrategyService service = new MomentumStrategy(stockPool, section);
 		DefaultCategoryDataset dataset = null;
-		try {
-			dataset = service.getMStrategyWinningGraph(isHold, Period, begin, end);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			dataset = service.getMStrategyWinningGraph(isHold, Period, begin, end);
+//		} catch (ParseException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		JFreeChart jfreechart = ChartFactory.createLineChart("策略胜率", "计算周期", "策略胜率", dataset, PlotOrientation.VERTICAL,
 				true, true, false);
 

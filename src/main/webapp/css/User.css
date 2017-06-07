@@ -105,18 +105,6 @@ body {
 	background-color: #eee;
 }
 
-.list tbody {
-	font-weight: 200;
-	text-align: center;
-}
-
-.list tr th td {
-	width: 100px;
-	border: 1px;
-	text-align: center;
-	font-weight: 200;
-}
-
 .input-form {
 	display: none;
 	width: 840px;
@@ -138,9 +126,9 @@ body {
 }
 
 .input-form input {
-	width: 150px;
-	height: 35px;
-	margin-left: 10px;
+	width: 180px;
+	height: 30px;
+	margin: 10px 0px 10px 10px;
 	border-color: #ccc;
 	border: 1px solid transparent;
 	border-radius: 3px;

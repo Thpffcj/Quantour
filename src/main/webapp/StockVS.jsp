@@ -6,18 +6,14 @@
 <head>
 <meta charset="UTF-8">
 <title>股票比较</title>
-<link rel="stylesheet"
-	href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
-<link rel="stylesheet"
-	href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
-<script
-	src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <link rel="stylesheet" type="text/css" href="css/index.css">
 <link rel="stylesheet" href="css/StockVS.css">
 <link rel="stylesheet"
 	href="//apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
-<script src="//apps.bdimg.com/libs/jquery/1.10.2/jquery.min.js"></script>
 <script src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 <script src="theme/echarts.js"></script>
 <script type="text/javascript">
@@ -54,7 +50,7 @@
 				<li class="firstli"><a href="javascript:void(0)">${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
-						<li><a href="Main.jsp">退出登录</a></li>
+						<li><a href="Main.jsp" onclick="logout()">退出登录</a></li>
 					</ul>
 				</li>
 			</ul>
@@ -62,9 +58,41 @@
 	</nav>
 
 	<div class="divinput">
-		<input type="text" placeholder="输入股票代码/名称" id="code"> 
-		<a href="Stock.jsp" target="_blank" id="searchcode"><button type="submit" class="search">搜索</button></a>
+		<div class="stock-drop-list">
+			<input type="text" placeholder="输入股票代码/名称" id="code">
+			<ul id="match-list">
+			</ul>
+		</div>
+		<a href="javascript:void(0)" target="_blank" id="searchcode"><button type="button" class="search">搜索</button></a>
+		
 		<script type="text/javascript">
+		$("#code").bind('input propertychange', function() {
+			$.ajax({
+				type: "POST",
+				url: "getMatch",
+				data: {
+					enter: $("#code").val(),
+				},
+				dataType: "json",
+				success: function(obj){
+					var result = JSON.parse(obj);
+					var s = "";
+					for(var i=0;i<5;i++){
+						if(result.name[i]!=null){
+							s = s+"<li onclick=\"getStock('"+result.code[i]+"')\">"+result.code[i]+"&emsp;&emsp;"+result.name[i]+"</li>";
+						}
+					}
+					$("#match-list").attr("style","");
+					$("#match-list").html(s);
+				}
+			});
+		});
+		
+		function getStock(code){
+			$("#code").val(code);
+			$("#match-list").attr("style","display:none;");
+		}
+		
 		$("#searchcode").click(function(){ 
 			$.ajax({ 
 				type : "POST",
@@ -74,11 +102,42 @@
 				},
 				dataType : "json",
 				success : function(obj) {
-					
+					var result = JSON.parse(obj);
+					console.log(result.result);
+					if(result.result=="unknow"){
+						$("#search-modal-prompt").html("无效的股票代码/名称!");
+						$("#search-modal").modal('show');
+					}else if(result.result=="null"){
+						$("#search-modal-prompt").html("搜索内容为空!");
+						$("#search-modal").modal('show');
+					}else{
+						window.open("Stock.jsp");
+					}
 				}
 			});
 		});
 		</script>
+	</div>
+	
+	<div class="modal fade" id="search-modal" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h4 class="modal-title" id="myModalLabel">提示</h4>
+				</div>
+				<div class="modal-body">
+					<label>按下 ESC 按钮退出。</label>
+					<br>
+					<strong id="search-modal-prompt">无效的股票代码/名称!</strong>
+				</div>
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary" data-dismiss="modal">确定</button>
+				</div>
+			</div>
+		</div>
 	</div>
 	
 	<div class="w1200">
@@ -274,6 +333,19 @@
 			}
 		});
 		}
+	</script>
+	
+	<script>
+	function logout(){
+		$.ajax({
+			type : "GET",
+			url : "Logout",
+			dataType : "json",
+			success: function(obj) {
+				
+			}
+		});
+	}
 	</script>
 
 </body>

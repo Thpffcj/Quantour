@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.swing.plaf.synth.SynthSpinnerUI;
+
 import org.apache.commons.io.input.DemuxInputStream;
 import org.json.JSONObject;
 import com.opensymphony.xwork2.ModelDriven;
@@ -56,7 +58,7 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		int[] data;
 		
 		if(date == null  || date.equals("")){
-			upsAndDownsPO = getStockBLService.getDistributionOfUpsAndDowns("2015-05-05");
+			upsAndDownsPO = getStockBLService.getDistributionOfUpsAndDowns("2017-05-25");
 		}else{
 			upsAndDownsPO = getStockBLService.getDistributionOfUpsAndDowns(date);
 		}
@@ -67,14 +69,15 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		
 		int days = ups.size();
 		String[] upName = new String[days];
-		Double[] upAmplitude = new Double[days];
+		String[] upAmplitude = new String[days];
 		String[] downName = new String[days];
-		Double[] downAmplitude = new Double[days];
+		String[] downAmplitude = new String[days];
+		DecimalFormat df = new DecimalFormat("0.00");
 		for(int i=0; i<days; i++){
 			upName[i] = ups.get(i).getName();
-			upAmplitude[i] = ups.get(i).getUps();
+			upAmplitude[i] = df.format(ups.get(i).getUps()*100)+"%";
 			downName[i] = downs.get(i).getName();
-			downAmplitude[i] = downs.get(i).getUps();
+			downAmplitude[i] = df.format(downs.get(i).getUps()*100)+"%";
 		}
 		
 		JSONObject json = new JSONObject();
@@ -91,17 +94,15 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		
 		String beginDate = request.getParameter("begindate"); 
 		String endDate = request.getParameter("enddate"); 
-//		String code = request.getParameter("code");
 		String code = WebCookieVO.getSearchCode();
 		
-//		System.out.println(code);
 		Map<String, ArrayList<String>> KData = new HashMap<>();
 		if(code == null || code.equals("")){
 			KData = getKGraphDataService.getKData("000001", beginDate, endDate);
 		}else{				
 			KData = getKGraphDataService.getKData(code, beginDate, endDate);
 		}
-
+		System.out.println("KData----"+KData);
 		ArrayList<String> date = KData.get("KDate");
 		ArrayList<String> open = KData.get("KOpen");
 		ArrayList<String> close = KData.get("KClose");
@@ -132,7 +133,7 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		if(code==null||code.equals("")){
 			json.put("LCode", "000001");
 		}else{
-			json.put("LCode", code);
+			json.put("LCode", Tran(code));
 		}
 		json.put("LClose", KClose[days-2]);
 		json.put("LOpen", KOpen[days-1]);
@@ -151,6 +152,10 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		return "success";
 	}
 	
+	/**
+	 * 得到股票对比图
+	 * @return
+	 */
 	public String getVSGraph(){
 		
 		String beginDate = request.getParameter("begindate"); 
@@ -203,16 +208,117 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		return SUCCESS;
 	}
 	
+	/**
+	 * 获得版块基准收益率
+	 * @return
+	 */
+	public String getBenchmark(){
+		
+		Map<String, ArrayList<String>> data = new HashMap<>();
+		
+		String type = request.getParameter("type");
+		if(type.equals("hs300")){
+			data = getStockBLService.getBenchmark("hs300");
+		}else if(type.equals("399005")){
+			data = getStockBLService.getBenchmark("399005");
+		}else{
+			data = getStockBLService.getBenchmark("399006");
+		}
+		
+		ArrayList<String> date = new ArrayList<>();
+		ArrayList<String> adj = new ArrayList<>();
+		date = data.get("date");
+		adj = data.get("adjClose");
+		
+//		System.out.println("date "+date.size());
+		int days = date.size();
+		String[] dates = new String[days];
+		Double[] adjClose = new Double[days];
+		
+		for(int i=0; i<days; i++){
+			dates[i] = date.get(i);
+			adjClose[i] = Double.parseDouble(adj.get(i));
+		}
+//		System.out.println(dates[0]+" "+dates[1]);
+		
+		JSONObject json = new JSONObject();
+		json.put("Date", dates);
+		json.put("AdjClose", adjClose);
+		result = json.toString();
+		return SUCCESS;
+	}
+	
+	/**
+	 * 保存用户想要搜索的股票代码
+	 * @return
+	 */
 	public String saveSearchCode(){
 		String code = request.getParameter("code");
-		WebCookieVO.setSearchCode(code);
-		System.out.println(code);
+		String Code = code.replace(" ", "");
+		JSONObject json = new JSONObject();
+		
+		if(Code.equals("")){
+			json.put("result", "null");
+			result = json.toString();
+			return "success";
+		}
+		
+		if(!IsCode(Code)){
+			Code = Tran(getKGraphDataService.getCodeByName(Code));
+		}
+		
+		if(Code.equals("000000")){
+			json.put("result", "unknow");
+		}else if(getKGraphDataService.IsLegalCode(Code)==false){
+			json.put("result", "unknow");
+		}else{
+			WebCookieVO.setSearchCode(Code);
+			System.out.println(Code);
+			json.put("result", "success");
+		}
+		result = json.toString();
 		return "success";
 	}
 	
+	/**
+	 * 根据输入的股票代码/名称的一部分来寻找匹配的股票列表
+	 * @return
+	 */
+	public String getMatchList(){
+		String enter = request.getParameter("enter");
+		Map<String, String[]> matchlist = getKGraphDataService.getMatchList(enter);
+		JSONObject json = new JSONObject();
+		json.put("name", matchlist.get("name"));
+		json.put("code", matchlist.get("code"));
+		result = json.toString();
+		return "success";
+	}
+	
+	/**
+	 * 得到当天交易股票信息
+	 * @return
+	 */
 	public String getStockMessage(){
+		String page = request.getParameter("page");
+		System.out.println(page);
 		ArrayList<StockPO> poList = getStockBLService.getStockMessage();
-		System.out.println(poList.size());
+		
+		int n1 = 0;
+		int n2 = 0;
+		if(page.equals("-1")){
+			n1 = (WebCookieVO.getpage()-1)*10;
+		}else if(page.equals("-2")){
+			n1 = (WebCookieVO.getpage()+1)*10;
+		}else{
+			n1 = Integer.valueOf(page)*10;
+		}
+		WebCookieVO.setpage(n1/10);
+		if((n1+10)>poList.size()){
+			n2 = poList.size();
+		}else{
+			n2 = n1+10;
+		}
+		
 		String[] index = new String[poList.size()];
 		String[] code = new String[poList.size()];
 		String[] name = new String[poList.size()];
@@ -222,25 +328,23 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		String[] close = new String[poList.size()];
 		String[] fluctuation = new String[poList.size()];
 		String[] volume = new String[poList.size()];
-		
-		for(int i=0;i<poList.size();i++){
+		int i = 0;
+		for(int k=n1;k<n2;k++){
 			DecimalFormat df = new DecimalFormat("0.00");
 			
-			index[i] = Integer.toString(i+1);
-			code[i] = poList.get(i).getCode();
-			System.out.println("------------enter-------------");
+			index[i] = Integer.toString(k+1);
+			code[i] = poList.get(k).getCode();
 			name[i] = getStockBLService.getNameByCode(code[i]);
-			open[i] = df.format(poList.get(i).getOpen());
-			high[i] = df.format(poList.get(i).getHigh());
-			low[i] = df.format(poList.get(i).getLow());
-			close[i] = df.format(poList.get(i).getClose());
-			volume[i] = poList.get(i).getVolume();
-			System.out.println("------------1end-------------");
+			open[i] = df.format(poList.get(k).getOpen());
+			high[i] = df.format(poList.get(k).getHigh());
+			low[i] = df.format(poList.get(k).getLow());
+			close[i] = df.format(poList.get(k).getClose());
+			volume[i] = poList.get(k).getVolume();
 			ArrayList<StockPO> lastday = getStockBLService.getLastStockByCode(code[i]);
-			System.out.println("------------end-------------");
-			System.out.println(i+" "+lastday);
-			double fluct = (poList.get(i).getClose()-lastday.get(0).getClose())/lastday.get(0).getClose();
+			System.out.println(k+" "+lastday);
+			double fluct = (poList.get(k).getClose()-lastday.get(0).getClose())/lastday.get(0).getClose();
 			fluctuation[i] = df.format(fluct*100);
+			i++;
 		}
 		
 		JSONObject json = new JSONObject();
@@ -253,7 +357,62 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		json.put("close", close);
 		json.put("fluctuation", fluctuation);
 		json.put("volume", volume);
+		int length = 0;
+		if(poList.size()%10==0){
+			length = poList.size()/10;
+		}else{
+			length = poList.size()/10+1;
+		}
+		json.put("length", length);
+		json.put("now", n1/10+1);
 		result = json.toString();
 		return "success";
+	}
+	
+	/**
+	 * 转化股票代码
+	 * @param code
+	 * @return
+	 */
+	public String Tran(String code){
+		String Code = "";
+		switch (code.length()) {
+		case 6:
+			Code = code;
+			break;
+		case 5:
+			Code = "0"+code;
+			break;
+		case 4:
+			Code = "00"+code;
+			break;
+		case 3:
+			Code = "000"+code;
+			break;
+		case 2:
+			Code = "0000"+code;
+			break;
+		case 1:
+			Code = "00000"+code;
+			break;
+		default:
+			break;
+		}
+		return Code;
+	}
+	
+	/**
+	 * 判断输入的是否为股票代码
+	 * @param code
+	 * @return
+	 */
+	private boolean IsCode(String code){
+		String C = code.replace(" ", "");
+		try{
+			int number = Integer.valueOf(code);
+		}catch (Exception e) {
+			return false;
+		}
+		return true;
 	}
 }

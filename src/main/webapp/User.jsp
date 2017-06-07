@@ -38,10 +38,10 @@
 			</div>
 			<ul id="userul">
 				<li class="firstli"><img src="images/photo.png"></li>
-				<li class="firstli"><a href="javascript:void(0)">用户名</a>
+				<li class="firstli"><a href="javascript:void(0)">${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
-						<li><a href="Main.jsp">退出登录</a></li>
+						<li><a href="Main.jsp" onclick="logout()">退出登录</a></li>
 					</ul></li>
 			</ul>
 		</div>
@@ -77,24 +77,24 @@
 					<table class="table table-hover table-striped">
 						<thead>
 							<tr>
-								<th>序号</th>
-								<th>股票代码</th>
-								<th>股票名称</th>
-								<th>最新价</th>
-								<th>涨跌幅</th>
-								<th>删除</th>
+								<th style="text-align:center;">序号</th>
+								<th style="text-align:center;">股票代码</th>
+								<th style="text-align:center;">股票名称</th>
+								<th style="text-align:center;">最新价</th>
+								<th style="text-align:center;">涨跌幅</th>
+								<th style="text-align:center;">删除</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr>
-								<th>1</th>
-								<th>000001</th>
-								<th>平安银行</th>
-								<th>9.03</th>
-								<th>2.5%</th>
-								<th style="cursor: pointer;" data-toggle="modal"
+								<td>1</td>
+								<td>000001</td>
+								<td>平安银行</td>
+								<td>9.03</td>
+								<td>2.5%</td>
+								<td style="cursor: pointer;" data-toggle="modal"
 									data-target="#deletestock"><span
-									class="glyphicon glyphicon-trash"></span></th>
+									class="glyphicon glyphicon-trash"></span></td>
 							</tr>
 						</tbody>
 					</table>
@@ -105,10 +105,9 @@
 				<form>
 					<br> 
 					<label>昵称:</label> 
-					<input type="text" value="用户名"
-						id="username" placeholder="请输入昵称"> 
+					<input type="text" value=${sessionScope.loginUserName} id="username" placeholder="请输入昵称"> 
 					<br>
-					<button type="submit" class="btn"
+					<button type="button" class="btn" id="change-name"
 						style="position: relative; left: 100px;">确认更新</button>
 				</form>
 			</div>
@@ -118,31 +117,29 @@
 					<input type="password" id="oldpassword"
 						placeholder="请输入当前密码"> 
 					<br> 
-					<label>&ensp;新密码:&emsp;</label> 
-					<input type="password" id="newpassword1"
-						style="position: relative; left: 3px;" placeholder="请输入新密码">
+					<label>&ensp;新密码:&ensp;&emsp;</label> 
+					<input type="password" id="newpassword1" placeholder="请输入新密码">
 					<br> 
 					<label>确认新密码:</label> 
 					<input type="password"
 						id="newpassword2" placeholder="请再次输入新密码">
 					<br>
-					<button type="submit" class="btn"
+					<button type="button" class="btn" id="change-password"
 						style="position: relative; left: 120px;">确认修改</button>
 				</form>
 			</div>
 			<div class="input-form" id="input3">
 				<form action="UploadFile.ashx" method="post" enctype="multipart/form-data">
 					<br> 
-					<input type="file" accept="image/*" id="image"
+					<input type="file" id="image"
 						style="color: white;width:auto;">
-					<button type="submit" class="btn"
+					<button type="button" class="btn" id="change-image"
 						style="position: relative; left: 50px;">确认上传</button>
 				</form>
 			</div>
 		</div>
 	</div>
 
-	<!-- 模态框（Modal） -->
 	<div class="modal fade" id="rename" tabindex="-1" role="dialog"
 		aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -167,9 +164,7 @@
 		</div>
 		<!-- /.modal-dialog -->
 	</div>
-	<!-- /.modal -->
 	
-	<!-- 模态框（Modal） -->
 	<div class="modal fade" id="addpool" tabindex="-1" role="dialog"
 		aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -194,9 +189,7 @@
 		</div>
 		<!-- /.modal-dialog -->
 	</div>
-	<!-- /.modal -->
-
-	<!-- 模态框（Modal） -->
+	
 	<div class="modal fade" id="deletepool" tabindex="-1" role="dialog"
 		aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -218,9 +211,7 @@
 		</div>
 		<!-- /.modal-dialog -->
 	</div>
-	<!-- /.modal -->
-
-	<!-- 模态框（Modal） -->
+	
 	<div class="modal fade" id="deletestock" tabindex="-1" role="dialog"
 		aria-labelledby="myModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
@@ -242,7 +233,29 @@
 		</div>
 		<!-- /.modal-dialog -->
 	</div>
-	<!-- /.modal -->
+	
+	<div class="modal fade" id="change-modal" tabindex="-1" role="dialog"
+		aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-hidden="true">×</button>
+					<h4 class="modal-title" id="myModalLabel">提示</h4>
+				</div>
+				<div class="modal-body">
+					<label>按下 ESC 按钮退出。</label>
+					<br>
+					<strong id="change-modal-prompt">修改成功!</strong>
+				</div>
+				<div class="modal-footer">
+					<a href="User.jsp" id="modal-yes"><button type="submit" class="btn btn-primary">确定</button></a>
+				</div>
+			</div>
+			<!-- /.modal-content -->
+		</div>
+		<!-- /.modal-dialog -->
+	</div>
 
 	<script>
 		function click1() {
@@ -285,6 +298,100 @@
 			document.getElementById("input3").className = "input-form";
 			document.getElementById("self").className = "selfstock active";
 		}
+	</script>
+	
+	<script>
+	$("#change-name").click(function(){
+		$.ajax({
+			type : "POST",
+			url : "ChangeName",
+			data: {
+				name: $("#username").val(),
+			},
+			dataType : "json",
+			success: function(obj) {
+				var result = JSON.parse(obj);
+				
+				if(result.result=="success"){
+					$("#change-modal-prompt").html("修改成功!");
+					$("#modal-yes").attr("href","User.jsp");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="same"){
+					$("#change-modal-prompt").html("昵称尚未修改!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="null"){
+					$("#change-modal-prompt").html("昵称不能为空!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}else{
+					$("#change-modal-prompt").html("该昵称已被占用!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}
+			}
+		});
+	});
+	
+	$("#change-password").click(function(){
+		$.ajax({
+			type : "POST",
+			url : "ChangePassword",
+			data: {
+				oldpassword: $("#oldpassword").val(),
+				newpassword1: $("#newpassword1").val(),
+				newpassword2: $("#newpassword2").val(),
+			},
+			dataType : "json",
+			success: function(obj) {
+				var result = JSON.parse(obj);
+				console.log(result.result);
+				if(result.result=="success"){
+					$("#change-modal-prompt").html("修改成功!");
+					$("#modal-yes").attr("href","User.jsp");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="notsame"){
+					$("#change-modal-prompt").html("两次密码不同!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="null"){
+					$("#change-modal-prompt").html("密码不能为空!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="failure"){
+					$("#change-modal-prompt").html("修改失败!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="falseold"){
+					$("#change-modal-prompt").html("原密码错误!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}
+			}
+		});
+	});
+	</script>
+	
+	<script>
+	function logout(){
+		$.ajax({
+			type : "GET",
+			url : "Logout",
+			dataType : "json",
+			success: function(obj) {
+				
+			}
+		});
+	}
 	</script>
 </body>
 </html>

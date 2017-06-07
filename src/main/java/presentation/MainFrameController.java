@@ -369,7 +369,7 @@ public class MainFrameController {
 			}
 
 			UsersService service = new Users();
-			service.UploadPhoto(StageRepertory.getusername(), StageRepertory.getusername());
+//			service.UploadPhoto(StageRepertory.getusername(), StageRepertory.getusername());
 		}
 	}
 

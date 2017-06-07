@@ -44,6 +44,7 @@
 				<value>ConceptClassifiedPO.hbm.xml</value>
 				<value>AreaClassifiedPO.hbm.xml</value>
 				<value>IndustryClassifiedPO.hbm.xml</value>
+				<value>BasePO.hbm.xml</value>
 			</list>
 		</property>
 		
@@ -83,6 +84,10 @@
 		<property name="getStockBLService" ref="getStockBLService"></property>
 	</bean>
 	
+	<bean id="BenchmarkGraphAction" class="action.StockAction" scope="prototype">
+		<property name="getStockBLService" ref="getStockBLService"></property>
+	</bean>
+	
 	<!-- 配置业务层的类 -->
 	<bean id="getKGraphDataService" class="businessLogic.GetKGraphData">
 		<property name="stockDataService" ref="stockDataService"></property>
@@ -103,6 +108,7 @@
 		<property name="getPlateDataService" ref="getPlateDataService"></property>
 	</bean>
 	
+	<!-- 配置业务层的类 -->
 	<bean id="getPlateDataService" class="businessLogic.GetPlateData">
 		<property name="stockDataService" ref="stockDataService"></property>
 	</bean>
@@ -128,7 +134,6 @@
 		<property name="meanReversionService" ref="meanReversionService"></property>
 	</bean>
 	
-	
 	<!-- 配置业务层的类 -->
 	<bean id="getRSIDataService" class="businessLogic.GetRSIData">
 		<property name="stockDataService" ref="stockDataService"></property>
@@ -143,6 +148,17 @@
 		<property name="stockDataService" ref="stockDataService"></property>
 	</bean>
 	
+	<!-- predict -->
+	<!-- 配置action类 -->
+	<bean id="ForecastAction" class="action.ForecastAction" scope="prototype">
+		<property name="markovForecastService" ref="markovForecastService"></property>
+	</bean>
+	
+	<!-- 配置业务层的类 -->
+	<bean id="markovForecastService" class="businessLogic.MarkovForecast">
+		<property name="stockDataService" ref="stockDataService"></property>
+	</bean>
+
 
 	<!-- 配置事务管理器 -->
 	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">

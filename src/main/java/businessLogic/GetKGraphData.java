@@ -24,6 +24,10 @@ public class GetKGraphData implements GetKGraphDataService{
 		this.stockDataService = stockDataService;
 	}
 	
+	private static ArrayList<String> codelist = null;
+	
+	private static ArrayList<String> namelist = null;
+	
 	public void getKData(){
 		
 	}
@@ -115,5 +119,91 @@ public class GetKGraphData implements GetKGraphDataService{
 		}
 		String name = stockDataService.getNameByCode(Integer.valueOf(code));
 		return name;
+	}
+	
+	public String getCodeByName(String name){
+		if(name==null||name.equals("")){
+			return "000001";
+		}
+		int code = stockDataService.getCodeByName(name);
+		return Integer.toString(code);
+	}
+	
+	/**
+	 * 判断是否存在该股票
+	 * @param code
+	 * @return
+	 */
+	public boolean IsLegalCode(String code){
+		if(codelist==null){
+			codelist = stockDataService.GetAllCode();
+		}
+		for(int i=0;i<codelist.size();i++){
+			if(code.equals(codelist.get(i))){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public Map<String, String[]> getMatchList(String enter){
+		String code = enter.replace(" ", "");
+		boolean IsCode = IsCode(code);
+		if(codelist==null){
+			codelist = stockDataService.GetAllCode();
+		}
+		if(namelist==null){
+			namelist = stockDataService.GetAllName();
+		}
+		
+		int length = code.length();
+		String[] c = new String[5];
+		String[] name = new String[5];
+		int k = 0;
+		if(length==0){
+			
+		}else if(IsCode){
+			for(int i=0;i<codelist.size();i++){
+				if(code.equals(codelist.get(i).substring(0,length))){
+					c[k] = codelist.get(i);
+					name[k] = namelist.get(i);
+					k++;
+					if(k==5){
+						break;
+					}
+				}
+			}
+		}else{
+			for(int i=0;i<codelist.size();i++){
+				if(code.equals(namelist.get(i).substring(0,length))){
+					c[k] = codelist.get(i);
+					name[k] = namelist.get(i);
+					k++;
+					if(k==5){
+						break;
+					}
+				}
+			}
+		}
+		
+		Map<String, String[]> matchlist = new HashMap<>();
+		matchlist.put("code", c);
+		matchlist.put("name", name);
+		return matchlist;
+	}
+	
+	/**
+	 * 判断输入的是否为股票代码
+	 * @param code
+	 * @return
+	 */
+	private boolean IsCode(String code){
+		String C = code.replace(" ", "");
+		try{
+			int number = Integer.valueOf(code);
+		}catch (Exception e) {
+			return false;
+		}
+		return true;
 	}
 }

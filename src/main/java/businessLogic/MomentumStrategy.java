@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hamcrest.core.IsEqual;
 import org.jfree.data.category.DefaultCategoryDataset;
@@ -73,20 +75,22 @@ public class MomentumStrategy implements MomentumStrategyService{
 	 * @return
 	 * @throws ParseException 
 	 */
-	public DefaultCategoryDataset getMStrategyComparedGraph(String Begin,String End,int existTime,int holdTime) throws ParseException {
-		if(this.MStrategyComparedGraph!=null&&Begin.equals(this.lastBegin)&&End.equals(this.lastEnd)
-				&&existTime==this.lastExistTime&&holdTime==this.lastHoldTime
-				&&isEqual(this.lastStockPool,stockPool)&&IsEqualsection(section, lastSection)){
-			return this.MStrategyComparedGraph;
-		}else{
-			MStrategyYieldGraph = null;
-			MStrategyExtraProfitGraph = null;
-			MStrategyWinningGraph = null;
-		}
-		DefaultCategoryDataset Compared = new DefaultCategoryDataset();
+	public Map<String, ArrayList<String>> getMStrategyComparedGraph(String Begin,String End,int existTime,int holdTime) throws ParseException {
+//		if(this.MStrategyComparedGraph!=null&&Begin.equals(this.lastBegin)&&End.equals(this.lastEnd)
+//				&&existTime==this.lastExistTime&&holdTime==this.lastHoldTime
+//				&&isEqual(this.lastStockPool,stockPool)&&IsEqualsection(section, lastSection)){
+//			return this.MStrategyComparedGraph;
+//		}else{
+//			MStrategyYieldGraph = null;
+//			MStrategyExtraProfitGraph = null;
+//			MStrategyWinningGraph = null;
+//		}
+		Map<String, ArrayList<String>> data = new HashMap<>();
+//		DefaultCategoryDataset Compared = new DefaultCategoryDataset();
 		//作图线的名字
 		String strategy = "策略收益率";
 		String benchmark = "基准收益率";
+		String day = "日期";
 		//策略和基准的累计收益率
 		ArrayList<String> Days = sds.getDate(Begin, End);
 		ArrayList<Double> StrategyProfit = getWinnerProfitEveryday(time.parse(Begin),time.parse(End),holdTime,existTime);
@@ -117,20 +121,28 @@ public class MomentumStrategy implements MomentumStrategyService{
 		//计算夏普比率
 		this.sharpeRatio = p.getSharpeRatio(StrategyProfit);
 		//作图
-		for(int j=Math.min(Math.min(Days.size(), BenchmarkProfit.size()), StrategyProfit.size())-1;j>=0;j--){
-			Compared.addValue(BenchmarkProfit.get(j), benchmark, Days.get(j));
-			Compared.addValue(StrategyProfit.get(j), strategy, Days.get(j));
+		
+		ArrayList<String> StrategyProfit_String = new ArrayList<>();
+		ArrayList<String> BenchmarkProfit_String = new ArrayList<>();
+		
+		for(int j=Math.min(BenchmarkProfit.size(), StrategyProfit.size())-1;j>=0;j--){
+			StrategyProfit_String.add(StrategyProfit.get(j).toString());
+			BenchmarkProfit_String.add(BenchmarkProfit.get(j).toString());
 		}
 		
-		this.lastBegin=Begin;
-		this.lastEnd=End;
-		this.lastExistTime=existTime;
-		this.lastHoldTime=holdTime;
-		this.lastStockPool=stockPool;
-		this.lastSection=section;
-		this.MStrategyComparedGraph = Compared;
+		data.put(strategy, StrategyProfit_String);
+		data.put(benchmark, BenchmarkProfit_String);
+		data.put(day, Days);
 		
-		return Compared;
+//		this.lastBegin=Begin;
+//		this.lastEnd=End;
+//		this.lastExistTime=existTime;
+//		this.lastHoldTime=holdTime;
+//		this.lastStockPool=stockPool;
+//		this.lastSection=section;
+//		this.MStrategyComparedGraph = Compared;
+		
+		return data;
 	}
 
 	/**
@@ -142,14 +154,15 @@ public class MomentumStrategy implements MomentumStrategyService{
 	 * @return
 	 * @throws ParseException 
 	 */
-	public DefaultCategoryDataset getMStrategyExtraProfitGraph(boolean isHold,int Time,String Begin,String End) throws ParseException {
-		if(this.MStrategyExtraProfitGraph!=null&&Begin.equals(this.lastBegin2)&&End.equals(this.lastEnd2)
-				&&isHold==this.lastisHold&&Time==this.lastTime
-				&&isEqual(this.lastStockPool,stockPool)&&IsEqualsection(section, lastSection)){
-			return this.MStrategyExtraProfitGraph;
-		}
-		DefaultCategoryDataset ExtraProfit = new DefaultCategoryDataset();
-		String series = "额外收益率";
+	public Map<String, ArrayList<String>> getMStrategyExtraProfitGraph(boolean isHold,int Time,String Begin,String End) throws ParseException {
+//		if(this.MStrategyExtraProfitGraph!=null&&Begin.equals(this.lastBegin2)&&End.equals(this.lastEnd2)
+//				&&isHold==this.lastisHold&&Time==this.lastTime
+//				&&isEqual(this.lastStockPool,stockPool)&&IsEqualsection(section, lastSection)){
+//			return this.MStrategyExtraProfitGraph;
+//		}
+		Map<String, ArrayList<String>> data = new HashMap<>();
+//		DefaultCategoryDataset ExtraProfit = new DefaultCategoryDataset();
+//		String series = "额外收益率";
 		double normalProfit = 0;
 		ArrayList<String> Days = sds.getDate(Begin, End);
 		int daylong = Days.size();
@@ -171,11 +184,16 @@ public class MomentumStrategy implements MomentumStrategyService{
 			ArrayList<Double> BenchmarkAdj = sds.getStockAdjCloseBySection(section, Begin, End);
 			normalProfit = (BenchmarkAdj.get(0)-BenchmarkOpen.get(BenchmarkAdj.size()-1))/BenchmarkOpen.get(BenchmarkAdj.size()-1);	
 		}
+		ArrayList<String> ExtraProfit = new ArrayList<>();
+		ArrayList<String> DayLong = new ArrayList<>();
+		
 		//若为真，持有期固定
 		if(isHold){
 			for(int i=10;i<121;i+=10){
 				double totalProfit = getTotalProfit(Begin,End,i,Time);
-				ExtraProfit.addValue(totalProfit-normalProfit, series, (Integer)i);
+//				ExtraProfit.addValue(totalProfit-normalProfit, series, (Integer)i);
+				ExtraProfit.add(Double.toString(totalProfit));
+				DayLong.add(Integer.toString(i));
 				DecimalFormat df = new DecimalFormat("0.00%");
 				this.calculationCycle.add(i);
 				this.excessIncome.add(df.format(totalProfit-normalProfit));
@@ -185,37 +203,43 @@ public class MomentumStrategy implements MomentumStrategyService{
 		else{
 			for(int i=Days.size()/10;i<=Days.size();i+=Days.size()/10){
 				double totalProfit = getTotalProfit(Begin,End,Time,i);
-				ExtraProfit.addValue(totalProfit-normalProfit, series, (Integer)i);
+//				ExtraProfit.addValue(totalProfit-normalProfit, series, (Integer)i);
+				ExtraProfit.add(Double.toString(totalProfit));
+				DayLong.add(Integer.toString(i));
 				DecimalFormat df = new DecimalFormat("0.00%");
 				this.calculationCycle.add(i);
 				this.excessIncome.add(df.format(totalProfit-normalProfit));
 			}
 		}
-		this.lastBegin2=Begin;
-		this.lastEnd2=End;
-		this.lastisHold=isHold;
-		this.lastTime=Time;
-		this.lastStockPool=stockPool;
-		this.lastSection=section;
-		this.MStrategyExtraProfitGraph = ExtraProfit;
+		data.put("额外收益率", ExtraProfit);
+		data.put("天数", DayLong);
+//		this.lastBegin2=Begin;
+//		this.lastEnd2=End;
+//		this.lastisHold=isHold;
+//		this.lastTime=Time;
+//		this.lastStockPool=stockPool;
+//		this.lastSection=section;
+//		this.MStrategyExtraProfitGraph = ExtraProfit;
 		
-		return ExtraProfit;
+		return data;
 	}
 
 	/**
 	 * 策略胜率与不同持有期/形成期的关系图
 	 */
-	public DefaultCategoryDataset getMStrategyWinningGraph(boolean isHold, int Time, String Begin, String End) throws ParseException {
-		if(this.MStrategyWinningGraph!=null&&Begin.equals(this.lastBegin2)&&End.equals(this.lastEnd2)
-				&&isHold==this.lastisHold&&Time==this.lastTime
-				&&isEqual(this.lastStockPool,stockPool)&&IsEqualsection(section, lastSection)){
-			return this.MStrategyWinningGraph;
-		}
-		DefaultCategoryDataset Winning = new DefaultCategoryDataset();
-		String series = "策略胜率曲线";
+	public Map<String, ArrayList<String>> getMStrategyWinningGraph(boolean isHold, int Time, String Begin, String End) throws ParseException {
+//		if(this.MStrategyWinningGraph!=null&&Begin.equals(this.lastBegin2)&&End.equals(this.lastEnd2)
+//				&&isHold==this.lastisHold&&Time==this.lastTime
+//				&&isEqual(this.lastStockPool,stockPool)&&IsEqualsection(section, lastSection)){
+//			return this.MStrategyWinningGraph;
+//		}
+		Map<String, ArrayList<String>> data = new HashMap<>();
+//		DefaultCategoryDataset Winning = new DefaultCategoryDataset();
+//		String series = "策略胜率";
 		Date begin = time.parse(Begin);
 		Date end = time.parse(End);
-		
+		ArrayList<String> WinPercentage = new ArrayList<>();
+		ArrayList<String> DayLong = new ArrayList<>();
 		ArrayList<String> Days = sds.getDate(Begin, End);
 		ArrayList<Double> BenchmarkProfit = getBenchProfitEveryday(begin,end);
 		DecimalFormat df = new DecimalFormat("0.00%");
@@ -228,7 +252,9 @@ public class MomentumStrategy implements MomentumStrategyService{
 						WinDay++;
 					}
 				}
-				Winning.addValue((double)(WinDay*1.0/Days.size()), series, (Integer)i);
+//				Winning.addValue((double)(WinDay*1.0/Days.size()), series, (Integer)i);
+				WinPercentage.add(Double.toString((double)(WinDay*1.0/Days.size())));
+				DayLong.add(Integer.toString(i));
 				winningPercentage.add(df.format((double)(WinDay*1.0/Days.size())));
 			}
 		}
@@ -241,18 +267,22 @@ public class MomentumStrategy implements MomentumStrategyService{
 						WinDay++;
 					}
 				}
-				Winning.addValue((double)(WinDay*1.0/Days.size()), series, (Integer)i);
+//				Winning.addValue((double)(WinDay*1.0/Days.size()), series, (Integer)i);
+				WinPercentage.add(Double.toString((double)(WinDay*1.0/Days.size())));
+				DayLong.add(Integer.toString(i));
 				winningPercentage.add(df.format((double)(WinDay*1.0/Days.size())));
 			}
 		}
-		this.lastBegin2=Begin;
-		this.lastEnd2=End;
-		this.lastisHold=isHold;
-		this.lastTime=Time;
-		this.lastStockPool=stockPool;
-		this.lastSection=section;
-		this.MStrategyWinningGraph = Winning;
-		return Winning;
+		data.put("策略胜率", WinPercentage);
+		data.put("天数", DayLong);
+//		this.lastBegin2=Begin;
+//		this.lastEnd2=End;
+//		this.lastisHold=isHold;
+//		this.lastTime=Time;
+//		this.lastStockPool=stockPool;
+//		this.lastSection=section;
+//		this.MStrategyWinningGraph = Winning;
+		return data;
 	}
 	/**
 	 * 收益率频率分布直方图

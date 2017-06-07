@@ -12,6 +12,13 @@ import dataService.StockDataService;
 import po.StockPO;
 
 public class MarkovForecast implements MarkovForecastService{
+	
+	//注入股票查询的Dao
+	private StockDataService stockDataService;
+	public void setStockDataService(StockDataService stockDataService) {
+		this.stockDataService = stockDataService;
+	}
+	
 	/**
 	 * 预测未来股票的复权收盘价所属的价格区间
 	 * @param Name

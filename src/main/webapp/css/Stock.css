@@ -18,6 +18,7 @@ body {
 }
 
 .divinput .search {
+	float: left;
 	background-color: #5584ff;
 	font-size: 16px;
 	color: white;
@@ -25,6 +26,32 @@ body {
 	border: transparent;
 	border-radius: 4px;
 	height: 25px;
+	margin-left: 20px;
+}
+
+.stock-drop-list{
+	float: left;
+	width: 150px;
+}
+
+.divinput ul {
+	background-color: white;
+	width: 150px;
+	border:	1px solid black;
+}
+
+.divinput li {
+	color: black;
+	list-style-type: none;
+	position: relative;
+	left: -40px;
+	width: 148px;
+	padding: 5px 0px 5px 0px;
+}
+
+.divinput li:hover {
+	background-color: #d3d3d3;
+	cursor: pointer;
 }
 
 .w1200 {
@@ -54,7 +81,7 @@ body {
 	border-radius: 3px;
 }
 
-.btn {
+.w1200 .btn {
     padding: 5px 16px;
     margin-bottom: 0;
     font-size: 14px;
@@ -126,4 +153,38 @@ body {
     border: 1px Solid transparent;
     border-radius: 3px;
     padding-left: 20px;
+}
+
+.modal {
+	width: 350px;
+	margin: 0 auto;
+}
+
+.modal-header {
+	width: 350px;
+	text-align: center;
+}
+
+.modal-body {
+	width: 350px;
+	text-align: center;
+}
+
+.modal-footer {
+	width: 350px;
+	text-align: center;
+}
+
+.modal-footer .btn {
+	margin: 0px 20px 0px 20px;
+}
+
+.modal label {
+	font-weight: 200;
+	color: red;
+}
+
+.modal input {
+	border: 1px solid #000;
+	border-radius: 3px;
 }

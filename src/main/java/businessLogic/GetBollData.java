@@ -383,13 +383,11 @@ public class GetBollData implements GetBollDataService{
 		return rateOfReturn;
 	}
 	
-	public ArrayList<String> getSuggest(){
-		ArrayList<String> suggests = new ArrayList<>();
-		String suggest = "当价格自下而上突破上轨，即突破上方压力线时，我们认为多方力量正在走强，一波上涨行情已经形成，买入信号产生；当价格自上而下跌破下轨，即跌破支撑线时，我们认为空方力量正在走强，一波下跌趋势已经形成，卖出信号产生。";
-		suggests.add(suggest);
-		suggest = "布林线本身既包括了趋势指标，也包括了震荡指标，能帮助我们快速的认清市场的走势，是非常常用的技术指标。一般情况下，使用布林线操作的胜率要高于KDJ和RSI等指标。因为这些指标通常会在价格盘整的时候失去作用，产生很多错误信号。而布林线可以很好的帮我们寻找盘整阶段，以及在盘整结束时及时入场。";
-		suggests.add(suggest);
-		return suggests;
+	public String[] getSuggest(){
+		String[] suggest = new String[2];
+		suggest[0] = "当价格自下而上突破上轨，即突破上方压力线时，我们认为多方力量正在走强，一波上涨行情已经形成，买入信号产生；当价格自上而下跌破下轨，即跌破支撑线时，我们认为空方力量正在走强，一波下跌趋势已经形成，卖出信号产生。";
+		suggest[1] = "布林线本身既包括了趋势指标，也包括了震荡指标，能帮助我们快速的认清市场的走势，是非常常用的技术指标。一般情况下，使用布林线操作的胜率要高于KDJ和RSI等指标。因为这些指标通常会在价格盘整的时候失去作用，产生很多错误信号。而布林线可以很好的帮我们寻找盘整阶段，以及在盘整结束时及时入场。";
+		return suggest;
 	}
 	
 	public MeanReversionVO getParameter() {

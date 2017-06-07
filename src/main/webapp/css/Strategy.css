@@ -18,6 +18,7 @@ body {
 }
 
 .divinput .search {
+	float: left;
 	background-color: #5584ff;
 	font-size: 16px;
 	color: white;
@@ -25,6 +26,32 @@ body {
 	border: transparent;
 	border-radius: 4px;
 	height: 25px;
+	margin-left: 20px;
+}
+
+.stock-drop-list{
+	float: left;
+	width: 150px;
+}
+
+.divinput ul {
+	background-color: white;
+	width: 150px;
+	border:	1px solid black;
+}
+
+.divinput li {
+	color: black;
+	list-style-type: none;
+	position: relative;
+	left: -40px;
+	width: 148px;
+	padding: 5px 0px 5px 0px;
+}
+
+.divinput li:hover {
+	background-color: #d3d3d3;
+	cursor: pointer;
 }
 
 .w1200 {
@@ -34,8 +61,21 @@ body {
 }
 
 .head {
-	position: relative;
-	left: 150px;
+	margin: 22px 0;
+}
+
+h2 {
+	height: 21px;
+    line-height: 21px;
+    font-weight: 700;
+    border-left: 6px solid #528fcc;
+    padding-left: 10px;
+    font-size: 22px;
+    overflow: hidden;
+    color: white;
+}
+
+.choose{
 	margin: 22px 0;
 	padding-left: 30px;
 }
@@ -67,8 +107,6 @@ a.normal {
 }
 
 .input-form {
-	position: relative;
-	left: 150px;
 	display: none;
 }
 
@@ -132,23 +170,22 @@ a.normal {
 }
 
 .graph1 {
-	width: 1100px;
-	height: 300px;
+	width: 1200px;
+	height: 399px;
 	position: relative;
-	top: -100px;
-	left: 50px;
+	top: -70px;
 }
 
 .tablist {
 	width: 250px;
-	height: 300px;
+	height: 400px;
 	float: left;
 	zoom: 1;
 }
 
 .graph1 .item {
 	padding-top: 1px;
-    height: 100px;
+    height: 133px;
     text-align: center;
     cursor: pointer;
     background-color: #ebeff0;
@@ -165,20 +202,19 @@ a.normal {
 }
 
 .graph1 .item h3 {
-	padding-top: 13px;
+	padding-top: 28px;
 }
 
 .result {
+	float: left;
 	width: 850px;
-	height: 400px;
-	position: relative;
-	left: 250px;
+	height: 399px;
 }
 
 .result .graph {
 	display: none;
 	width: 850px;
-	height: 400px;
+	height: 399px;
 	background-color: #fff;
 }
 
@@ -191,6 +227,29 @@ a.normal {
 	left: 395px;
 	top: -22px;
 	width: 150px;
+}
+
+.input-quota {
+	margin-bottom: 20px;
+}
+
+.input-quota label {
+	color: white;
+	font-weight: 100;
+	margin: 8px 20px 8px 20px; 
+}
+
+.input-quota input {
+	width: 180px;
+	height: 30px;
+	border-color: #ccc;
+	border: 1px solid transparent;
+	border-radius: 3px;
+}
+.quota-result {
+	width: 1200px;
+	height: 400px;
+	background-color: white;
 }
 
 .modal {
