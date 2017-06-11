@@ -12,14 +12,11 @@ import vo.quantify.MeanReversionVO;
 
 public interface MeanReversionService {
 
-	public Map<String, ArrayList<String>> getMeanReversionGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end) throws ParseException;
+	public Map<String, ArrayList<String>> getMeanReversionGraphData(String section, String userName, int shares, int holdPeriod, int formingPeriod, String begin, String end) throws ParseException;
 
-	public Map<String, ArrayList<String>> GetMeanReturnRateGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin,String end);
+	public Map<String, ArrayList<String>> GetMeanReturnRateGraphData(String section,  int shares, int holdPeriod, int formingPeriod, String begin,String end);
 
-	public Map<String, ArrayList<String>> GetMeanWinningPercentageGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end);
-	
-	public DefaultCategoryDataset GetDistributionHistogramGraphData(String section, ArrayList<String> stockPool, int shares,
-			int holdPeriod, int formingPeriod, String begin, String end);
+	public Map<String, ArrayList<String>> GetMeanWinningPercentageGraphData(String section, int shares, int holdPeriod, int formingPeriod, String begin, String end);
 	
 	//获得年化收益率,基准年化收益率,最大回撤,阿尔法,贝塔,夏普比率
 	public MeanReversionVO getParameter();

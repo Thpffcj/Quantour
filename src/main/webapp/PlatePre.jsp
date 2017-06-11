@@ -36,8 +36,8 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				</ul>
 			</div>
 			<ul id="userul">
-				<li class="firstli"><img src="images/photo.png"></li>
-				<li class="firstli"><a href="javascript:void(0)">${sessionScope.loginUserName}</a>
+				<li class="firstli"><img id="photo"></li>
+				<li class="firstli"><a href="javascript:void(0)" id="loginUserName">${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
 						<li><a href="Main.jsp" onclick="logout()">退出登录</a></li>
@@ -173,7 +173,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							<th style="text-align:center;">现价</th>
 							<th style="text-align:center;">涨跌幅(%)</th>
 							<th style="text-align:center;">交易量</th>
-							<th style="text-align:center;">加股票池</th>
+							<th style="text-align:center;">加自选股</th>
 					</tr>
 				</thead>
 				<tbody id="children-list">
@@ -194,34 +194,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			</div>
 		</div>
 	</div>
-	
-	<!-- 模态框（Modal） -->
-	<div class="modal fade" id="addpool" tabindex="-1" role="dialog"
-		aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true">×</button>
-					<h4 class="modal-title" id="myModalLabel">加入股票池</h4>
-				</div>
-				<div class="modal-body">
-					<label>按下 ESC 按钮退出。</label> <br> 
-					选择股票池:&emsp;
-					<select>
-						<option value="默认">默认</option>
-					</select>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					<a href="User.jsp"><button type="button" class="btn btn-primary">确定</button></a>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
-	<!-- /.modal -->
 	
 	<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 	<script src="theme/dark.js"></script>
@@ -562,7 +534,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 							code[i]+"')\">"+code[i]+"</a></td><td><a href=\"Stock.jsp\" target=\"_blank\" onclick=\"SearchStock('"+
 							code[i]+"')\">"+name[i]+"</a></td><td>"+open[i]+"</td><td>"
 							+high[i]+"</td><td>"+low[i]+"</td><td>"+close[i]+"</td><td>"+fluct[i]+"</td><td>"+volume[i]
-							+"</td><td><a class=\"plus\" data-toggle=\"modal\" data-target=\"#addpool\"><span class=\"glyphicon glyphicon-plus\"></span></a></td><tr>";
+							+"</td><td><a class=\"plus\" onclick=\"addSelfStock('"+code[i]+"')\"><span class=\"glyphicon glyphicon-plus\"></span></a></td><tr>";
 					}
 				}
 				$("#children-list").html(s);
@@ -627,6 +599,47 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			}
 		});
 	}
+	
+	function addSelfStock(c){
+		$.ajax({
+			type: "POST",
+			url: "addSelfStock",
+			data: {
+				code: c,
+				username: $("#loginUserName").text(),
+			},
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				if(result.result=="success"){
+					$("#search-modal-prompt").html("添加成功!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result.result=="same"){
+					$("#search-modal-prompt").html("股票已存在!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result.result=="null") {
+					$("#search-modal-prompt").html("股票名称/代码不能为空!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result.result=="failure"){
+					$("#search-modal-prompt").html("添加失败!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result.result=="unknow"){
+					$("#search-modal-prompt").html("无效股票名称/代码!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#search-modal").modal('show');
+				}
+			}
+		});
+	}
 	</script>
 	
 	<script>
@@ -641,6 +654,23 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		});
 		
 	}
+	
+	$(document).ready(function(){
+		$.ajax({
+			Type: "POST",
+			url: "getPhoto",
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				var image = result.image;
+				if(image!=""){
+					$("#photo").attr("src", image);
+				}else{
+					$("#photo").attr("src", "images/photo.png");
+				}
+			}
+		});
+	});
 	</script>
 </body>
 </html>

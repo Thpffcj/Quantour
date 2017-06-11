@@ -19,6 +19,7 @@ import org.jfree.data.time.ohlc.OHLCSeriesCollection;
 import businessLogicService.GetRSIDataService;
 import data.StockData;
 import dataService.StockDataService;
+import po.BasePO;
 import po.StockPO;
 import vo.quantify.MeanReversionVO;
 
@@ -240,8 +241,8 @@ public class GetRSIData implements GetRSIDataService{
 		ArrayList<Double> marketIncome = new ArrayList<>();
 		ArrayList<Double> opens = new ArrayList<>();
 		ArrayList<Double> adjClose = new ArrayList<>();
-		opens = stockDataService.getStockOpenBySection(section, begin, end);
-		adjClose = stockDataService.getStockAdjCloseBySection(section, begin, end);
+		opens = getBenchProfitEveryday(section, begin, end);
+		adjClose = getBenchProfitEveryday(section, begin, end);
 		double open = opens.get(0);
 		for(int i=0; i<adjClose.size(); i++){
 			marketIncome.add((adjClose.get(i)-open)/open);
@@ -334,13 +335,11 @@ public class GetRSIData implements GetRSIDataService{
 		return rateOfReturn;
 	}
 	
-	public ArrayList<String> getSuggest(){
-		ArrayList<String> suggests = new ArrayList<>();
-		String suggest = "RSI值越大，说明近一段时间内价格上涨所产生的波动占整个波动的比例越大。当RSI超过70时，我们认为涨幅过于强劲，接下来很有可能会反转下跌，所以定义70以上的区域为超买区，应当卖出。反之，我们定义30以下的区域为超卖区，应当买入。";
-		suggests.add(suggest);
-		suggest = "RSI指标能够较为直观且有效的显示出一段时期内买卖双方的力量对比，帮助投资者较好的认清市场动态，掌握买卖时机，被多数投资者喜爱，尤其是短线操作中尤为给力，是最常用的技术指标之一。";
-		suggests.add(suggest);
-		return suggests;
+	public String[] getSuggest(){
+		String[] suggest = new String[2];
+		suggest[0] = "RSI值越大，说明近一段时间内价格上涨所产生的波动占整个波动的比例越大。当RSI超过70时，我们认为涨幅过于强劲，接下来很有可能会反转下跌，所以定义70以上的区域为超买区，应当卖出。反之，我们定义30以下的区域为超卖区，应当买入。";
+		suggest[1] = "RSI指标能够较为直观且有效的显示出一段时期内买卖双方的力量对比，帮助投资者较好的认清市场动态，掌握买卖时机，被多数投资者喜爱，尤其是短线操作中尤为给力，是最常用的技术指标之一。";
+		return suggest;
 	}
 	
 	public MeanReversionVO getParameter() {
@@ -391,5 +390,30 @@ public class GetRSIData implements GetRSIDataService{
 			e.printStackTrace();
 		}
 		return Origin;
+	}
+	
+	/**
+	 * 获取基准的每日收益率
+	 * @param Begin
+	 * @param End
+	 * @return
+	 */
+	private ArrayList<Double> getBenchProfitEveryday(String section, String begin, String end) {
+		
+		ArrayList<Double> BenchmarkProfit = new ArrayList<Double>();
+
+		ArrayList<BasePO> Benchmark = stockDataService.getBenchmarkByDate(section, begin, end);
+		BenchmarkProfit = new ArrayList<Double>();
+
+		BasePO basePO = new BasePO();
+		double income = 0.0;
+		double open = Benchmark.get(0).getAdjOpen();
+		for (int i = 0; i < Benchmark.size(); i++) {
+			basePO = Benchmark.get(i);
+			income = (basePO.getAdjClose() - open) / open;
+			BenchmarkProfit.add(income);
+		}
+
+		return BenchmarkProfit;
 	}
 }

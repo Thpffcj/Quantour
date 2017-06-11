@@ -35,6 +35,8 @@ body {
 }
 
 .divinput ul {
+	position: absolute;
+	z-index: 1;
 	background-color: white;
 	width: 150px;
 	border:	1px solid black;
@@ -247,6 +249,12 @@ a.normal {
 	border-radius: 3px;
 }
 .quota-result {
+	width: 1200px;
+	height: 400px;
+	background-color: white;
+}
+
+.quota-result1 {
 	width: 1200px;
 	height: 400px;
 	background-color: white;

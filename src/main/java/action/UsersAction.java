@@ -1,6 +1,11 @@
 package action;
 
+import sun.misc.BASE64Decoder;
+
+import sun.misc.BASE64Encoder;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.struts2.interceptor.validation.SkipValidation;
 import org.json.JSONObject;
@@ -84,6 +89,10 @@ public class UsersAction extends SuperAction implements ModelDriven<UserPO> {
 		return "success";
 	}
 	
+	/**
+	 * 退出登录
+	 * @return
+	 */
 	public String logout(){
 		System.out.println("-------");
 		if(session.getAttribute("loginUserName")!=null){
@@ -94,6 +103,10 @@ public class UsersAction extends SuperAction implements ModelDriven<UserPO> {
 		return "success";
 	}
 	
+	/**
+	 * 修改昵称
+	 * @return
+	 */
 	public String ChangeName(){
 		String name = request.getParameter("name");
 		String oldname = (String) session.getAttribute("loginUserName");
@@ -119,6 +132,10 @@ public class UsersAction extends SuperAction implements ModelDriven<UserPO> {
 		return "success";
 	}
 	
+	/**
+	 * 修改密码
+	 * @return
+	 */
 	public String ChangePassword(){
 		String oldpw = request.getParameter("oldpassword");
 		String newpw1 = request.getParameter("newpassword1");
@@ -128,6 +145,90 @@ public class UsersAction extends SuperAction implements ModelDriven<UserPO> {
 		String re = usersService.ChangePassword(username, oldpw, newpw1, newpw2);
 		JSONObject json = new JSONObject();
 		json.put("result", re);
+		result = json.toString();
+		return "success";
+	}
+	
+	/**
+	 * 得到头像
+	 */
+	public String getPhoto(){
+		String username = (String) session.getAttribute("loginUserName");
+		String image = usersService.GetPhoto(username);
+		JSONObject json = new JSONObject();
+		json.put("image", image);
+		result = json.toString();
+		return "success";
+	}
+	
+	/**
+	 * 上传头像
+	 * @return
+	 */
+	public String UploadImage(){
+		String username = (String) session.getAttribute("loginUserName");
+		String image = request.getParameter("image");
+		System.out.println(image.length());
+		String resultmessage = usersService.UploadPhoto(username, image);
+		JSONObject json = new JSONObject();
+		json.put("result", resultmessage);
+		result = json.toString();
+		return "success";
+	}
+	
+	/**
+	 * 得到用户自选股
+	 * @return
+	 */
+	public String getSelfStock(){
+		String page = request.getParameter("page");
+		String username = request.getParameter("username");
+		
+		Map<String, String[]> stockmessage = usersService.getSelfStockByUsername(page, username);
+		
+		JSONObject json = new JSONObject();
+		json.put("index", stockmessage.get("index"));
+		json.put("code", stockmessage.get("code"));
+		json.put("name", stockmessage.get("name"));
+		json.put("close", stockmessage.get("close"));
+		json.put("fluct", stockmessage.get("fluct"));
+		int length = 0;
+		if(stockmessage.get("index").length%10==0){
+			length = stockmessage.get("index").length/10;
+		}else {
+			length = stockmessage.get("index").length/10+1;
+		}
+		json.put("length", length);
+		result = json.toString();
+		return "success";
+	}
+	
+	/**
+	 * 添加用户自选股
+	 * @return
+	 */
+	public String addSelfStock(){
+		String code = request.getParameter("code");
+		String username = request.getParameter("username");
+		
+		String resultmessage = usersService.addSelfStockByUsername(code, username);
+		JSONObject json = new JSONObject();
+		json.put("result", resultmessage);
+		result = json.toString();
+		return "success";
+	}
+	
+	/**
+	 * 删除用户自选股
+	 * @return
+	 */
+	public String deleteSelfStock(){
+		String code = request.getParameter("code");
+		String username = request.getParameter("username");
+		
+		String resultmessage = usersService.deleteSelfStockByUsername(code, username);
+		JSONObject json = new JSONObject();
+		json.put("result", resultmessage);
 		result = json.toString();
 		return "success";
 	}

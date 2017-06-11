@@ -19,6 +19,7 @@ import org.jfree.data.time.ohlc.OHLCSeriesCollection;
 import businessLogicService.GetBollDataService;
 import data.StockData;
 import dataService.StockDataService;
+import po.BasePO;
 import po.StockPO;
 import vo.quantify.MeanReversionVO;
 
@@ -82,11 +83,11 @@ public class GetBollData implements GetBollDataService{
 	/**
 	 * 获得指定时间内均线图的数据
 	 */
-	public Map<String, ArrayList<String>> getAverageData(String condition, String begin, String end) {
+	public Map<String, ArrayList<Double>> getAverageData(String condition, String begin, String end) {
 		
-		Map<String, ArrayList<String>> data = new HashMap<>();
+		Map<String, ArrayList<Double>> data = new HashMap<>();
 		
-		StockDataService sds = new StockData();
+//		StockDataService sds = new StockData();
 		ArrayList<StockPO> stockList = new ArrayList<StockPO>();
 		//查询日期之前的数据量
 		int beforeDays = 19;
@@ -96,12 +97,12 @@ public class GetBollData implements GetBollDataService{
 			code = Integer.parseInt(condition);
 		}
 		else{
-			stockList = sds.getStockByNameAndDate(condition, begin, end);
+			stockList = stockDataService.getStockByNameAndDate(condition, begin, end);
 			code = Integer.parseInt(stockList.get(0).getCode());
 		}
 		
 		for(int i=0;i<19;i++){
-			isBegin = sds.JudgeIfTheLast(code, begin);
+			isBegin = stockDataService.JudgeIfTheLast(code, begin);
 			//如果之前没有数据了
 			if(isBegin==-1){
 				beforeDays = i;
@@ -112,55 +113,55 @@ public class GetBollData implements GetBollDataService{
 			}
 		}
 		stockList = getStockData(condition,begin,end);
-		
-		// 保留收盘价数据的集合
-		TimeSeriesCollection timeSeriesCollection = new TimeSeriesCollection();
-		// 对应时间收盘价数据
-		TimeSeries MD = new TimeSeries("MD");
-		TimeSeries UP = new TimeSeries("UP");
-		TimeSeries DN = new TimeSeries("DN");
-		
-		ArrayList<Double> closes20 = new ArrayList<>();
-		ArrayList<Double> upData = new ArrayList<>();
-		ArrayList<Double> downData = new ArrayList<>();
-		
+//		
+//		// 保留收盘价数据的集合
+//		TimeSeriesCollection timeSeriesCollection = new TimeSeriesCollection();
+//		// 对应时间收盘价数据
+//		TimeSeries MD = new TimeSeries("MD");
+//		TimeSeries UP = new TimeSeries("UP");
+//		TimeSeries DN = new TimeSeries("DN");
+//		
+//		ArrayList<Double> closes20 = new ArrayList<>();
+//		ArrayList<Double> upData = new ArrayList<>();
+//		ArrayList<Double> downData = new ArrayList<>();
+//		
 		StockPO spo = new StockPO();
-		ArrayList<String> dates = new ArrayList<>();
+//		ArrayList<String> dates = new ArrayList<>();
 		ArrayList<Double> closes = new ArrayList<>();
 		for(int i=stockList.size()-1;i>=0;i--){
 			spo = stockList.get(i);
 			String date = spo.getDate();
-			dates.add(date);
  			double close = spo.getClose();
  			closes.add(close);
 	    }
 		
-		closes20 = movingAverage.getAveData(closes,20,beforeDays);
-		
-		if(closes20 == null || closes20.size() == 0){
-			return null;
-		}
+//		closes20 = movingAverage.getAveData(closes,20,beforeDays);
+//		
+//		if(closes20 == null || closes20.size() == 0){
+//			return null;
+//		}
 		
 		ArrayList<Double> standardDeviation = new ArrayList<>();
 		standardDeviation = getStandardDeviation(closes);
 		
-		for(int i=0; i<closes20.size(); i++){
-			upData.add(closes20.get(i)+2*standardDeviation.get(i));
-			downData.add(closes20.get(i)-2*standardDeviation.get(i));
-		}
-	
-		upDatas.put(condition, upData);
-		downDatas.put(condition, downData);
-		
-		MD = addData(closes20, dates, MD, 19);
-		UP = addData(upData, dates, UP, 19);
-		DN = addData(downData, dates, DN, 19);
-		
-		timeSeriesCollection.addSeries(MD);
-		timeSeriesCollection.addSeries(UP);
-		timeSeriesCollection.addSeries(DN);
+//		for(int i=0; i<closes20.size(); i++){
+//			upData.add(closes20.get(i)+2*standardDeviation.get(i));
+//			downData.add(closes20.get(i)-2*standardDeviation.get(i));
+//		}
+//	
+//		upDatas.put(condition, upData);
+//		downDatas.put(condition, downData);
+//		
+//		MD = addData(closes20, dates, MD, 19);
+//		UP = addData(upData, dates, UP, 19);
+//		DN = addData(downData, dates, DN, 19);
+//		
+//		timeSeriesCollection.addSeries(MD);
+//		timeSeriesCollection.addSeries(UP);
+//		timeSeriesCollection.addSeries(DN);
 		
 		newStockPool.add(condition);
+		data.put("standardDeviation", standardDeviation);
 		return data;
 	}
 
@@ -289,8 +290,8 @@ public class GetBollData implements GetBollDataService{
 		ArrayList<Double> marketIncome = new ArrayList<>();
 		ArrayList<Double> opens = new ArrayList<>();
 		ArrayList<Double> adjClose = new ArrayList<>();
-		opens = stockDataService.getStockOpenBySection(section, begin, end);
-		adjClose = stockDataService.getStockAdjCloseBySection(section, begin, end);
+		opens = getBenchProfitEveryday(section, begin, end);
+		adjClose = getBenchProfitEveryday(section, begin, end);
 		double open = opens.get(0);
 		for(int i=0; i<adjClose.size(); i++){
 			marketIncome.add((adjClose.get(i)-open)/open);
@@ -438,5 +439,30 @@ public class GetBollData implements GetBollDataService{
 			e.printStackTrace();
 		}
 		return Origin;
+	}
+	
+	/**
+	 * 获取基准的每日收益率
+	 * @param Begin
+	 * @param End
+	 * @return
+	 */
+	private ArrayList<Double> getBenchProfitEveryday(String section, String begin, String end) {
+		
+		ArrayList<Double> BenchmarkProfit = new ArrayList<Double>();
+
+		ArrayList<BasePO> Benchmark = stockDataService.getBenchmarkByDate(section, begin, end);
+		BenchmarkProfit = new ArrayList<Double>();
+
+		BasePO basePO = new BasePO();
+		double income = 0.0;
+		double open = Benchmark.get(0).getAdjOpen();
+		for (int i = 0; i < Benchmark.size(); i++) {
+			basePO = Benchmark.get(i);
+			income = (basePO.getAdjClose() - open) / open;
+			BenchmarkProfit.add(income);
+		}
+
+		return BenchmarkProfit;
 	}
 }

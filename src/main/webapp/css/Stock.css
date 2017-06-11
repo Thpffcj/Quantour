@@ -35,6 +35,8 @@ body {
 }
 
 .divinput ul {
+	position: absolute;
+	z-index: 1;
 	background-color: white;
 	width: 150px;
 	border:	1px solid black;
@@ -58,6 +60,22 @@ body {
 	width: 1200px;
     margin: 0 auto;
     padding-top: 50px;
+}
+
+.head {
+	margin: 22px 0;
+}
+
+h2 {
+	height: 21px;
+    line-height: 21px;
+    font-weight: 700;
+    border-left: 6px solid #528fcc;
+    padding-left: 10px;
+    margin-left: 80px;
+    font-size: 22px;
+    overflow: hidden;
+    color: white;
 }
 
 .stockpre {
@@ -93,8 +111,15 @@ body {
 
 .Kdiv {
 	height: 500px;
-	width: 900px;
-	margin: 20px 150px 0px 150px;
+	width: 1000px;
+	margin: 20px 100px 0px 100px;
+	background-color: white;
+}
+
+.trend {
+	height: 500px;
+	width: 1000px;
+	margin: 20px 100px 0px 100px;
 	background-color: white;
 }
 
@@ -140,6 +165,27 @@ body {
 	text-align: center;
 	padding-top: 33px;
 	background-color: #2767a9;
+}
+
+.trend-input {
+	width: 1080px;
+	margin-left: 120px;	
+	padding-top: 30px;
+}
+
+.trend-input label {
+	color: white;
+	padding-left: 20px;
+	padding-right: 20px;
+	font-weight: 100;
+}
+
+.trend-input input {
+	width: 180px;
+	height: 30px;
+	border-color: #ccc;
+	border: 1px solid transparent;
+	border-radius: 3px;
 }
 
 .selfstock {

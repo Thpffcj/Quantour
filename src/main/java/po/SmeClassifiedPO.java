@@ -1,5 +1,10 @@
 package po;
 
+/**
+ * 
+ * @author 费慧通
+ *中小板
+ */
 public class SmeClassifiedPO {
 
 	private String code;

@@ -33,7 +33,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 				</ul>
 			</div>
 			<ul id="userul">
-				<li class="firstli"><img src="images/photo.png"></li>
+				<li class="firstli"><img id="photo"></li>
 				<li class="firstli"><a href="javascript:void(0)">${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
@@ -538,6 +538,23 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			}
 		});
 	}
+	
+	$(document).ready(function(){
+		$.ajax({
+			Type: "POST",
+			url: "getPhoto",
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				var image = result.image;
+				if(image!=""){
+					$("#photo").attr("src", image);
+				}else{
+					$("#photo").attr("src", "images/photo.png");
+				}
+			}
+		});
+	});
 	</script>
 </body>
 </html>

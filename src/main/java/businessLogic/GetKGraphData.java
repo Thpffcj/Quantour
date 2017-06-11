@@ -1,5 +1,6 @@
 package businessLogic;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,21 @@ public class GetKGraphData implements GetKGraphDataService{
 	public Map<String, ArrayList<String>> getKData(String condition, String beginDate, String endDate) {
 		
 		Map<String, ArrayList<String>> KData = new HashMap<>();
+		ArrayList<String> result = new ArrayList<>();
+		if(beginDate.equals("")||endDate.equals("")){
+			result.add("null");
+			KData.put("result", result);
+			return KData;
+		}
+		try{
+			LocalDate.parse(beginDate);
+			LocalDate.parse(endDate);
+		}catch (Exception e) {
+			result.add("wrongdate");
+			KData.put("result", result);
+			return KData;
+		}
+		
 		ArrayList<String> KDate = new ArrayList<>();
 		ArrayList<String> KOpen = new ArrayList<>();
 		ArrayList<String> KClose = new ArrayList<>();
@@ -54,6 +70,8 @@ public class GetKGraphData implements GetKGraphDataService{
 			KHighest.add(String.valueOf(spo.getHigh()));
 			KVolumn.add(String.valueOf(spo.getVolume()));
 		}
+		result.add("success");
+		KData.put("result", result);
 		KData.put("KDate", KDate);
 		KData.put("KOpen", KOpen);
 		KData.put("KClose", KClose);

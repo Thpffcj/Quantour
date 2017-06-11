@@ -122,8 +122,8 @@ $(document).ready(function(){
 				</ul>
 			</div>
 			<ul id="userul">
-				<li class="firstli"><img src="images/photo.png"></li>
-				<li class="firstli"><a href="javascript:void(0)">${sessionScope.loginUserName}</a>
+				<li class="firstli"><img id="photo"></li>
+				<li class="firstli"><a href="javascript:void(0)" id="loginUserName">${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
 						<li><a href="Main.jsp" onclick="logout()">退出登录</a></li>
@@ -230,6 +230,10 @@ $(document).ready(function(){
 				<label>选择股票池:</label>
 				<select id = "stockpool">
 					<option value = "全部">全部</option>
+					<option value = "主板">主板</option>
+					<option value = "中小板">中小板</option>
+					<option value = "创业板">创业板</option>
+					<option value = "我的自选股">我的自选股</option>
 				</select>
 				<button type="button" class="btn-plus" data-toggle="modal" data-target="#addpool">
 					<span class="glyphicon glyphicon-plus"></span></button>
@@ -256,6 +260,10 @@ $(document).ready(function(){
 				<label>选择股票池:</label>
 				<select id = "stockpool">
 					<option value = "全部">全部</option>
+					<option value = "主板">主板</option>
+					<option value = "中小板">中小板</option>
+					<option value = "创业板">创业板</option>
+					<option value = "我的自选股">我的自选股</option>
 				</select>
 				<button type="button" class="btn-plus" data-toggle="modal" data-target="#addpool"><span class="glyphicon glyphicon-plus"></span></button>
 				<label>回测时间:</label>
@@ -264,10 +272,10 @@ $(document).ready(function(){
 				<input type = "text" id = "enddate2" value="2017-05-25" placeholder="请选择结束日期">
 				<br><br>
 				<label>&emsp;均&emsp;线:&emsp;</label>
-				<select id = "stockpool">
-					<option value = "5日">5日</option>
-					<option value = "10日">10日</option>
-					<option value = "20日">20日</option>
+				<select id = "movingaverage">
+					<option value = "5">5日</option>
+					<option value = "10">10日</option>
+					<option value = "20">20日</option>
 				</select>
 				<label>持有期:</label>
 				<div id="slider3"></div>
@@ -280,9 +288,6 @@ $(document).ready(function(){
 			<script type="text/javascript">
 				$(document).ready(function(){ 
 					showMeanReversionGraph()
-					showMeanReturnRateGraph()
-					showMeanWinningPercentageGraph()
-					
 					$("#searchMean").click(function(){ 
 						showMeanReversionGraph()
 						showMeanReturnRateGraph()
@@ -330,34 +335,42 @@ $(document).ready(function(){
 			<label>---</label>
 			<input type = "text" id = "enddate3" value="2017-05-25" placeholder="请选择结束日期">
 			<label>股票代码/名称:</label>
-			<input type="text" id="code" placeholder="请输入股票代码/名称">
+			<input type="text" id="boolCode" placeholder="请输入股票代码/名称">
 			<button type="button" id="begin-quota" class="btn" onclick="Quota('Boll')" style="margin-left:80px;">开始分析</button>
-		</div>
-		<div class="quota-result" id="strategyGraph">
 		</div>
 		<p id="suggestion1"></p>
 		<p id="suggestion2"></p>
-		
+		<div class="quota-result" id="strategyGraph">
+		</div>
+		<div class="quota-result1" id="strategyGraph1">
+		</div>
+
 		<script type="text/javascript">
-		function Quota(type){
-			if(type == 'Boll'){
-				$("#begin-quota").click(function(){ 
-					showBollGraph()
-				});
+			$(document).ready(function() {
+				
+			});
+			function Quota(type) {
+				if (type == 'Boll') {
+					$("#begin-quota").click(function() {
+						showBollGraph()
+						showStockGains()
+					});
+				}
+				if (type == 'KDJ') {
+					$("#begin-quota").click(function() {
+						showKDJGraph()
+						showStockGains()
+					});
+				}
+				if (type == 'RSI') {
+					$("#begin-quota").click(function() {
+						showRSIGraph()
+						showStockGains()
+					});
+				}
 			}
-			if(type == 'KDJ'){
-				$("#begin-quota").click(function(){ 
-					showKDJGraph()
-				});
-			}
-			if(type == 'RSI'){
-				$("#begin-quota").click(function(){ 
-					showRSIGraph()
-				});
-			}
-		}
-			</script>
-		
+		</script>
+
 		<br><br><br>
 	</div>
 	
@@ -452,22 +465,26 @@ $(document).ready(function(){
 	});
 	</script>
 	
-	<!--  
+	
 	<script src="theme/dark.js"></script>
 	<script type="text/javascript">
 
-	function showMeanReversionGraph(){
+	function showMStrategyComparedGraph(){
 
 		var date = new Array;
 		var marketIncome = new Array;
 		var strategicIncome = new Array;
 
-		var colors = [ '#FFFFFF', '#FFFF00', '#A020F0' ];
+		var colors = [ '#FF0000', '#0000FF', '#000000'  ];
 
 		$.ajax({
 			type : "GET",
-			url : "MeanReversionGraph",
+			url : "MStrategyComparedGraph",
 			data: {
+				loginUserName: $("#loginUserName").text(),
+				formation: $("#formation").val(),
+				holding: $("#holding").val(),
+				stock: $("#begindate2").val(),
 				begin: $("#begindate2").val(),
 				end: $("#enddate2").val()
 			},
@@ -513,7 +530,297 @@ $(document).ready(function(){
 							axisLine : {
 								onZero : false,
 								lineStyle : {
-									color : colors[0]
+									color : colors[2]
+								}
+							},
+							axisPointer : {
+								label : {
+									formatter : function(params) {
+										return ' ' + params.value + (params.seriesData.length ? '：' 
+												+ params.seriesData[0].data : '')
+												+ ' ' + params.value + (params.seriesData.length ? '：' 
+														+ params.seriesData[1].data : '');
+									}
+								}
+							},
+							data : date
+						},
+
+					],
+					yAxis : [ {
+						scale: true,
+						type : 'value'
+					} ],
+					series : [
+							{
+								name : '基准收益率',
+								type : 'line',
+								smooth : true,
+								data : marketIncome
+							},
+							{
+								name : '策略收益率',
+								type : 'line',
+								smooth : true,
+								data : strategicIncome
+							},
+					]
+				}
+				myChart.setOption(option);
+			}
+		});
+	}
+	</script>
+	
+	<script src="theme/dark.js"></script>
+	<script type="text/javascript">
+
+	function showMStrategyExtraProfitGraph(){
+		
+		var date = new Array;
+		var values = new Array;
+
+		var colors = [ '#5793f3', '#d14a61', '#675bba', '#000000' ];
+
+		$.ajax({
+			type : "GET",
+			url : "MStrategyExtraProfitGraph",
+			data: {
+				begin: $("#begindate2").val(),
+				end: $("#enddate2").val()
+			},
+			dataType : "json",
+			success : function(obj) {
+				var resultJSONData = JSON.parse(obj);
+				for (i = 0; i < resultJSONData.Dates.length; i++) {
+					date[i] = resultJSONData.Dates[i];
+					values[i] = resultJSONData.Values[i];
+				}
+				
+				var myChart = echarts.init(document
+						.getElementById('back-flow-graph2'));
+				option = {
+					color : colors,
+					backgroundColor : '#eee',
+					title: {
+					        text: "超额收益",
+					        x: 'center'
+					    },
+					tooltip : {
+						trigger : 'none',
+						axisPointer : {
+							type : 'cross'
+						}
+					},
+					grid : {
+						top : 70,
+						bottom : 50
+					},
+					xAxis : [
+						{
+							type : 'category',
+							axisTick : {
+								alignWithLabel : true
+							},
+							axisLine : {
+								onZero : false,
+								lineStyle : {
+									color : colors[3]
+								}
+							},
+							axisPointer : {
+								label : {
+									formatter : function(params) {
+										return ' '
+												+ params.value
+												+ (params.seriesData.length ? '：'
+														+ params.seriesData[0].data
+														: '');
+									}
+								}
+							},
+							data : date
+						},
+
+					],
+					yAxis : [ {
+						scale: true,
+						type : 'value'
+					} ],
+					series : [
+							{
+								type : 'line',
+								smooth : true,
+								 areaStyle: {
+						                normal: {
+						                    color:  'rgb(255, 70, 131)'
+						                }
+						            },
+								data : values
+							} ]
+				}
+				myChart.setOption(option);
+			}
+		});
+	}
+	</script>
+	
+	<script src="theme/dark.js"></script>
+	<script type="text/javascript">
+
+	function showMStrategyWinningGraph(){
+		
+		var date = new Array;
+		var values = new Array;
+
+		var colors = [ '#5793f3', '#d14a61', '#675bba', '#000000' ];
+
+		$.ajax({
+			type : "GET",
+			url : "MStrategyWinningGraph",
+			data: {
+				begin: $("#begindate2").val(),
+				end: $("#enddate2").val()
+			},
+			dataType : "json",
+			success : function(obj) {
+				var resultJSONData = JSON.parse(obj);
+				for (i = 0; i < resultJSONData.Dates.length; i++) {
+					date[i] = resultJSONData.Dates[i];
+					values[i] = resultJSONData.Values[i];
+				}
+				
+				var myChart = echarts.init(document
+						.getElementById('back-flow-graph3'));
+				option = {
+					color : colors,
+					backgroundColor : '#eee',
+					title: {
+					        text: "超额收益",
+					        x: 'center'
+					    },
+					tooltip : {
+						trigger : 'none',
+						axisPointer : {
+							type : 'cross'
+						}
+					},
+					grid : {
+						top : 70,
+						bottom : 50
+					},
+					xAxis : [
+						{
+							type : 'category',
+							axisTick : {
+								alignWithLabel : true
+							},
+							axisLine : {
+								onZero : false,
+								lineStyle : {
+									color : colors[3]
+								}
+							},
+							axisPointer : {
+								label : {
+									formatter : function(params) {
+										return ' '
+												+ params.value
+												+ (params.seriesData.length ? '：'
+														+ params.seriesData[0].data
+														: '');
+									}
+								}
+							},
+							data : date
+						},
+
+					],
+					yAxis : [ {
+						scale: true,
+						type : 'value'
+					} ],
+					series : [
+							{
+								type : 'line',
+								smooth : true,
+								 areaStyle: {
+						                normal: {
+						                    color:  'rgb(255, 70, 131)'
+						                }
+						            },
+								data : values
+							} ]
+				}
+				myChart.setOption(option);
+			}
+		});
+	}
+	</script>
+	 
+	<script src="theme/dark.js"></script>
+	<script type="text/javascript"> 
+	function showMeanReversionGraph(){
+
+		var date = new Array;
+		var marketIncome = new Array;
+		var strategicIncome = new Array;
+
+		var colors = [ '#FF0000', '#0000FF', '#000000' ];
+
+		$.ajax({
+			type : "GET",
+			url : "MeanReversionGraph",
+			data: {
+				stockpool: $("#stockpool").val(),
+				begin: $("#begindate2").val(),
+				end: $("#enddate2").val(),
+				movingaverage: $("#movingaverage").val(),
+				hold: $("#holding2").val(),
+			},
+			dataType : "json",
+			success : function(obj) {
+				var resultJSONData = JSON.parse(obj);
+				for (i = 0; i < resultJSONData.Dates.length; i++) {
+					date[i] = resultJSONData.Dates[i];
+					marketIncome[i] = resultJSONData.MarketIncome[i];
+					strategicIncome[i] = resultJSONData.StrategicIncome[i];
+				}
+				
+				var myChart = echarts.init(document
+						.getElementById('back-flow-graph1'));
+				option = {
+					color : colors,
+					backgroundColor : '#eee',
+					 title: {
+					        text: "累计收益率",
+					        x: 'center'
+					    },
+					tooltip : {
+						trigger : 'none',
+						axisPointer : {
+							type : 'cross'
+						}
+					},
+					legend : {
+						top : 25,
+						left : 'center',
+						data : ['基准收益率','策略收益率']
+					},
+					grid : {
+						top : 70,
+						bottom : 50
+					},
+					xAxis : [
+						{
+							type : 'category',
+							axisTick : {
+								alignWithLabel : true
+							},
+							axisLine : {
+								onZero : false,
+								lineStyle : {
+									color : colors[2]
 								}
 							},
 							axisPointer : {
@@ -563,7 +870,7 @@ $(document).ready(function(){
 		var date = new Array;
 		var values = new Array;
 
-		var colors = [ '#5793f3', '#d14a61', '#675bba' ];
+		var colors = [ '#5793f3', '#d14a61', '#675bba', '#000000' ];
 
 		$.ajax({
 			type : "GET",
@@ -608,7 +915,7 @@ $(document).ready(function(){
 							axisLine : {
 								onZero : false,
 								lineStyle : {
-									color : colors[1]
+									color : colors[3]
 								}
 							},
 							axisPointer : {
@@ -656,7 +963,7 @@ $(document).ready(function(){
 		var date = new Array;
 		var values = new Array;
 
-		var colors = [ '#5793f3', '#d14a61', '#675bba' ];
+		var colors = [ '#5793f3', '#d14a61', '#675bba', '#000000' ];
 
 		$.ajax({
 			type : "GET",
@@ -701,7 +1008,7 @@ $(document).ready(function(){
 							axisLine : {
 								onZero : false,
 								lineStyle : {
-									color : colors[1]
+									color : colors[3]
 								}
 							},
 							axisPointer : {
@@ -740,15 +1047,14 @@ $(document).ready(function(){
 		});
 	}
 	</script>
-	 -->
 	 
-	<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 	<script src="theme/dark.js"></script>
 	<script type="text/javascript">
 
 		function showBollGraph(){
 		
 			var KData = new Array;
+			var value = new Array;
 
 			function splitData(rawData) {
 				var categoryData = [];
@@ -766,9 +1072,62 @@ $(document).ready(function(){
 				};
 			}
 
+			function calculateMA(dayCount, data, value) {
+				if(dayCount == 20){
+					 var result = [];
+					    for (var i = 0, len = data.values.length; i < len; i++) {
+					        if (i < dayCount) {
+					            result.push('-');
+					            continue;
+					        }
+					        var sum = 0;
+					        for (var j = 0; j < dayCount; j++) {
+					            sum += data.values[i - j][1];
+					        }
+					        result.push(+(sum / dayCount).toFixed(3));
+					    }
+					    return result;
+				}
+				if(dayCount == 19){
+					var result = [];
+				    for (var i = 0, len = data.values.length; i < len; i++) {
+				        if (i < dayCount+1) {
+				            result.push('-');
+				            continue;
+				        }
+				        var sum = 0;
+				        for (var j = 0; j < 20; j++) {
+				            sum += data.values[i - j][1];
+				        }
+				        result.push(+(sum / dayCount - 2*value[i]).toFixed(3));
+				    }
+				    return result;
+				}
+				else{
+					var result = [];
+				    for (var i = 0, len = data.values.length; i < len; i++) {
+				        if (i < dayCount) {
+				            result.push('-');
+				            continue;
+				        }
+				        var sum = 0;
+				        for (var j = 0; j < 20; j++) {
+				            sum += data.values[i - j][1];
+				        }
+				        result.push(+(sum / dayCount + 2*value[i]).toFixed(3));
+				    }
+				    return result;
+				}
+			}
+
 			$.ajax({
 				type : "POST",
 				url : "BollGraph",
+				data: {
+					begin: $("#begindate3").val(),
+					end: $("#enddate3").val(),
+					code: $("#boolCode").val()
+				},
 				dataType : "json",
 				success : function(obj) {
 					var resultJSONData = JSON.parse(obj);
@@ -783,6 +1142,7 @@ $(document).ready(function(){
 						KData[i][3] = resultJSONData.Lowest[i];
 						KData[i][4] = resultJSONData.Highest[i];
 						KData[i][5] = resultJSONData.Volumn[i];
+						value[i] = resultJSONData.Value[i];
 					}
 
 					var data = splitData(KData);
@@ -793,10 +1153,14 @@ $(document).ready(function(){
 					var option = {
 						backgroundColor : '#eee',
 						animation : false,
+						 title: {
+						        text: "Boll指标",
+						        x: 'center'
+						    },
 						legend : {
-							top : 10,
+							top : 30,
 							left : 'center',
-							data : [ 'Dow-Jones index']
+							data : [ 'MA20', 'UP', 'DOWN', 'Dow-Jones index']
 						},
 						tooltip : {
 							trigger : 'axis',
@@ -944,6 +1308,33 @@ $(document).ready(function(){
 							end : 100
 						} ],
 						series : [
+							  {
+					                name: 'MA20',
+					                type: 'line',
+					                data: calculateMA(20, data, value),
+					                smooth: true,
+					                lineStyle: {
+					                    normal: {opacity: 0.5}
+					                }
+					            },
+					            {
+					                name: 'UP',
+					                type: 'line',
+					                data: calculateMA(21, data, value),
+					                smooth: true,
+					                lineStyle: {
+					                    normal: {opacity: 0.5}
+					                }
+					            },
+					            {
+					                name: 'DOWN',
+					                type: 'line',
+					                data: calculateMA(19, data, value),
+					                smooth: true,
+					                lineStyle: {
+					                    normal: {opacity: 0.5}
+					                }
+					            },
 								{
 									name : 'Dow-Jones index',
 									type : 'candlestick',
@@ -989,9 +1380,8 @@ $(document).ready(function(){
 			});	
 		}	
 	</script>
-	
+
 	  
-	<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 	<script src="theme/dark.js"></script>
 	<script type="text/javascript">
 
@@ -999,21 +1389,29 @@ $(document).ready(function(){
 		
 		var date = new Array;
 		var value = new Array;
-		var sname;
+		var sname = new Array;
 
-		var colors = [ '#5793f3', '#d14a61', '#675bba' ];
+		var colors = [ '#5793f3', '#d14a61', '#675bba', '#000000' ];
 
 		$.ajax({
 			type : "GET",
 			url : "RSIGraph",
+			data: {
+				begin: $("#begindate3").val(),
+				end: $("#enddate3").val(),
+				code: $("#boolCode").val()
+			},
 			dataType : "json",
 			success : function(obj) {
 				var resultJSONData = JSON.parse(obj);
+				$("#suggestion1").html(resultJSONData.Suggestion[0]);
+				$("#suggestion2").html(resultJSONData.Suggestion[1]);
+				
 				for (i = 0; i < resultJSONData.Dates.length; i++) {
 					date[i] = resultJSONData.Dates[i];
 					value[i] = resultJSONData.Values[i];
 				}
-				name =  resultJSONData.Name;
+				sname[0] =  resultJSONData.Name;
 				
 				var myChart = echarts.init(document
 						.getElementById('strategyGraph'));
@@ -1021,7 +1419,7 @@ $(document).ready(function(){
 					color : colors,
 					backgroundColor : '#eee',
 					title: {
-					        text: "累计收益率",
+					        text: "RSI指标",
 					        x: 'center'
 					    },
 					tooltip : {
@@ -1031,7 +1429,7 @@ $(document).ready(function(){
 						}
 					},
 					legend : {
-						top : 10,
+						top : 30,
 						left : 'center',
 						data : sname
 					},
@@ -1048,7 +1446,7 @@ $(document).ready(function(){
 							axisLine : {
 								onZero : false,
 								lineStyle : {
-									color : colors[1]
+									color : colors[3]
 								}
 							},
 							axisPointer : {
@@ -1084,7 +1482,6 @@ $(document).ready(function(){
 	}
 	</script>
 	
-	<script src="http://echarts.baidu.com/build/dist/echarts.js"></script>
 	<script src="theme/dark.js"></script>
 	<script type="text/javascript">
 
@@ -1094,23 +1491,31 @@ $(document).ready(function(){
 		var K = new Array;
 		var D = new Array;
 		var J = new Array;
-		var sname;
+		var sname = new Array;
 
-		var colors = [ '#FFFFFF', '#FFFF00', '#A020F0' ];
+		var colors = [ '#FFFFFF', '#FFFF00', '#A020F0', '#000000' ];
 
 		$.ajax({
 			type : "GET",
 			url : "KDJStochasticGraph",
+			data: {
+				begin: $("#begindate3").val(),
+				end: $("#enddate3").val(),
+				code: $("#boolCode").val()
+			},
 			dataType : "json",
 			success : function(obj) {
 				var resultJSONData = JSON.parse(obj);
+				$("#suggestion1").html(resultJSONData.Suggestion[0]);
+				$("#suggestion2").html(resultJSONData.Suggestion[1]);
+				
 				for (i = 0; i < resultJSONData.Dates.length; i++) {
 					date[i] = resultJSONData.Dates[i];
 					K[i] = resultJSONData.K[i];
 					D[i] = resultJSONData.D[i];
 					J[i] = resultJSONData.J[i];
 				}
-				name =  resultJSONData.Name;
+				sname[0] =  resultJSONData.Name;
 				
 				var myChart = echarts.init(document
 						.getElementById('strategyGraph'));
@@ -1118,7 +1523,7 @@ $(document).ready(function(){
 					color : colors,
 					backgroundColor : '#eee',
 					 title: {
-					        text: sname,
+					        text: "KDJ指标",
 					        x: 'center'
 					    },
 					tooltip : {
@@ -1128,7 +1533,7 @@ $(document).ready(function(){
 						}
 					},
 					legend : {
-						top : 10,
+						top : 30,
 						left : 'center',
 						data : ['K','D','J']
 					},
@@ -1145,7 +1550,7 @@ $(document).ready(function(){
 							axisLine : {
 								onZero : false,
 								lineStyle : {
-									color : colors[0]
+									color : colors[3]
 								}
 							},
 							axisPointer : {
@@ -1195,6 +1600,103 @@ $(document).ready(function(){
 	}
 	</script>
 	
+	<script src="theme/dark.js"></script>
+	<script type="text/javascript">
+
+	function showStockGains(){
+		
+		var date = new Array;
+		var value = new Array;
+		var sname = new Array;
+
+		var colors = [ '#5793f3', '#d14a61', '#675bba', '#000000' ];
+
+		$.ajax({
+			type : "POST",
+			url : "StockGainsGraph",
+			data: {
+				begin: $("#begindate3").val(),
+				end: $("#enddate3").val(),
+				code: $("#boolCode").val()
+			},
+			dataType : "json",
+			success : function(obj) {
+				var resultJSONData = JSON.parse(obj);
+				for (i = 0; i < resultJSONData.Date.length; i++) {
+					date[i] = resultJSONData.Date[i];
+					value[i] = resultJSONData.AdjClose[i];
+				}
+				sname[0] = resultJSONData.Name;
+				
+				var myChart = echarts.init(document
+						.getElementById('strategyGraph1'));
+				option = {
+					color : colors,
+					backgroundColor : '#eee',
+					title: {
+					        text: "股票价格",
+					        x: 'center'
+					    },
+					tooltip : {
+						trigger : 'none',
+						axisPointer : {
+							type : 'cross'
+						}
+					},
+					legend : {
+						top : 30,
+						left : 'center',
+						data : sname
+					},
+					grid : {
+						top : 70,
+						bottom : 50
+					},
+					xAxis : [
+						{
+							type : 'category',
+							axisTick : {
+								alignWithLabel : true
+							},
+							axisLine : {
+								onZero : false,
+								lineStyle : {
+									color : colors[3]
+								}
+							},
+							axisPointer : {
+								label : {
+									formatter : function(params) {
+										return ' '
+												+ params.value
+												+ (params.seriesData.length ? '：'
+														+ params.seriesData[0].data
+														: '');
+									}
+								}
+							},
+							data : date
+						},
+
+					],
+					yAxis : [ {
+						scale: true,
+						type : 'value'
+					} ],
+					series : [
+							{
+								name : sname,
+								type : 'line',
+								smooth : true,
+								data : value
+							} ]
+				}
+				myChart.setOption(option);
+			}
+		});
+	}
+	</script>
+	 
 	<script>
 	function logout(){
 		$.ajax({
@@ -1206,6 +1708,23 @@ $(document).ready(function(){
 			}
 		});
 	}
+	
+	$(document).ready(function(){
+		$.ajax({
+			Type: "POST",
+			url: "getPhoto",
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				var image = result.image;
+				if(image!=""){
+					$("#photo").attr("src", image);
+				}else{
+					$("#photo").attr("src", "images/photo.png");
+				}
+			}
+		});
+	});
 	</script>
 </body>
 </html>

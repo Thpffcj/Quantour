@@ -13,7 +13,7 @@ public interface GetBollDataService {
 
 	public Map<String, ArrayList<String>> getBollData(String condition, String begin, String end);
 	
-	public Map<String, ArrayList<String>> getAverageData(String Code, String Begin, String End);
+	public Map<String, ArrayList<Double>> getAverageData(String Code, String Begin, String End);
 	
 	public DefaultCategoryDataset GetBollBackTestGraphData(String section, ArrayList<String> stockPool, String begin, String end);
 	

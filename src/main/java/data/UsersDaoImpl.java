@@ -9,6 +9,7 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import dataService.UsersDao;
+import po.SelfStockPO;
 import po.UserPO;
 
 public class UsersDaoImpl implements UsersDao{
@@ -46,6 +47,7 @@ public class UsersDaoImpl implements UsersDao{
 		user.setUid(getNewUid());
 		user.setUsername(username);
 		user.setPassword(password);
+		user.setAvatar("");
 		session.save(user);
 		tx.commit();
 		if(tx != null){
@@ -137,6 +139,48 @@ public class UsersDaoImpl implements UsersDao{
 		return true;
 	}
 	
+	/**
+	 * 根据用户名得到头像
+	 * @param username
+	 * @param image
+	 * @return
+	 */
+	public String getPhoto(String username){
+		String hql = "";
+		try{
+			Session session = sessionFactory.openSession();
+			hql = "select avatar from UserPO where username=?";
+			Query query = session.createQuery(hql);
+			query.setParameter(0, username);
+			String avatar = (String) query.getSingleResult();
+			return avatar;
+		}
+		catch(Exception ex){
+			ex.printStackTrace();
+			return "";
+		}
+	}
+	
+	/**
+	 * 根据用户名更新头像
+	 * @param username
+	 * @param image
+	 * @return
+	 */
+	public boolean UploadPhoto(String username, String image){
+		Session session = sessionFactory.openSession();
+		Transaction tx = session.beginTransaction();
+		String hql = "update UserPO u set u.avatar='"+image+"'where u.username=?";
+		Query query = session.createQuery(hql);
+		query.setParameter(0, username);
+		int num = query.executeUpdate();
+		tx.commit();
+		if(num<=0){
+			return false;
+		}
+		return true;
+	}
+	
 	private int getNewUid() {
 		Session session = sessionFactory.openSession();
 		Transaction tx = session.beginTransaction();
@@ -150,6 +194,67 @@ public class UsersDaoImpl implements UsersDao{
 		sid = sid + 1;
 		tx.commit();
 		return sid;
+	}
+	
+	/**
+	 * 根据用户名得到自选股
+	 * @param username
+	 * @return
+	 */
+	public ArrayList<String> getSelfStockByUsername(String username){
+		ArrayList<String> codelist = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		
+		transaction = session.beginTransaction();
+		String hql = "select code from SelfStockPO where username=?";
+		Query query = session.createQuery(hql);
+		query.setParameter(0, username);
+		codelist = (ArrayList<String>) query.getResultList();
+		transaction.commit();
+		session.close();
+		return codelist;
+	}
+	
+	/**
+	 * 添加用户自选股
+	 * @param code
+	 * @param username
+	 * @return
+	 */
+	public boolean addSelfStockByUsername(String code, String username){
+		Session session = sessionFactory.openSession();
+		Transaction tx = session.beginTransaction();
+		SelfStockPO po = new SelfStockPO();
+		po.setUsername(username);
+		po.setCode(code);
+		session.save(po);
+		tx.commit();
+		if(tx != null){
+			tx = null;
+		}
+		return true;
+	}
+	
+	/**
+	 * 删除用户自选股
+	 * @param code
+	 * @param username
+	 * @return
+	 */
+	public boolean deleteSelfStockByUsername(String code, String username){
+		Session session = sessionFactory.openSession();
+		Transaction tx = session.beginTransaction();
+		String hql = "delete from SelfStockPO where code=? and username=?";
+		Query query = session.createQuery(hql);
+		query.setParameter(0, code);
+		query.setParameter(1, username);
+		int num = query.executeUpdate();
+		tx.commit();
+		if(num<0){
+			return false;
+		}
+		return true;
 	}
 	
 	public static void main(String[] args) {

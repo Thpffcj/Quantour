@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,10 @@ import org.jfree.data.category.DefaultCategoryDataset;
 
 import businessLogicService.MeanReversionService;
 import data.StockData;
+import data.UsersDaoImpl;
 import dataService.StockDataService;
+import dataService.UsersDao;
+import po.BasePO;
 import po.StockPO;
 import vo.quantify.DistributionHistogramVO;
 import vo.quantify.MeanReturnRateVO;
@@ -50,21 +54,14 @@ public class MeanReversion implements MeanReversionService{
 	//策略收益率
 	static ArrayList<Double> strategicIncome = new ArrayList<>();
 
-	static DefaultCategoryDataset meanReversionDataset = null;
-	static DefaultCategoryDataset meanReturnRateDataset = null;
-	static DefaultCategoryDataset meanWinningPercentageDataset = null;
-	static DefaultCategoryDataset distributionHistogramDataset = null;
-	static String lastSection = null; 
-	static ArrayList<String> lastStockPool = new ArrayList<>(); 
-	static int lastShares = 0;
-	static int lastHoldPeriod = 0; 
-	static int lastFormingPeriod = 0; 
-	static String lastBegin = null;
-	static String lastEnd = null;
 	
 	MeanReversionUtil util = new MeanReversionUtil();
 	MovingAverage movingAverage = new MovingAverage();
 	ParameterCalculation parameterCalculation = new ParameterCalculation(); 
+	
+	private ArrayList<String> stockPool;
+	private String section;
+	private String userName;
 
 	//注入股票查询的Dao
 	private StockDataService stockDataService;
@@ -73,72 +70,56 @@ public class MeanReversion implements MeanReversionService{
 	}
 	
 	/**
+	 * 均值回归所需数据
 	 * holdPeriod持有期
 	 * formingPeriod形成期
 	 */
-	public Map<String, ArrayList<String>> getMeanReversionGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end){
-		
-//		if (meanReversionDataset != null && lastShares == shares && lastHoldPeriod == holdPeriod 
-//				&& lastFormingPeriod == formingPeriod  && lastBegin.equals(begin) 
-//				&& lastEnd.equals(end) && lastStockPool.size() == stockPool.size()  && isEqual(lastStockPool, stockPool)) {
-//			return meanReversionDataset;
-//		}
+	public Map<String, ArrayList<String>> getMeanReversionGraphData(String section, String userName, int shares, int holdPeriod, int formingPeriod, String begin, String end){
 		
 		Map<String, ArrayList<String>> data = new HashMap<>();
 
+		this.section = section;
+		this.userName = userName;
+		getSectionCode();
+		
+		System.out.println("stockPool "+stockPool.size());
+		
 		DecimalFormat df = new DecimalFormat("0.00%");
-		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-		
-		//
-//		System.out.println("mean");
-		int daylong = stockDataService.getDate(begin, end).size();
-		//
-//		System.out.println(daylong);
-//		newStockPool = new ArrayList<>();
-//		for(int i=0; i<stockPool.size(); i++){
-//			ArrayList<stockPO> stock = getStockData(stockPool.get(i), begin, end);
-//			if(stock.size() >= daylong){
-//				newStockPool.add(stockPool.get(i));
-//			}
-//		}
-//		System.out.println(" "+newStockPool.size());
-		
-		deviationDegree = new HashMap<>();
-		
-		getStockPoolDeviationDegree(stockPool, formingPeriod, begin, end, daylong);
-		//
-//		System.out.println(deviationDegree.size());
-		
-		int standard = Integer.MIN_VALUE;
-		for (int i = 0; i < newStockPool.size(); i++) {
-			int temp = getStockData(newStockPool.get(i), begin, end).size();
-			if (temp > standard) {
-				standard = temp;
-			}
-		}
-
 		
 		int days = Integer.MAX_VALUE;
+		int daylong = stockDataService.getDate(begin, end).size();
 		String condition = null;
-		for (int i = 0; i < newStockPool.size(); i++) {
-			int temp = getStockData(newStockPool.get(i), begin, end).size();
-			if (temp <= days) {
-				days = temp;
-				condition = newStockPool.get(i);
+		int tempDay = 0;
+		newStockPool = new ArrayList<>();
+		for(int i=0; i<100; i++){
+			ArrayList<StockPO> stock = stockDataService.getStockByCodeAndDate(Integer.valueOf(stockPool.get(i)), begin, end);
+			tempDay = stock.size();
+			if(tempDay >= 2*daylong/3){
+				newStockPool.add(stockPool.get(i));
+				if (tempDay <= days) {
+					days = tempDay;
+					condition = stockPool.get(i);
+				}
 			}
 		}
+		
 		ArrayList<StockPO> minStock = getStockData(condition, begin, end);
 		for (int i = minStock.size() - 1; i >= 0; i--) {
 			dates.add(minStock.get(i).getDate());
 		}
+		System.out.println("newStockPool "+newStockPool.size());
+		System.out.println("dates "+dates.size());
+		
+		//获得股票偏离度
+		deviationDegree = new HashMap<>();
+		getStockPoolDeviationDegree(newStockPool, formingPeriod, begin, end, daylong);
+	
 		//
 //		System.out.println(newStockPool.size()+" "+dates.size());
-
+		
+		//调仓
 		selectShares = new ArrayList<>();
 		selectShares = transferPositions(days, shares, holdPeriod, deviationDegree);
-		
-		String series1 = "marketIncome";
-		String series2 = "strategicIncome";
 
 		marketIncome = new ArrayList<>();
 		strategicIncome = new ArrayList<>();
@@ -146,21 +127,17 @@ public class MeanReversion implements MeanReversionService{
 		if (section == null) {
 			marketIncome = getRateOfReturn(newStockPool, days, begin, end, shares, holdPeriod, 0);
 		} else {
-			marketIncome = getMarketIncomeBySection(section, begin, end);
+			marketIncome = getBenchProfitEveryday(begin, end);
 		}
 		if(selectShares != null){
 			strategicIncome = getRateOfReturn(selectShares, days, begin, end, shares, holdPeriod, 1);
 		}else{
 			strategicIncome = marketIncome;
 		}
-		for (int i = 0; i < strategicIncome.size(); i++) {
-			dataset.addValue(strategicIncome.get(i), series1, dates.get(i));
-			dataset.addValue(marketIncome.get(i), series2, dates.get(i));
-		}
-
+		
 		ArrayList<String> sMarketIncome = new ArrayList<>();
 		ArrayList<String> sStrategicIncome = new ArrayList<>();
-		for(int i=0; i<marketIncome.size(); i++){
+		for(int i=0; i<strategicIncome.size(); i++){
 			sMarketIncome.add(String.valueOf(marketIncome.get(i)));
 			sStrategicIncome.add(String.valueOf(strategicIncome.get(i)));
 		}
@@ -198,42 +175,140 @@ public class MeanReversion implements MeanReversionService{
 		parameter.add(String.valueOf(sharpeRatio));
 		data.put("parameter", parameter);
 		
-		meanReversionDataset = dataset;
-		lastSection = section; 
-		lastStockPool = stockPool; 
-		lastShares = shares;
-		lastHoldPeriod = holdPeriod; 
-		lastFormingPeriod = formingPeriod; 
-		lastBegin = begin;
-		lastEnd = end;
-		
+		System.out.println("getMeanReversionGraphData success");
 		return data;
 	}
 	
-	
 	/**
-	 * ͨ��������г�������
-	 * @param section
+	 * 超额收益
+	 * @param stockPool
+	 * @param shares
+	 * @param holdPeriod
+	 * @param formingPeriod
 	 * @param begin
 	 * @param end
 	 * @return
 	 */
-	public ArrayList<Double> getMarketIncomeBySection(String section, String begin, String end){
-		ArrayList<Double> marketIncome = new ArrayList<>();
-		ArrayList<Double> opens = new ArrayList<>();
-		ArrayList<Double> adjClose = new ArrayList<>();
-		opens = stockDataService.getStockOpenBySection(section, begin, end);
-		adjClose = stockDataService.getStockAdjCloseBySection(section, begin, end);
-		double open = opens.get(0);
-		for(int i=0; i<adjClose.size(); i++){
-			marketIncome.add((adjClose.get(i)-open)/open);
+	public Map<String, ArrayList<String>> GetMeanReturnRateGraphData(String section,  int shares, int holdPeriod, int formingPeriod, String begin, String end){
+		
+//		getMeanReversionGraphData(section, shares, holdPeriod, formingPeriod, begin, end);
+		
+		Map<String, ArrayList<String>> data = new HashMap<>();
+		
+		calculationCycle = new ArrayList<>();
+		excessIncome = new ArrayList<>();
+		ArrayList<String> excessGraph = new ArrayList<>();
+		
+		DecimalFormat df = new DecimalFormat("0.00%");
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+		//
+		int days = Integer.MAX_VALUE;
+		for(int i=0; i<newStockPool.size(); i++){
+			int temp = getStockData(newStockPool.get(i), begin, end).size();
+			if(temp<days){
+				days = temp;
+			}
 		}
-		return marketIncome;
+
+		String series = "Excess";
+		
+		ArrayList<Integer> day = new ArrayList<>();
+		
+		for(int i=0; i<strategicIncome.size(); i++){
+			day.add(i+1);
+//			System.out.println(day.get(i));
+			calculationCycle.add(String.valueOf(day.get(i)));
+			excessIncome.add(df.format(strategicIncome.get(i)-marketIncome.get(i)));
+			excessGraph.add(String.valueOf(strategicIncome.get(i)-marketIncome.get(i)));
+			dataset.addValue(strategicIncome.get(i)-marketIncome.get(i), series, day.get(i));
+		}
+		
+		data.put("date", calculationCycle);
+		data.put("excessGraph", excessGraph);
+		data.put("excessData", excessIncome);
+		return data;
 	}
 	
 	/**
-	 * ��ù�Ʊ��������
-	 * ����ѡ��Ĺ�Ʊ���ʽ�ƽ������Ͷ�ʣ����Բ��Ե�������Ҳ��ֱ�Ӽ���ƽ��ֵ
+	 * 策略胜率
+	 * @param stockPool
+	 * @param shares
+	 * @param holdPeriod
+	 * @param formingPeriod
+	 * @param begin
+	 * @param end
+	 * @return
+	 */
+	public Map<String, ArrayList<String>> GetMeanWinningPercentageGraphData(String section, int shares, int holdPeriod, int formingPeriod, String begin, String end){
+
+//		getMeanReversionGraphData(section, shares, holdPeriod, formingPeriod, begin, end);
+		
+		Map<String, ArrayList<String>> data = new HashMap<>();
+		ArrayList<String> winning = new ArrayList<>();
+		
+		winningPercentage = new ArrayList<>();
+		DecimalFormat df = new DecimalFormat("0.00%");
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+		//
+		int days = Integer.MAX_VALUE;
+		for(int i=0; i<newStockPool.size(); i++){
+			int temp = getStockData(newStockPool.get(i), begin, end).size();
+			if(temp<days){
+				days = temp;
+			}
+		}
+		
+		String series = "WinningPercentage";
+		
+		double winDay = 0.0;
+		double loseDay = 0.0;
+		ArrayList<String> day = new ArrayList<>();
+
+		for(int i=0; i<strategicIncome.size(); i++){
+			day.add(String.valueOf(i+1));
+			if(marketIncome.get(i)>strategicIncome.get(i)){
+				loseDay++;
+			}else{
+				winDay++;
+			}
+			winning.add(String.valueOf(winDay/(winDay+loseDay)));
+			winningPercentage.add(df.format(winDay/(winDay+loseDay)));
+			dataset.addValue(winDay/(winDay+loseDay), series, day.get(i));
+		}
+		
+		data.put("winningGraph", winning);
+		data.put("date", day);
+		return data;
+	}
+	
+	/**
+	 * 获取基准的每日收益率
+	 * @param Begin
+	 * @param End
+	 * @return
+	 */
+	private ArrayList<Double> getBenchProfitEveryday(String begin, String end) {
+		
+		ArrayList<Double> BenchmarkProfit = new ArrayList<Double>();
+
+		ArrayList<BasePO> Benchmark = stockDataService.getBenchmarkByDate(section, begin, end);
+		BenchmarkProfit = new ArrayList<Double>();
+
+		BasePO basePO = new BasePO();
+		double income = 0.0;
+		double open = Benchmark.get(0).getAdjOpen();
+		for (int i = 0; i < Benchmark.size(); i++) {
+			basePO = Benchmark.get(i);
+			income = (basePO.getAdjClose() - open) / open;
+			BenchmarkProfit.add(income);
+		}
+
+		return BenchmarkProfit;
+	}
+	
+	/**ֵ
 	 * @param condition
 	 * @param begin
 	 * @param end
@@ -255,7 +330,7 @@ public class MeanReversion implements MeanReversionService{
 		double in = 0.0;
 		double out = 0.0;
 		double rate = 0.0;
-		// �ֹ����е�λ��
+		//
 		int m = 0;
 		int nextPeriod = 0;
 		double money = 1000/shares;
@@ -311,7 +386,6 @@ public class MeanReversion implements MeanReversionService{
 
 	
 	/**
-	 *  ����
 	 * @param shares
 	 * @param deviationDegree
 	 * @return
@@ -328,7 +402,7 @@ public class MeanReversion implements MeanReversionService{
 		
 		int location = 0;
 		int n = deviationDegree.size();
-		//ѡ��ʱ���ڵ�����
+		//
 	    for(int day=0; day<days; day+=holdPeriod){
 	    	 double a[] = new double[n];
 	    	 Map<Double,String> temp = new HashMap<>(); 
@@ -360,7 +434,7 @@ public class MeanReversion implements MeanReversionService{
 	}
 	
 	/**
-	 * �����Ʊ�����Ʊ��ƫ���
+	 * 获得股票偏离度
 	 * @param stockPool
 	 * @param begin
 	 * @param end
@@ -373,7 +447,7 @@ public class MeanReversion implements MeanReversionService{
 	}
 	
 	/**
-	 * �������������������
+	 * 获得股票
 	 * @param condition
 	 * @param begin
 	 * @param end
@@ -393,7 +467,7 @@ public class MeanReversion implements MeanReversionService{
 	}
 	
 	/**
-	 * ���ָ����Ʊ��ƫ���
+	 * 
 	 * @param condition
 	 * @param begin
 	 * @param end
@@ -402,7 +476,7 @@ public class MeanReversion implements MeanReversionService{
 	public Map<String,ArrayList<Double>> getDeviationDegree(String condition, int formingPeriod, String begin, String end, int standard) {
 		
 		ArrayList<StockPO> stockList = new ArrayList<StockPO>();
-		//��ѯ����֮ǰ��������
+		//
 		int beforeDays = formingPeriod-1;
 		int isBegin = 0;
 		int code;
@@ -416,7 +490,7 @@ public class MeanReversion implements MeanReversionService{
 		
 		for(int i=0;i<formingPeriod-1;i++){
 			isBegin = stockDataService.JudgeIfTheLast(code, begin);
-			//���֮ǰû��������
+			//
 			if(isBegin==-1){
 				beforeDays = i;
 				break;
@@ -427,7 +501,6 @@ public class MeanReversion implements MeanReversionService{
 		}
 		stockList = getStockData(condition,begin,end);
 	
-		
 		StockPO spo = new StockPO();
 		ArrayList<Double> adjCloses = new ArrayList<>();
 		for(int i=stockList.size()-1;i>=0;i--){
@@ -436,31 +509,18 @@ public class MeanReversion implements MeanReversionService{
  			adjCloses.add(close);
 	    }
 		
-		//��Ʊ��Ȩ���̼۾�ֵ���� 
 		ArrayList<Double> closes = new ArrayList<>();
 		closes = movingAverage.getAveData(adjCloses,formingPeriod,beforeDays);
 	
-//		for(int i=0; i<closes.size(); i++){
-//			System.out.println(condition+" "+closes.get(i));
-//		}
-//		System.out.println(closes.size()+" "+standard);
-		if(closes == null || closes.size() <= standard/2 || closes.size() < 10){
-			return deviationDegree;
-		}
-	
-		//��ù�Ʊƫ��ȼ���
-//		System.out.println(closes.size()+" "+adjCloses.size()+" "+beforeDays);
 		ArrayList<Double> d = getDeviationDegree(closes,adjCloses,beforeDays);
 		deviationDegree.put(condition, d);
-		newStockPool.add(condition);
 		
 		return deviationDegree;
 	}
 	
 	/**
-	 * ��ù�Ʊƫ��ȼ���
-	 * @param closes20        ��Ʊ��Ȩ���̼۾�ֵ����
-	 * @param adjCloses  ��Ʊ��Ȩ���̼ۼ���
+	 * @param closes20       
+	 * @param adjCloses  
 	 * @return
 	 */
 	public ArrayList<Double> getDeviationDegree(ArrayList<Double> closes, ArrayList<Double> adjCloses,int beforeDays){
@@ -476,217 +536,24 @@ public class MeanReversion implements MeanReversionService{
 		return deviationDegrees;
 	}
 	
-	/**
-	 * 超额收益
-	 * @param stockPool
-	 * @param shares
-	 * @param holdPeriod
-	 * @param formingPeriod
-	 * @param begin
-	 * @param end
-	 * @return
-	 */
-	public Map<String, ArrayList<String>> GetMeanReturnRateGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end){
-		
-		getMeanReversionGraphData(section, stockPool, shares, holdPeriod, formingPeriod, begin, end);
-		
-		Map<String, ArrayList<String>> data = new HashMap<>();
-		calculationCycle = new ArrayList<>();
-		excessIncome = new ArrayList<>();
-		ArrayList<String> excessGraph = new ArrayList<>();
-		
-		DecimalFormat df = new DecimalFormat("0.00%");
-		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-
-		//����ѡ���Ĺ�Ʊ
-		int days = Integer.MAX_VALUE;
-		for(int i=0; i<newStockPool.size(); i++){
-			int temp = getStockData(newStockPool.get(i), begin, end).size();
-			if(temp<days){
-				days = temp;
-			}
+	private void getSectionCode(){
+		System.out.println(section);
+		if(section.equals("全部")){
+			stockPool =  stockDataService.GetAllCode();
 		}
-
-		String series = "Excess";
-		
-		ArrayList<Integer> day = new ArrayList<>();
-		
-		for(int i=0; i<strategicIncome.size(); i++){
-			day.add(i+1);
-//			System.out.println(day.get(i));
-			calculationCycle.add(String.valueOf(day.get(i)));
-			excessIncome.add(df.format(strategicIncome.get(i)-marketIncome.get(i)));
-			excessGraph.add(String.valueOf(strategicIncome.get(i)-marketIncome.get(i)));
-			dataset.addValue(strategicIncome.get(i)-marketIncome.get(i), series, day.get(i));
+		else if(section.equals("主板")){
+			stockPool = stockDataService.getMainAllCode();
 		}
-		
-		data.put("date", calculationCycle);
-		data.put("excessGraph", excessGraph);
-		data.put("excessData", excessIncome);
-		return data;
-	}
-	
-	/**
-	 * 策略胜率
-	 * @param stockPool
-	 * @param shares
-	 * @param holdPeriod
-	 * @param formingPeriod
-	 * @param begin
-	 * @param end
-	 * @return
-	 */
-	public Map<String, ArrayList<String>> GetMeanWinningPercentageGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end){
-
-		getMeanReversionGraphData(section, stockPool, shares, holdPeriod, formingPeriod, begin, end);
-		
-		Map<String, ArrayList<String>> data = new HashMap<>();
-		ArrayList<String> winning = new ArrayList<>();
-		
-		winningPercentage = new ArrayList<>();
-		DecimalFormat df = new DecimalFormat("0.00%");
-		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-
-		//����ѡ���Ĺ�Ʊ
-		int days = Integer.MAX_VALUE;
-		for(int i=0; i<newStockPool.size(); i++){
-			int temp = getStockData(newStockPool.get(i), begin, end).size();
-			if(temp<days){
-				days = temp;
-			}
+		else if(section.equals("中小板")){
+			stockPool = stockDataService.getGemAllCode();
 		}
-		
-		String series = "WinningPercentage";
-		
-		double winDay = 0.0;
-		double loseDay = 0.0;
-		ArrayList<String> day = new ArrayList<>();
-
-		for(int i=0; i<strategicIncome.size(); i++){
-			day.add(String.valueOf(i+1));
-			if(marketIncome.get(i)>strategicIncome.get(i)){
-				loseDay++;
-			}else{
-				winDay++;
-			}
-			winning.add(String.valueOf(winDay/(winDay+loseDay)));
-			winningPercentage.add(df.format(winDay/(winDay+loseDay)));
-			dataset.addValue(winDay/(winDay+loseDay), series, day.get(i));
+		else if(section.equals("创业板")){
+			stockPool = stockDataService.getSmeAllCode();
 		}
-		
-		data.put("winningGraph", winning);
-		data.put("date", day);
-		return data;
-	}
-	
-	/**
-	 * 收益分布直方图
-	 * @param stockPool
-	 * @param shares
-	 * @param holdPeriod
-	 * @param formingPeriod
-	 * @param begin
-	 * @param end
-	 * @return
-	 */
-	public DefaultCategoryDataset GetDistributionHistogramGraphData(String section, ArrayList<String> stockPool, int shares, int holdPeriod, int formingPeriod, String begin, String end){
-
-		winDays = 0;
-		loseDays = 0;
-		
-		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-		
-		String seriesRed = "���������";
-		String seriesGreen = "���������";
-		
-		Map<Double, Integer> distributionHistogram1 = new HashMap<>();
-		Map<Double, Integer> distributionHistogram2 = new HashMap<>();
-		
-		NumberFormat numberFormat = NumberFormat.getNumberInstance();
-		numberFormat.setMaximumFractionDigits(2);
-		
-		for(int i=0; i<strategicIncome.size(); i++){
-			double income = Double.parseDouble(numberFormat.format(strategicIncome.get(i)));
-			if(income>=0){
-				if(income == -0){
-					income = 0;
-				}
-				if(distributionHistogram1.containsKey(income)){
-					int temp = distributionHistogram1.get(income);
-					temp++;
-					distributionHistogram1.put(income, temp);
-				}
-				else{
-					distributionHistogram1.put(income, 1);
-				}
-				winDays++;
-			}
-			else{
-				if(distributionHistogram2.containsKey(income)){
-					int temp = distributionHistogram2.get(income);
-					temp++;
-					distributionHistogram2.put(income, temp);
-				}
-				else{
-					distributionHistogram2.put(income, 1);
-				}
-				loseDays++;
-			}
+		else if(section.equals("我的自选股")){
+			UsersDao usersDao = new UsersDaoImpl();
+			stockPool = usersDao.getSelfStockByUsername(userName);
 		}
-		winPercentage = Double.parseDouble(numberFormat.format(winDays/(winDays+loseDays)));		
-		
-		int n = distributionHistogram1.size();
-		int m = distributionHistogram2.size();
-		double[] incomes1 = new double[n];
-		double[] incomes2 = new double[m];
-
-		int index1 = 0;
-		int index2 = 0;
-		for (Double name : distributionHistogram1.keySet()) {
-			incomes1[index1] = name;
-			index1++;
-		}
-		for (Double name : distributionHistogram2.keySet()) {
-			double temp = -name;
-			incomes2[index2] = temp;
-			index2++;
-		}
-
-		util.heapSort(incomes1);
-		util.heapSort(incomes2);
-		
-		dataset.addValue(0, seriesGreen, String.valueOf("0"));
-		int i = 0;
-		int j = 0;
-		for(int p=0; p<m+n; p++){
-			if(n == 0){
-				dataset.addValue(distributionHistogram2.get(-incomes2[j]), seriesGreen, String.valueOf(incomes2[j]));
-				j++;
-				continue;
-			}
-			if(m == 0){
-				dataset.addValue(distributionHistogram1.get(incomes1[i]), seriesRed, String.valueOf(incomes1[i]));
-				i++;
-				continue;
-			}
-			if(i == n){
-				incomes1[i-1] = Integer.MAX_VALUE;
-				i--;
-			}
-			if(j == m){
-				incomes2[j-1] = Integer.MAX_VALUE;
-				j--;
-			}
-			if(incomes1[i]<=incomes2[j]){
-				dataset.addValue(distributionHistogram1.get(incomes1[i]), seriesRed, String.valueOf(incomes1[i]));
-				i++;
-			}else{
-				dataset.addValue(distributionHistogram2.get(-incomes2[j]), seriesGreen, String.valueOf(incomes2[j]));
-				j++;
-			}
-		}
-		
-		return dataset;
 	}
 
 	public MeanReversionVO getParameter() {

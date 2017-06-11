@@ -45,6 +45,10 @@
 				<value>AreaClassifiedPO.hbm.xml</value>
 				<value>IndustryClassifiedPO.hbm.xml</value>
 				<value>BasePO.hbm.xml</value>
+				<value>GemClassifiedPO.hbm.xml</value>
+				<value>SmeClassifiedPO.hbm.xml</value>
+				<value>SelfStockPO.hbm.xml</value>
+				<value>MainClassified.hbm.xml</value>
 			</list>
 		</property>
 		
@@ -59,6 +63,7 @@
 	<!-- 配置业务层的类 -->
 	<bean id="usersService" class="businessLogic.Users">
 		<property name="usersDao" ref="usersDao"></property>
+		<property name="stockDataService" ref="stockDataService"></property>
 	</bean>
 
 	<!-- 配置DAO的类 -->
@@ -85,6 +90,10 @@
 	</bean>
 	
 	<bean id="BenchmarkGraphAction" class="action.StockAction" scope="prototype">
+		<property name="getStockBLService" ref="getStockBLService"></property>
+	</bean>
+	
+	<bean id="StockGainsGraphAction" class="action.StockAction" scope="prototype">
 		<property name="getStockBLService" ref="getStockBLService"></property>
 	</bean>
 	
@@ -133,6 +142,15 @@
 	<bean id="MeanWinningPercentageGraphAction" class="action.QuantifyAction" scope="prototype">
 		<property name="meanReversionService" ref="meanReversionService"></property>
 	</bean>
+	<bean id="MStrategyComparedGraphAction" class="action.QuantifyAction" scope="prototype">
+		<property name="momentumStrategyService" ref="momentumStrategyService"></property>
+	</bean>
+	<bean id="MStrategyWinningGraphAction" class="action.QuantifyAction" scope="prototype">
+		<property name="momentumStrategyService" ref="momentumStrategyService"></property>
+	</bean>
+	<bean id="MStrategyExtraProfitGraphAction" class="action.QuantifyAction" scope="prototype">
+		<property name="momentumStrategyService" ref="momentumStrategyService"></property>
+	</bean>
 	
 	<!-- 配置业务层的类 -->
 	<bean id="getRSIDataService" class="businessLogic.GetRSIData">
@@ -145,6 +163,9 @@
 		<property name="stockDataService" ref="stockDataService"></property>
 	</bean>
 	<bean id="meanReversionService" class="businessLogic.MeanReversion">
+		<property name="stockDataService" ref="stockDataService"></property>
+	</bean>
+	<bean id="momentumStrategyService" class="businessLogic.MomentumStrategy">
 		<property name="stockDataService" ref="stockDataService"></property>
 	</bean>
 	

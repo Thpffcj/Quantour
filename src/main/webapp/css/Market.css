@@ -35,6 +35,8 @@ body {
 }
 
 .divinput ul {
+	position: absolute;
+	z-index: 1;
 	background-color: white;
 	width: 150px;
 	border:	1px solid black;

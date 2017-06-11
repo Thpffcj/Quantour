@@ -37,8 +37,8 @@
 				</ul>
 			</div>
 			<ul id="userul">
-				<li class="firstli"><img src="images/photo.png"></li>
-				<li class="firstli"><a href="javascript:void(0)">${sessionScope.loginUserName}</a>
+				<li class="firstli"><img id="photo"></li>
+				<li class="firstli"><a href="javascript:void(0)" id="loginUserName">${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
 						<li><a href="Main.jsp" onclick="logout()">退出登录</a></li>
@@ -51,7 +51,7 @@
 		<div class="navigation">
 			<ul class="tab">
 				<li><span class="glyphicon glyphicon-star"></span>&ensp;股票研究</li>
-				<li id="id4" onclick="click4()" class="less active">&emsp;股票池&emsp;</li>
+				<li id="id4" onclick="click4()" class="less active">&emsp;自选股&emsp;</li>
 				<li><span class="glyphicon glyphicon-cog"></span>&ensp;账号设置</li>
 				<li id="id1" onclick="click1()" class="less normal">&emsp;编辑昵称</li>
 				<li id="id2" onclick="click2()" class="less normal">&emsp;修改密码</li>
@@ -61,17 +61,12 @@
 		<div class="operate-area">
 			<div id="self" class="selfstock active">
 				<div class="header">
-					<label>请选择股票池:&ensp;</label> <select>
-						<option value="默认">默认</option>
-					</select> 
-					<a data-toggle="modal" data-target="#rename">重命名</a> 
-					<a data-toggle="modal" data-target="#addpool"> <span
-						class="glyphicon glyphicon-plus"></span>新增</a>
-					<a data-toggle="modal" data-target="#deletepool"> <span
-						class="glyphicon glyphicon-trash"></span>删除</a> 
-					<input type="text" placeholder="输入股票代码/名称">
-					<button type="button">添加</button>
-					>
+					<div class="stock-drop-list">
+						<input type="text" placeholder="输入股票代码/名称" id="code">
+						<ul id="match-list">
+						</ul>
+					</div>
+					<button type="button" id="addselfstock">添加</button>
 				</div>
 				<div class="list">
 					<table class="table table-hover table-striped">
@@ -85,19 +80,13 @@
 								<th style="text-align:center;">删除</th>
 							</tr>
 						</thead>
-						<tbody>
-							<tr>
-								<td>1</td>
-								<td>000001</td>
-								<td>平安银行</td>
-								<td>9.03</td>
-								<td>2.5%</td>
-								<td style="cursor: pointer;" data-toggle="modal"
-									data-target="#deletestock"><span
-									class="glyphicon glyphicon-trash"></span></td>
-							</tr>
+						<tbody id="selfstock-list">
 						</tbody>
 					</table>
+					<div class="m-page">
+						<ul id="i-page">
+						</ul>
+					</div>
 				</div>
 			</div>
 			<div class="input-form" id="input1">
@@ -131,85 +120,13 @@
 			<div class="input-form" id="input3">
 				<form action="UploadFile.ashx" method="post" enctype="multipart/form-data">
 					<br> 
-					<input type="file" id="image"
+					<input type="file" id="image" onchange="selectImage(this)"
 						style="color: white;width:auto;">
-					<button type="button" class="btn" id="change-image"
+					<button type="button" class="btn" id="change-image" onclick="uploadImage()"
 						style="position: relative; left: 50px;">确认上传</button>
 				</form>
 			</div>
 		</div>
-	</div>
-
-	<div class="modal fade" id="rename" tabindex="-1" role="dialog"
-		aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true">×</button>
-					<h4 class="modal-title" id="myModalLabel">重命名您的股票池</h4>
-				</div>
-				<div class="modal-body">
-					<label>按下 ESC 按钮退出。</label>
-					<br> 
-					<input type="text" value="默认"
-						placeholder="输入股票池的新名称">
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-					<button type="button" class="btn btn-primary">提交更改</button>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
-	
-	<div class="modal fade" id="addpool" tabindex="-1" role="dialog"
-		aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true">×</button>
-					<h4 class="modal-title" id="myModalLabel">新增股票池</h4>
-				</div>
-				<div class="modal-body">
-					<label>按下 ESC 按钮退出。</label> <br> 
-					股票池名称:&emsp;
-					<input type="text" value=""
-						placeholder="输入股票池的名称">
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					<button type="button" class="btn btn-primary">确定</button>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
-	
-	<div class="modal fade" id="deletepool" tabindex="-1" role="dialog"
-		aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true">×</button>
-					<h4 class="modal-title" id="myModalLabel">您确定删除该股票池吗？</h4>
-				</div>
-				<div class="modal-body">
-					<label>按下 ESC 按钮退出。</label>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					<button type="button" class="btn btn-primary">确定</button>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
 	</div>
 	
 	<div class="modal fade" id="deletestock" tabindex="-1" role="dialog"
@@ -226,7 +143,7 @@
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					<button type="button" class="btn btn-primary">确定</button>
+					<button type="button" class="btn btn-primary" id="IsDelete">确定</button>
 				</div>
 			</div>
 			<!-- /.modal-content -->
@@ -258,6 +175,9 @@
 	</div>
 
 	<script>
+		$(document).ready(function(){
+			changepage(0);
+		});
 		function click1() {
 			document.getElementById("id1").className = "less active";
 			document.getElementById("id2").className = "less";
@@ -297,6 +217,34 @@
 			document.getElementById("input2").className = "input-form";
 			document.getElementById("input3").className = "input-form";
 			document.getElementById("self").className = "selfstock active";
+			changepage(0);
+		}
+		
+		$("#code").bind('input propertychange', function() {
+			$.ajax({
+				type: "POST",
+				url: "getMatch",
+				data: {
+					enter: $("#code").val(),
+				},
+				dataType: "json",
+				success: function(obj){
+					var result = JSON.parse(obj);
+					var s = "";
+					for(var i=0;i<5;i++){
+						if(result.name[i]!=null){
+							s = s+"<li onclick=\"getStock('"+result.code[i]+"')\">"+result.code[i]+"&emsp;&emsp;"+result.name[i]+"</li>";
+						}
+					}
+					$("#match-list").attr("style","");
+					$("#match-list").html(s);
+				}
+			});
+		});
+		
+		function getStock(code){
+			$("#code").val(code);
+			$("#match-list").attr("style","display:none;");
 		}
 	</script>
 	
@@ -379,6 +327,204 @@
 			}
 		});
 	});
+	
+	function changepage(p){
+		$.ajax({
+			type: "POST",
+			url: "getSelfStock",
+			data: {
+				page: p,
+				username: $("#loginUserName").text(),
+			},
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				var index = result.index;
+				var code = result.code;
+				var name = result.name;
+				var close = result.close;
+				var fluct = result.fluct;
+				var length = result.length;
+				
+				var s = "";
+				for(var i=0;i<10;i++){
+					if(index[i]!=null){
+						s = s+"<tr><td>"+index[i]+"</td><td><a href=\"Stock.jsp\" target=\"_blank\" onclick=\"SearchStock('"+
+							code[i]+"')\">"+code[i]+"</a></td><td><a href=\"Stock.jsp\" target=\"_blank\" onclick=\"SearchStock('"+
+							code[i]+"')\">"+name[i]+"</a></td><td>"+close[i]+"</td><td>"+fluct[i]+
+							"</td><td style=\"cursor: pointer;\" onclick=\"deleteStock('"+code[i]+"')\"><span class=\"glyphicon glyphicon-trash\"></span></td><tr>";
+						$("#selfstock-list").html(s);
+					}
+				}
+				if(length!=1){
+					var s1 = "<li><a onclick=\"changepage(0)\">首页</a></li>";
+					var last = p-1;
+					if(last<0){
+						s1 = s1+"<li class=\"disable\"><a onclick=\"changepage("+last+")\">上一页</a></li>";
+					}else{
+						s1 = s1+"<li><a onclick=\"changepage("+last+")\">上一页</a></li>";
+					}
+					var page = p-p%3+1;
+					if((page>(length-2))&&(length>3)){
+						page = length-2;
+					}
+					if(length<3){
+						for(var i=0;i<length;i++){
+							var k = page+i;
+							if((k-1)==p){
+								var j = k-1;
+								s1 = s1+"<li class=\"active\"><a onclick=\"changepage("+j+")\">"+k+"</a></li>";
+							}else{
+								var j = k-1;
+								s1 = s1+"<li><a onclick=\"changepage("+j+")\">"+k+"</a></li>";
+							}
+						}
+					}else{
+						for(var i=0;i<3;i++){
+							var k = page+i;
+							if((k-1)==p){
+								var j = k-1;
+								s1 = s1+"<li class=\"active\"><a onclick=\"changepage("+j+")\">"+k+"</a></li>";
+							}else{
+								var j = k-1;
+								s1 = s1+"<li><a onclick=\"changepage("+j+")\">"+k+"</a></li>";
+							}
+						}
+					}
+					var next = p+1;
+					if(p==(length-1)){
+						s1 = s1+"<li class=\"disable\"><a onclick=\changepage("+next+")\">下一页</a></li>";
+					}else{
+						s1 = s1+"<li><a onclick=\"changepage("+next+")\">下一页</a></li>";
+					}
+					console.log(length);
+					var x = length-1;
+					s1 = s1+"<li><a onclick=\"changepage("+x+")\">尾页</a></li>";
+					
+					$("#i-page").html(s1);
+				}
+			}
+		});
+	}
+	
+	$("#addselfstock").click(function(){
+		$.ajax({
+			type: "POST",
+			url: "addSelfStock",
+			data: {
+				code: $("#code").val(),
+				username: $("#loginUserName").text(),
+			},
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				if(result.result=="success"){
+					$("#change-modal-prompt").html("添加成功!");
+					$("#modal-yes").attr("href","User.jsp");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="same"){
+					$("#change-modal-prompt").html("股票已存在!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="null") {
+					$("#change-modal-prompt").html("股票名称/代码不能为空!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="failure"){
+					$("#change-modal-prompt").html("添加失败!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="unknow"){
+					$("#change-modal-prompt").html("无效股票名称/代码!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}
+			}
+		});
+	});
+	
+	function deleteStock(c){
+		$("#IsDelete").attr("onclick","deleteSelfStock('"+c+"')");
+		$("#deletestock").modal('show');
+	}
+	
+	function deleteSelfStock(c){
+		$.ajax({
+			type: "POST",
+			url: "deleteSelfStock",
+			data: {
+				code: c,
+				username: $("#loginUserName").text(),
+			},
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				if(result.result=="success"){
+					$("#change-modal-prompt").html("删除成功!");
+					$("#modal-yes").attr("href","User.jsp");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#change-modal").modal('show');
+				}else {
+					$("#change-modal-prompt").html("删除失败!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}
+			}
+		});
+	}
+	</script>
+	
+	<script>
+	var image = '';
+	
+	function selectImage(file){
+		if(!file.files || !file.files[0]){
+			return;
+		}
+		var reader = new FileReader();
+		reader.onload = function(evt){
+ 			document.getElementById('image').src = evt.target.result;
+ 			image = evt.target.result;
+		}
+		reader.readAsDataURL(file.files[0]);
+	}
+	
+ 	function uploadImage(){
+		$.ajax({
+			type:'POST',
+			url: 'UploadImage', 
+			data: {
+				image: image,
+			},
+			async: false,
+			dataType: 'json',
+			success: function(obj){
+				var result = JSON.parse(obj);
+				if(result.result=="success"){
+					$("#change-modal-prompt").html("上传成功!");
+					$("#modal-yes").attr("href","User.jsp");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#change-modal").modal('show');
+				}else if(result.result=="failure"){
+					$("#change-modal-prompt").html("上传失败!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}else{
+					$("#change-modal-prompt").html("请先选择文件!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#change-modal").modal('show');
+				}
+			}
+		});
+ 	}
 	</script>
 	
 	<script>
@@ -392,6 +538,37 @@
 			}
 		});
 	}
+	
+	function SearchStock(c){
+		$.ajax({ 
+			type : "POST",
+			url : "SaveSearch",
+			data: {
+				code: c,
+			},
+			dataType : "json",
+			success : function(obj) {
+				
+			}
+		});
+	}
+	
+	$(document).ready(function(){
+		$.ajax({
+			Type: "POST",
+			url: "getPhoto",
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				var image = result.image;
+				if(image!=""){
+					$("#photo").attr("src", image);
+				}else{
+					$("#photo").attr("src", "images/photo.png");
+				}
+			}
+		});
+	});
 	</script>
 </body>
 </html>

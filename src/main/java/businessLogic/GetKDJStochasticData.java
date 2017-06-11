@@ -15,6 +15,7 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import businessLogicService.GetKDJStochasticDataService;
 import data.StockData;
 import dataService.StockDataService;
+import po.BasePO;
 import po.StockPO;
 import vo.quantify.MeanReversionVO;
 
@@ -294,8 +295,8 @@ public class GetKDJStochasticData implements GetKDJStochasticDataService{
 			ArrayList<Double> marketIncome = new ArrayList<>();
 			ArrayList<Double> opens = new ArrayList<>();
 			ArrayList<Double> adjClose = new ArrayList<>();
-			opens = stockDataService.getStockOpenBySection(section, begin, end);
-			adjClose = stockDataService.getStockAdjCloseBySection(section, begin, end);
+			opens = getBenchProfitEveryday(section, begin, end);
+			adjClose = getBenchProfitEveryday(section, begin, end);
 			double open = opens.get(0);
 			for(int i=0; i<adjClose.size(); i++){
 				marketIncome.add((adjClose.get(i)-open)/open);
@@ -391,13 +392,11 @@ public class GetKDJStochasticData implements GetKDJStochasticDataService{
 		return rateOfReturn;
 	}
 	
-	public ArrayList<String> getSuggest(){
-		ArrayList<String> suggests = new ArrayList<>();
-		String suggest = "根据KDJ的取值，可将其划分为几个区域，即超买区、超卖区和徘徊区。按一般划分标准，K、D、J这三值在20以下为超卖区，是买入信号；K、D、J这三值在80以上为超买区，是卖出信号；K、D、J这三值在20-80之间为徘徊区，宜观望。本策略在D<20, K线和D线同时上升，且K线从下向上穿过D线时，全仓买入；当 D>80, K线和D线同时下降，且K线从上向下穿过D线时，全仓卖出。";
-		suggests.add(suggest);
-		suggest = "KDJ指标在计算中考虑了计算周期内的最高价、最低价，兼顾了股价波动中的随机振幅，因而人们认为随机指标更真实地反映股价的波动，其提示作用更加明显。";
-		suggests.add(suggest);
-		return suggests;
+	public String[] getSuggest(){
+		String[] suggest = new String[2];
+		suggest[0] = "根据KDJ的取值，可将其划分为几个区域，即超买区、超卖区和徘徊区。按一般划分标准，K、D、J这三值在20以下为超卖区，是买入信号；K、D、J这三值在80以上为超买区，是卖出信号；K、D、J这三值在20-80之间为徘徊区，宜观望。本策略在D<20, K线和D线同时上升，且K线从下向上穿过D线时，全仓买入；当 D>80, K线和D线同时下降，且K线从上向下穿过D线时，全仓卖出。";
+		suggest[1] = "KDJ指标在计算中考虑了计算周期内的最高价、最低价，兼顾了股价波动中的随机振幅，因而人们认为随机指标更真实地反映股价的波动，其提示作用更加明显。";
+		return suggest;
 	}
 	
 	public MeanReversionVO getParameter() {
@@ -448,5 +447,30 @@ public class GetKDJStochasticData implements GetKDJStochasticDataService{
 			e.printStackTrace();
 		}
 		return Origin;
+	}
+	
+	/**
+	 * 获取基准的每日收益率
+	 * @param Begin
+	 * @param End
+	 * @return
+	 */
+	private ArrayList<Double> getBenchProfitEveryday(String section, String begin, String end) {
+		
+		ArrayList<Double> BenchmarkProfit = new ArrayList<Double>();
+
+		ArrayList<BasePO> Benchmark = stockDataService.getBenchmarkByDate(section, begin, end);
+		BenchmarkProfit = new ArrayList<Double>();
+
+		BasePO basePO = new BasePO();
+		double income = 0.0;
+		double open = Benchmark.get(0).getAdjOpen();
+		for (int i = 0; i < Benchmark.size(); i++) {
+			basePO = Benchmark.get(i);
+			income = (basePO.getAdjClose() - open) / open;
+			BenchmarkProfit.add(income);
+		}
+
+		return BenchmarkProfit;
 	}
 }

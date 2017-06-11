@@ -89,12 +89,17 @@ body {
 	border-color: #ccc;
 	border: 1px solid transparent;
 	border-radius: 3px;
+	float: left;
+	margin-left: 50px;
 }
 
 .list {
+	position: absolute;
+	float: left;
 	width: 790px;
 	height: 570px;
 	padding-top: 20px;
+	top: 160px;
 }
 
 .list table {
@@ -114,6 +119,34 @@ body {
 
 .operate-area .active{
 	display: block;
+}
+
+.stock-drop-list{
+	float: left;
+	width: 150px;
+}
+
+.stock-drop-list ul {
+	position: absolute;
+	background-color: white;
+	width: 150px;
+	border:	1px solid black;
+	margin-left: 20px;
+	z-index: 1;
+}
+
+.stock-drop-list li {
+	color: black;
+	list-style-type: none;
+	position: relative;
+	left: -40px;
+	width: 148px;
+	padding: 5px 0px 5px 0px;
+}
+
+.stock-drop-list li:hover {
+	background-color: #d3d3d3;
+	cursor: pointer;
 }
 
 .input-form form{
@@ -137,6 +170,44 @@ body {
 .btn {
 	margin-top: 30px;
 	background-color: #528fcc;
+}
+
+.m-page {
+	height: 30px;
+}
+
+.m-page ul {
+	margin-left: 80px;
+}
+
+.m-page li{
+	float: left;
+	list-style-type: none;
+	padding: 3px 0px 3px 0px;
+	margin: 0px 3px 0px 3px;
+	color: white;
+}
+
+.m-page li:hover {
+	background-color: #337ab7;
+}
+
+.m-page li.active {
+	background-color: #337ab7;
+}
+
+.m-page li.disable {
+	color: grey;
+	pointer-events: none; 
+}
+
+.m-page a{
+	color: white;
+	cursor: pointer;
+	text-decoration: none;
+	padding: 5px 10px 5px 10px;
+	width: auto;
+	height: 30px;
 }
 
 .modal {

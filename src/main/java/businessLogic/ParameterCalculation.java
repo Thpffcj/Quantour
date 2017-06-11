@@ -56,7 +56,7 @@ public class ParameterCalculation {
 		NumberFormat numberFormat = NumberFormat.getNumberInstance();
 		numberFormat.setMaximumFractionDigits(2);
 		
-		double beta;
+		double beta = 0.0;
 		//市场收益的方差
 		double variance = 0;
 		//策略收益和市场收益的协方差
@@ -82,7 +82,7 @@ public class ParameterCalculation {
 //		System.out.println(covariance+" "+variance);
 		String temp = numberFormat.format(covariance/variance);
 //		System.out.println(temp);
-		beta = Double.parseDouble(temp);
+//		beta = Double.parseDouble(temp);
 		return beta;
 	}
 	

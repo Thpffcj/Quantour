@@ -35,6 +35,8 @@ body {
 }
 
 .divinput ul {
+	position: absolute;
+	z-index: 1;
 	background-color: white;
 	width: 150px;
 	border:	1px solid black;
@@ -118,6 +120,62 @@ body {
     position: relative;
     left: 20px;
     background-color: #5584ff;
+}
+
+.input-left {
+	float: left;
+}
+
+.stock-drop-list1 {
+	float: left;
+}
+
+.stock-drop-list1 ul {
+	position: absolute;
+	z-index: 1;
+	background-color: white;
+	width: 180px;
+	border:	1px solid black;
+}
+
+.stock-drop-list1 li {
+	color: black;
+	list-style-type: none;
+	position: relative;
+	left: -40px;
+	width: 178px;
+	padding: 5px 0px 5px 0px;
+}
+
+.stock-drop-list1 li:hover {
+	background-color: #d3d3d3;
+	cursor: pointer;
+}
+
+.stock-drop-list2 {
+	float: left;
+}
+
+.stock-drop-list2 ul {
+	position: absolute;
+	z-index: 1;
+	background-color: white;
+	width: 180px;
+	border:	1px solid black;
+}
+
+.stock-drop-list2 li {
+	color: black;
+	list-style-type: none;
+	position: relative;
+	left: -40px;
+	width: 178px;
+	padding: 5px 0px 5px 0px;
+}
+
+.stock-drop-list2 li:hover {
+	background-color: #d3d3d3;
+	cursor: pointer;
 }
 
 .modal {

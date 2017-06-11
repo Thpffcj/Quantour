@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="http://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <link rel="stylesheet" type="text/css" href="css/index.css">
 <link rel="stylesheet" href="css/StockVS.css">
 <link rel="stylesheet"
@@ -30,13 +29,37 @@
 		});
 	});
 </script>
+<script>
+	jQuery(function($) {
+		$.datepicker.regional['zh-CN'] = {
+			closeText : '关闭',
+			prevText : '&#x3c;上月',
+			nextText : '下月&#x3e;',
+			currentText : '今天',
+			monthNames : [ '一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月',
+					'九月', '十月', '十一月', '十二月' ],
+			monthNamesShort : [ '一', '二', '三', '四', '五', '六', '七', '八', '九',
+					'十', '十一', '十二' ],
+			dayNames : [ '星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六' ],
+			dayNamesShort : [ '周日', '周一', '周二', '周三', '周四', '周五', '周六' ],
+			dayNamesMin : [ '日', '一', '二', '三', '四', '五', '六' ],
+			weekHeader : '周',
+			dateFormat : 'yy-mm-dd',
+			firstDay : 1,
+			isRTL : false,
+			showMonthAfterYear : true,
+			yearSuffix : '年'
+		};
+		$.datepicker.setDefaults($.datepicker.regional['zh-CN']);
+	});
+</script>
 </head>
 <body>
 	<nav id = "navbar">
 		<div>
 			<div>
 				<ul id = "navul">
-					<li><a><img src="images/Icon.jpg"></a></li>
+					<li><a><img id="photo"></a></li>
 					<li><a href="Main.jsp">首页</a></li>
 					<li><a href="Market.jsp">行情中心</a></li>
 					<li><a href="Stock.jsp">个股展示</a></li>
@@ -143,21 +166,92 @@
 	<div class="w1200">
 		<div class="stockvs">
 			<form action="">
-				<label>时间:</label><input type="text" id="begindate" value = "2005-02-01" placeholder = "请选择开始日期">
-				<label>---</label><input type="text" id="enddate" value = "2005-07-01" placeholder = "请选择结束日期">
-				<label>股票:</label><input type="text" id="code1" value = "000001" placeholder = "请输入股票代码/名称">
-				<label>VS</label><input type="text" id="code2" value="000010" placeholder = "请输入股票代码/名称">
+				<div class="input-left">
+					<label>时间:</label>
+					<input type="text" id="begindate" value = "2016-05-25" placeholder = "请选择开始日期">
+					<label>---</label>
+					<input type="text" id="enddate" value = "2017-05-25" placeholder = "请选择结束日期">
+					<label>股票:</label>
+				</div>
+				<div class="stock-drop-list1">
+					<input type="text" id="code1" value = "000001" placeholder = "请输入股票代码/名称">
+					<label>VS</label>
+					<ul id="match-list1">
+					</ul>
+				</div>
+				<div class="stock-drop-list2">
+					<input type="text" id="code2" value="000010" placeholder = "请输入股票代码/名称">
+					<ul id="match-list2">
+					</ul>
+				</div>
 				<button type = "button" class = "btn" id="searchVSGraph">比较</button>
 			</form>
 		</div>
 		<script type="text/javascript">
-			$(document).ready(function(){ 
-				showVSGraph()
-				$("#searchVSGraph").click(function(){ 
-					showVSGraph()	
-				});
+		$("#code1").bind('input propertychange', function() {
+			$.ajax({
+				type: "POST",
+				url: "getMatch",
+				data: {
+					enter: $("#code1").val(),
+				},
+				dataType: "json",
+				success: function(obj){
+					var result = JSON.parse(obj);
+					var s = "";
+					for(var i=0;i<5;i++){
+						if(result.name[i]!=null){
+							s = s+"<li onclick=\"getStock1('"+result.code[i]+"')\">"+result.code[i]+"&emsp;&emsp;&emsp;"+result.name[i]+"</li>";
+						}
+					}
+					$("#match-list1").attr("style","");
+					$("#match-list1").html(s);
+				}
 			});
-			</script>
+		});
+		
+		function getStock1(code){
+			$("#code1").val(code);
+			$("#match-list1").attr("style","display:none;");
+		}
+		
+		$("#code2").bind('input propertychange', function() {
+			$.ajax({
+				type: "POST",
+				url: "getMatch",
+				data: {
+					enter: $("#code2").val(),
+				},
+				dataType: "json",
+				success: function(obj){
+					var result = JSON.parse(obj);
+					var s = "";
+					for(var i=0;i<5;i++){
+						if(result.name[i]!=null){
+							s = s+"<li onclick=\"getStock2('"+result.code[i]+"')\">"+result.code[i]+"&emsp;&emsp;&emsp;"+result.name[i]+"</li>";
+						}
+					}
+					$("#match-list2").attr("style","");
+					$("#match-list2").html(s);
+				}
+			});
+		});
+		
+		function getStock2(code){
+			$("#code2").val(code);
+			$("#match-list2").attr("style","display:none;");
+		}
+		
+		$(document).ready(function(){ 
+			showVSGraph();
+			$("#searchVSGraph").click(function(){ 
+				$("#match-list1").attr("style","display:none;");
+				$("#match-list2").attr("style","display:none;");
+				showVSGraph();
+			});
+		});
+		</script>
+		
 		<p>走势对比:</p>
 		<div class="vsdiv" id="VSGraph"></div>
 		<div class="vsmess">
@@ -170,32 +264,7 @@
 						<th style = "text-align:center;">美丽生态<br>(000010)</th>
 					</tr>
 				</thead>
-				<tbody>
-					<tr>
-						<td>最低值</td>
-						<td>6.42</td>
-						<td>5.43</td>
-					</tr>
-					<tr>
-						<td>最高值</td>
-						<td>8.42</td>
-						<td>7.43</td>
-					</tr>
-					<tr>
-						<td>涨跌幅</td>
-						<td>6.42%</td>
-						<td>5.43%</td>
-					</tr>
-					<tr>
-						<td>收盘价</td>
-						<td>6.42</td>
-						<td>5.43</td>
-					</tr>
-					<tr>
-						<td>对数收益率</td>
-						<td>6.42</td>
-						<td>5.43</td>
-					</tr>
+				<tbody id="vs-message-list">
 				</tbody>
 			</table>
 		</div>
@@ -206,12 +275,6 @@
 	<script type="text/javascript">
 
 	function showVSGraph(){
-		
-		var names = new Array;
-		var date = new Array;
-		var stock1 = new Array;
-		var stock2 = new Array;
-
 		var colors = [ '#5793f3', '#d14a61', '#675bba' ];
 
 		$.ajax({
@@ -226,64 +289,58 @@
 			dataType : "json",
 			success : function(obj) {
 				var resultJSONData = JSON.parse(obj);
-				for (i = 0; i < resultJSONData.Name.length; i++) {
-					names[i] = resultJSONData.Name[i];
-				}
-				for (i = 0; i < resultJSONData.Date.length; i++) {
-					date[i] = resultJSONData.Date[i];
-				}
-				for (i = 0; i < resultJSONData.Stock1.length; i++) {
-					stock1[i] = resultJSONData.Stock1[i];
-				}
-				for (i = 0; i < resultJSONData.Stock2.length; i++) {
-					stock2[i] = resultJSONData.Stock2[i];
-				}
-				
-				var myChart = echarts.init(document
-						.getElementById('VSGraph'));
-				option = {
-					color : colors,
-					backgroundColor : '#eee',
-					tooltip : {
-						trigger : 'none',
-						axisPointer : {
-							type : 'cross'
-						}
-					},
-					legend : {
-						top : 10,
-						left : 'center',
-						data : names
-					},
-					grid : {
-						top : 70,
-						bottom : 50
-					},
-					xAxis : [
-						{
-							type : 'category',
-							axisTick : {
-								alignWithLabel : true
-							},
-							axisLine : {
-								onZero : false,
-								lineStyle : {
-									color : colors[1]
-								}
-							},
+				var result = resultJSONData.result;
+				if(result=="null"){
+					$("#search-modal-prompt").html("输入框不能为空!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result=="wrongdate"){
+					$("#search-modal-prompt").html("错误日期!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result=="unknow"){
+					$("#search-modal-prompt").html("无效的股票名称/代码!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result=="success"){
+					var names = resultJSONData.Name;
+					var date = resultJSONData.Date;
+					var stock1 = resultJSONData.Stock1;
+					var stock2 = resultJSONData.Stock2;
+					var parameter1 = resultJSONData.parameter1;
+					var parameter2 = resultJSONData.parameter2;
+					
+					var s = "<tr><td>一周涨跌</td><td>"+parameter1[0]+"</td><td>"+parameter2[0]+"</td></tr>"
+							+"<tr><td>一月涨跌</td><td>"+parameter1[1]+"</td><td>"+parameter2[1]+"</td></tr>"
+							+"<tr><td>三月涨跌</td><td>"+parameter1[2]+"</td><td>"+parameter2[2]+"</td></tr>"
+							+"<tr><td>半年涨跌</td><td>"+parameter1[3]+"</td><td>"+parameter2[3]+"</td></tr>"
+							+"<tr><td>一年涨跌</td><td>"+parameter1[4]+"</td><td>"+parameter2[4]+"</td></tr>";
+					$("#vs-message-list").html(s);
+					
+					var myChart = echarts.init(document
+							.getElementById('VSGraph'));
+					option = {
+						color : colors,
+						backgroundColor : '#eee',
+						tooltip : {
+							trigger : 'none',
 							axisPointer : {
-								label : {
-									formatter : function(params) {
-										return ' '
-												+ params.value
-												+ (params.seriesData.length ? '：'
-														+ params.seriesData[0].data
-														: '');
-									}
-								}
-							},
-							data : date
+								type : 'cross'
+							}
 						},
+						legend : {
+							top : 10,
+							left : 'center',
+							data : names
+						},
+						grid : {
+							top : 70,
+							bottom : 50
+						},
+						xAxis : [
 							{
 								type : 'category',
 								axisTick : {
@@ -292,7 +349,7 @@
 								axisLine : {
 									onZero : false,
 									lineStyle : {
-										color : colors[0]
+										color : colors[1]
 									}
 								},
 								axisPointer : {
@@ -308,28 +365,58 @@
 								},
 								data : date
 							},
+								{
+									type : 'category',
+									axisTick : {
+										alignWithLabel : true
+									},
+									axisLine : {
+										onZero : false,
+										lineStyle : {
+											color : colors[0]
+										}
+									},
+									axisPointer : {
+										label : {
+											formatter : function(params) {
+												return ' '
+														+ params.value
+														+ (params.seriesData.length ? '：'
+																+ params.seriesData[0].data
+																: '');
+											}
+										}
+									},
+									data : date
+								},
 
-					],
-					yAxis : [ {
-						scale: true,
-						type : 'value'
-					} ],
-					series : [
-							{
-								name : names[0],
-								type : 'line',
-								xAxisIndex: 1,
-								smooth : true,
-								data : stock1
+						],
+						yAxis : [ {
+							scale: true,
+							type : 'value',
+							axisLabel : {
+								formatter: function(value){
+									return value+"%";
+								}
 							},
-							{
-								name : names[1],
-								type : 'line',
-								smooth : true,
-								data : stock2
-							} ]
+						} ],
+						series : [
+								{
+									name : names[0],
+									type : 'line',
+									xAxisIndex: 1,
+									smooth : true,
+									data : stock1
+								},
+								{
+									name : names[1],
+									type : 'line',
+									smooth : true,
+									data : stock2
+								} ]
+					}
+					myChart.setOption(option);
 				}
-				myChart.setOption(option);
 			}
 		});
 		}
@@ -346,6 +433,23 @@
 			}
 		});
 	}
+	
+	$(document).ready(function(){
+		$.ajax({
+			Type: "POST",
+			url: "getPhoto",
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				var image = result.image;
+				if(image!=""){
+					$("#photo").attr("src", image);
+				}else{
+					$("#photo").attr("src", "images/photo.png");
+				}
+			}
+		});
+	});
 	</script>
 
 </body>

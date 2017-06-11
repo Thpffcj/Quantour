@@ -16,6 +16,8 @@ public interface StockDataService {
 	
 	public ArrayList<BasePO> getBenchmark(String code);
 	
+	public ArrayList<BasePO> getBenchmarkByDate(String Name,String Begin,String End);
+	
 	public Double getVolumeByDateAndCode(int Code,String Begin);
 	
 	public Double getVolumeByDateAndName(String Name,String Begin);
@@ -28,10 +30,6 @@ public interface StockDataService {
 	
 	public ArrayList<String> getCodeByPlate(String plate_type,String plate);
 	
-	public ArrayList<Double> getStockOpenBySection(String section, String begin, String end);
-	
-	public ArrayList<Double> getStockAdjCloseBySection(String section, String begin, String end);
-	
 	public ArrayList<String> getDate(String begin, String end);
 	
 	public ArrayList<String> GetAllCode();
@@ -41,6 +39,12 @@ public interface StockDataService {
 	public int getCodeByName(String name);
 	
 	public String getNameByCode(int code);
+	
+	public ArrayList<String> getSmeAllCode();
+	
+	public ArrayList<String> getGemAllCode();
+	
+	public ArrayList<String> getMainAllCode();
 	
 //	public StockPO getStockByOneDay(String Name,Date day);
 

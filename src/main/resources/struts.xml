@@ -8,17 +8,7 @@
 <struts>
    
    <package name="default" namespace="/" extends="struts-default,json-default" strict-method-invocation="false">
-     <!--  
-     <action name="Users_*" class="usersAction" method="{1}">
-       <result name="login_success">Stock.jsp</result>
-       <result name="login_failure">/users/Login.jsp</result>
-       <result name="input">/users/Login.jsp</result>
-       <result name="register_success">Login.jsp</result>
-       <result name="query_success">/Stock.jsp</result>
-     </action>
-     
-     -->
-     
+    
      <action name="Login" class="usersAction" method="login">
      	<result type ="json">
      		<param name="root">result</param>
@@ -49,6 +39,36 @@
      	</result>  
      </action>
      
+     <action name="UploadImage" class="usersAction" method="UploadImage">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="getPhoto" class="usersAction" method="getPhoto">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="getSelfStock" class="usersAction" method="getSelfStock">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="addSelfStock" class="usersAction" method="addSelfStock">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="deleteSelfStock" class="usersAction" method="deleteSelfStock">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
       <action name="UpsAndDownsGraph" class="UpsAndDownsGraphAction" method="getUpsAndDownsGraph">
      	<result type ="json">
      		<param name="root">result</param>
@@ -61,16 +81,16 @@
      	</result>
      </action>
      
-     <action name="VSGraph" class="VSGraphAction" method="getVSGraph">
-     	<result type ="json">
+      <action name="SmeStockMessage" class="GetStockList" method="getSmeStockMessage">
+     	<result type="json">
      		<param name="root">result</param>
-     	</result>  
-     </action>   
+     	</result>
+     </action>
      
-     <action name="KGraph" class="KGraphAction" method="getKGraph">
-     	<result type ="json">
+     <action name="GemStockMessage" class="GetStockList" method="getGemStockMessage">
+     	<result type="json">
      		<param name="root">result</param>
-     	</result>  
+     	</result>
      </action>
      
      <action name="SaveSearch" class="KGraphAction" method="saveSearchCode">
@@ -80,6 +100,18 @@
      </action>
      
      <action name="getMatch" class="KGraphAction" method="getMatchList">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+      <action name="VSGraph" class="VSGraphAction" method="getVSGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>   
+     
+     <action name="KGraph" class="KGraphAction" method="getKGraph">
      	<result type ="json">
      		<param name="root">result</param>
      	</result>  
@@ -121,7 +153,31 @@
      	</result>  
      </action>
      
+     <action name="MStrategyComparedGraph" class="MStrategyComparedGraphAction" method="getMStrategyComparedGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="MStrategyWinningGraph" class="MStrategyWinningGraphAction" method="getMStrategyWinningGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="MStrategyExtraProfitGraph" class="MStrategyExtraProfitGraphAction" method="getMStrategyExtraProfitGraph">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
       <action name="BenchmarkGraph" class="BenchmarkGraphAction" method="getBenchmark">
+     	<result type ="json">
+     		<param name="root">result</param>
+     	</result>  
+     </action>
+     
+     <action name="StockGainsGraph" class="StockGainsGraphAction" method="getStockGains">
      	<result type ="json">
      		<param name="root">result</param>
      	</result>  
@@ -158,6 +214,12 @@
      </action>
      
      <action name="ChildrenMessage" class="PlateAction" method="getPlateChildrenData">
+     	<result type="json">
+     		<param name="root">result</param>
+     	</result>
+     </action>
+    
+     <action name="Trendgraph" class="ForecastAction" method="closeValueForecast">
      	<result type="json">
      		<param name="root">result</param>
      	</result>

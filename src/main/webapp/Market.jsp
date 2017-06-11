@@ -61,8 +61,8 @@
 				</ul>
 			</div>
 			<ul id="userul">
-				<li class="firstli"><img src="images/photo.png"></li>
-				<li class="firstli"><a href="javascript:void(0)">${sessionScope.loginUserName}</a>
+				<li class="firstli"><img id="photo"></li>
+				<li class="firstli"><a href="javascript:void(0)" id="loginUserName">${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
 						<li><a href="Main.jsp" onclick="logout()">退出登录</a></li>
@@ -246,7 +246,7 @@
 							<th style="text-align:center;">现价</th>
 							<th style="text-align:center;">涨跌幅(%)</th>
 							<th style="text-align:center;">交易量</th>
-							<th style="text-align:center;">加股票池</th>
+							<th style="text-align:center;">加自选股</th>
 						</tr>
 					</thead>
 					<tbody id="listbody">
@@ -270,49 +270,24 @@
 	</div>
 	<br><br><br>
 	
-	<!-- 模态框（Modal） -->
-	<div class="modal fade" id="addpool" tabindex="-1" role="dialog"
-		aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true">×</button>
-					<h4 class="modal-title" id="myModalLabel">加入股票池</h4>
-				</div>
-				<div class="modal-body">
-					<label>按下 ESC 按钮退出。</label> <br> 
-					选择股票池:&emsp;
-					<select>
-						<option value="默认">默认</option>
-					</select>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					<a href="User.jsp"><button type="button" class="btn btn-primary">确定</button></a>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
-	<!-- /.modal -->
-	
 	<script type="text/javascript">
 	function shiftplate1() {
 		document.getElementById("plate1").className = "active";
 		document.getElementById("plate2").className = "";
 		document.getElementById("plate3").className = "";
+		changepage(0);
 	}
 	function shiftplate2() {
 		document.getElementById("plate1").className = "";
 		document.getElementById("plate2").className = "active";
 		document.getElementById("plate3").className = "";
+		Smechangepage(0);
 	}
 	function shiftplate3() {
 		document.getElementById("plate1").className = "";
 		document.getElementById("plate2").className = "";
 		document.getElementById("plate3").className = "active";
+		Gemchangepage(0);
 	}
 	</script>
 	
@@ -353,7 +328,7 @@
 							code[i]+"')\">"+code[i]+"</a></td><td><a href=\"Stock.jsp\" target=\"_blank\" onclick=\"SearchStock('"+
 							code[i]+"')\">"+name[i]+"</a></td><td>"+open[i]+"</td><td>"
 							+high[i]+"</td><td>"+low[i]+"</td><td>"+close[i]+"</td><td>"+fluctuation[i]+"</td><td>"+volume[i]
-							+"</td><td><a class=\"plus\" data-toggle=\"modal\" data-target=\"#addpool\"><span class=\"glyphicon glyphicon-plus\"></span></a></td><tr>";
+							+"</td><td><a class=\"plus\" onclick=\"addSelfStock('"+code[i]+"')\"><span class=\"glyphicon glyphicon-plus\"></span></a></td><tr>";
 					}
 				}
 				$("#listbody").html(s);
@@ -389,6 +364,138 @@
 		});
 	}
 	
+	function Smechangepage(p){
+		console.log(p);
+		$.ajax({
+			type : "GET",
+			url : "SmeStockMessage",
+			data: {
+				page: p,
+			},
+			dataType : "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				var index = result.index;
+				var code = result.code;
+				var name = result.name;
+				var open = result.open;
+				var high = result.high;
+				var low = result.low;
+				var close = result.close;
+				var fluctuation = result.fluctuation;
+				var volume = result.volume;
+				
+				var now = result.now;
+				
+				var s = "";
+				for(var i=0;i<10;i++){
+					if(index[i]!=null){
+						s = s+"<tr><td>"+index[i]+"</td><td><a href=\"Stock.jsp\" target=\"_blank\" onclick=\"SearchStock('"+
+							code[i]+"')\">"+code[i]+"</a></td><td><a href=\"Stock.jsp\" target=\"_blank\" onclick=\"SearchStock('"+
+							code[i]+"')\">"+name[i]+"</a></td><td>"+open[i]+"</td><td>"
+							+high[i]+"</td><td>"+low[i]+"</td><td>"+close[i]+"</td><td>"+fluctuation[i]+"</td><td>"+volume[i]
+							+"</td><td><a class=\"plus\" onclick=\"addSelfStock('"+code[i]+"')\"><span class=\"glyphicon glyphicon-plus\"></span></a></td><tr>";
+					}
+				}
+				$("#listbody").html(s);
+				var page = (now-1)-(now-1)%5+1;
+				if(page>(result.length-4)){
+					page = result.length-4;
+				}
+				var s1 = "<li><a onclick=\"Smechangepage(0)\">首页</a></li>";
+				if(p==0){
+					s1 = s1+"<li class=\"disable\"><a onclick=\"Smechangepage(-1)\">上一页</a></li>";
+				}else{
+					s1 = s1+"<li><a onclick=\"Smechangepage(-1)\">上一页</a></li>";
+				}
+				for(var i=0;i<5;i++){
+					var k = page+i;
+					if(k==now){
+						var j = k-1;
+						s1 = s1+"<li class=\"active\"><a onclick=\"Smechangepage("+j+")\">"+k+"</a></li>";
+					}else{
+						var j = k-1;
+						s1 = s1+"<li><a onclick=\"Smechangepage("+j+")\">"+k+"</a></li>";
+					}
+				}
+				if(now==(result.length)){
+					s1 = s1+"<li class=\"disable\"><a onclick=\"Smechangepage(-2)\">下一页</a></li>";
+				}else{
+					s1 = s1+"<li><a onclick=\"Smechangepage(-2)\">下一页</a></li>";
+				}
+				length = result.length-1;
+				s1 = s1+"<li><a onclick=\"Smechangepage("+length+")\">尾页</a></li>";
+				$("#i-page").html(s1);
+			}
+		});
+	}
+	
+	function Gemchangepage(p){
+		console.log(p);
+		$.ajax({
+			type : "GET",
+			url : "GemStockMessage",
+			data: {
+				page: p,
+			},
+			dataType : "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				var index = result.index;
+				var code = result.code;
+				var name = result.name;
+				var open = result.open;
+				var high = result.high;
+				var low = result.low;
+				var close = result.close;
+				var fluctuation = result.fluctuation;
+				var volume = result.volume;
+				
+				var now = result.now;
+				
+				var s = "";
+				for(var i=0;i<10;i++){
+					if(index[i]!=null){
+						s = s+"<tr><td>"+index[i]+"</td><td><a href=\"Stock.jsp\" target=\"_blank\" onclick=\"SearchStock('"+
+							code[i]+"')\">"+code[i]+"</a></td><td><a href=\"Stock.jsp\" target=\"_blank\" onclick=\"SearchStock('"+
+							code[i]+"')\">"+name[i]+"</a></td><td>"+open[i]+"</td><td>"
+							+high[i]+"</td><td>"+low[i]+"</td><td>"+close[i]+"</td><td>"+fluctuation[i]+"</td><td>"+volume[i]
+							+"</td><td><a class=\"plus\" onclick=\"addSelfStock('"+code[i]+"')\"><span class=\"glyphicon glyphicon-plus\"></span></a></td><tr>";
+					}
+				}
+				$("#listbody").html(s);
+				var page = (now-1)-(now-1)%5+1;
+				if(page>(result.length-4)){
+					page = result.length-4;
+				}
+				var s1 = "<li><a onclick=\"Gemchangepage(0)\">首页</a></li>";
+				if(p==0){
+					s1 = s1+"<li class=\"disable\"><a onclick=\"Gemchangepage(-1)\">上一页</a></li>";
+				}else{
+					s1 = s1+"<li><a onclick=\"Gemchangepage(-1)\">上一页</a></li>";
+				}
+				for(var i=0;i<5;i++){
+					var k = page+i;
+					if(k==now){
+						var j = k-1;
+						s1 = s1+"<li class=\"active\"><a onclick=\"Gemchangepage("+j+")\">"+k+"</a></li>";
+					}else{
+						var j = k-1;
+						s1 = s1+"<li><a onclick=\"Gemchangepage("+j+")\">"+k+"</a></li>";
+					}
+				}
+				if(now==(result.length)){
+					s1 = s1+"<li class=\"disable\"><a onclick=\"Gemchangepage(-2)\">下一页</a></li>";
+				}else{
+					s1 = s1+"<li><a onclick=\"Gemchangepage(-2)\">下一页</a></li>";
+				}
+				length = result.length-1;
+				s1 = s1+"<li><a onclick=\"Gemchangepage("+length+")\">尾页</a></li>";
+				$("#i-page").html(s1);
+			}
+		});
+	}
+	
 	function SearchStock(c){
 		$.ajax({ 
 			type : "POST",
@@ -399,6 +506,47 @@
 			dataType : "json",
 			success : function(obj) {
 				
+			}
+		});
+	}
+	
+	function addSelfStock(c){
+		$.ajax({
+			type: "POST",
+			url: "addSelfStock",
+			data: {
+				code: c,
+				username: $("#loginUserName").text(),
+			},
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				if(result.result=="success"){
+					$("#search-modal-prompt").html("添加成功!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result.result=="same"){
+					$("#search-modal-prompt").html("股票已存在!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result.result=="null") {
+					$("#search-modal-prompt").html("股票名称/代码不能为空!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result.result=="failure"){
+					$("#search-modal-prompt").html("添加失败!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result.result=="unknow"){
+					$("#search-modal-prompt").html("无效股票名称/代码!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+					$("#search-modal").modal('show');
+				}
 			}
 		});
 	}
@@ -738,6 +886,23 @@
 			}
 		});
 	}
+	
+	$(document).ready(function(){
+		$.ajax({
+			Type: "POST",
+			url: "getPhoto",
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				var image = result.image;
+				if(image!=""){
+					$("#photo").attr("src", image);
+				}else{
+					$("#photo").attr("src", "images/photo.png");
+				}
+			}
+		});
+	});
 	</script>
 </body>
 </html>

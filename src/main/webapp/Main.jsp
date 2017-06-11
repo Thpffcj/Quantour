@@ -36,8 +36,8 @@
 				<li><a href="Login.jsp"><span class="glyphicon glyphicon-log-in"></span>登录</a></li>
 			</ul>
 			<ul id="userul" style = "display:none;">
-				<li class="firstli"><img src="images/photo.png"></li>
-				<li class="firstli"><a href="javascript:void(0)" id="loginUserName">${sessionScope.loginUserName}</a>
+				<li class="firstli"><img id="photo"></li>
+				<li class="firstli"><a href="javascript:void(0)" id="loginUserName" >${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
 						<li><a href="Main.jsp" onclick="logout()">退出登录</a></li>
@@ -48,9 +48,41 @@
 	</nav>
 	
 	<div class="divinput">
-		<input type="text" placeholder="输入股票代码/名称" id="code"> 
+		<div class="stock-drop-list">
+			<input type="text" placeholder="输入股票代码/名称" id="code">
+			<ul id="match-list">
+			</ul>
+		</div>
 		<a href="javascript:void(0)" target="_blank" id="searchcode"><button type="button" class="search">搜索</button></a>
+		
 		<script type="text/javascript">
+		$("#code").bind('input propertychange', function() {
+			$.ajax({
+				type: "POST",
+				url: "getMatch",
+				data: {
+					enter: $("#code").val(),
+				},
+				dataType: "json",
+				success: function(obj){
+					var result = JSON.parse(obj);
+					var s = "";
+					for(var i=0;i<5;i++){
+						if(result.name[i]!=null){
+							s = s+"<li onclick=\"getStock('"+result.code[i]+"')\">"+result.code[i]+"&emsp;&emsp;"+result.name[i]+"</li>";
+						}
+					}
+					$("#match-list").attr("style","");
+					$("#match-list").html(s);
+				}
+			});
+		});
+		
+		function getStock(code){
+			$("#code").val(code);
+			$("#match-list").attr("style","display:none;");
+		}
+		
 		$("#searchcode").click(function(){ 
 			$.ajax({ 
 				type : "POST",
@@ -69,7 +101,12 @@
 						$("#search-modal-prompt").html("搜索内容为空!");
 						$("#search-modal").modal('show');
 					}else{
-						window.open("Stock.jsp");
+						var name = $("#loginUserName").text();
+						if(name==""||name==null){
+							window.open("Login.jsp");
+						}else{
+							window.open("Stock.jsp");
+						}
 					}
 				}
 			});
@@ -129,6 +166,7 @@
 					+"<li><a href=\"StockVS.jsp\">股票比较</a></li>"+"<li><a href=\"Strategy.jsp\">策略回测</a></li>"
 					+"<li><a href=\"Plate.jsp\">板块</a></li>";
 			$("#navul").html(s);
+			getphoto();
 		}
 	});
 
@@ -150,6 +188,23 @@
 				+"<li><a href=\"Login.jsp\">股票比较</a></li>"+"<li><a href=\"Login.jsp\">策略回测</a></li>"
 				+"<li><a href=\"Login.jsp\">板块</a></li>";
 		$("#navul").html(s);
+	}
+	
+	function getphoto(){
+		$.ajax({
+			Type: "POST",
+			url: "getPhoto",
+			dataType: "json",
+			success: function(obj){
+				var result = JSON.parse(obj);
+				var image = result.image;
+				if(image!=""){
+					$("#photo").attr("src", image);
+				}else{
+					$("#photo").attr("src", "images/photo.png");
+				}
+			}
+		});
 	}
 	</script>
 </body>

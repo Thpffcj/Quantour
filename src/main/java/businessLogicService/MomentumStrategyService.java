@@ -13,13 +13,13 @@ import vo.quantify.MeanReversionVO;
 
 public interface MomentumStrategyService {
 
-	public Map<String, ArrayList<String>> getMStrategyComparedGraph(String Begin, String End, int existTime, int holdTime) throws ParseException;
+	public Map<String, ArrayList<String>> getMStrategyComparedGraph(String userName,String section,String Begin, String End, int existTime, int holdTime) throws ParseException;
 
-	public Map<String, ArrayList<String>> getMStrategyWinningGraph(boolean isHold, int Time, String Begin, String End) throws ParseException;
+	public Map<String, ArrayList<String>> getMStrategyWinningGraph(String userName,String section,boolean isHold, int Time, String Begin, String End) throws ParseException;
 
-	public Map<String, ArrayList<String>> getMStrategyExtraProfitGraph(boolean isHold, int Time, String Begin, String End) throws ParseException;
+	public Map<String, ArrayList<String>> getMStrategyExtraProfitGraph(String userName,String section,boolean isHold, int Time, String Begin, String End) throws ParseException;
 
-	public DefaultCategoryDataset getMStrategyYieldGraph(String Begin, String End, int holdTime, int existTime) throws ParseException;
+	
 
 	//获得年化收益率,基准年化收益率,最大回撤,阿尔法,贝塔,夏普比率
 	public MeanReversionVO getParameter();

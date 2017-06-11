@@ -102,52 +102,55 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		}else{				
 			KData = getKGraphDataService.getKData(code, beginDate, endDate);
 		}
-		System.out.println("KData----"+KData);
-		ArrayList<String> date = KData.get("KDate");
-		ArrayList<String> open = KData.get("KOpen");
-		ArrayList<String> close = KData.get("KClose");
-		ArrayList<String> lowest = KData.get("KLowest");
-		ArrayList<String> highest = KData.get("KHighest");
-		ArrayList<String> volumn = KData.get("KVolumn");
 		
-		int days = KData.get("KDate").size();
-		String[] KDate = new String[days];
-		Double[] KOpen = new Double[days];
-		Double[] KClose = new Double[days];
-		Double[] KLowest = new Double[days];
-		Double[] KHighest = new Double[days];
-		String[] KVolumn = new String[days];
-		
-		for(int i=0; i<days; i++){
-			KDate[i] = date.get(i);
-			KOpen[i] = Double.valueOf(open.get(i));
-			KClose[i] = Double.valueOf(close.get(i));
-			KLowest[i] = Double.valueOf(lowest.get(i));
-			KHighest[i] = Double.valueOf(highest.get(i));
-			KVolumn[i] = volumn.get(i);
-		}
-		
-		DecimalFormat df = new DecimalFormat("0.00");
 		JSONObject json = new JSONObject();
-		json.put("LName", getKGraphDataService.getNameByCode(code));
-		if(code==null||code.equals("")){
-			json.put("LCode", "000001");
-		}else{
-			json.put("LCode", Tran(code));
+		json.put("result", KData.get("result").get(0));
+		if(KData.get("result").get(0).equals("success")){
+			ArrayList<String> date = KData.get("KDate");
+			ArrayList<String> open = KData.get("KOpen");
+			ArrayList<String> close = KData.get("KClose");
+			ArrayList<String> lowest = KData.get("KLowest");
+			ArrayList<String> highest = KData.get("KHighest");
+			ArrayList<String> volumn = KData.get("KVolumn");
+			
+			int days = KData.get("KDate").size();
+			String[] KDate = new String[days];
+			Double[] KOpen = new Double[days];
+			Double[] KClose = new Double[days];
+			Double[] KLowest = new Double[days];
+			Double[] KHighest = new Double[days];
+			String[] KVolumn = new String[days];
+			
+			for(int i=0; i<days; i++){
+				KDate[i] = date.get(i);
+				KOpen[i] = Double.valueOf(open.get(i));
+				KClose[i] = Double.valueOf(close.get(i));
+				KLowest[i] = Double.valueOf(lowest.get(i));
+				KHighest[i] = Double.valueOf(highest.get(i));
+				KVolumn[i] = volumn.get(i);
+			}
+			
+			DecimalFormat df = new DecimalFormat("0.00");
+			json.put("LName", getKGraphDataService.getNameByCode(code));
+			if(code==null||code.equals("")){
+				json.put("LCode", "000001");
+			}else{
+				json.put("LCode", Tran(code));
+			}
+			json.put("LClose", KClose[days-2]);
+			json.put("LOpen", KOpen[days-1]);
+			json.put("LHighest",  KHighest[days-1]);
+			json.put("LLowest",  KLowest[days-1]);
+			json.put("LVolumn", KVolumn[days-1]);
+			json.put("LMoney",  df.format(Double.parseDouble(KVolumn[days-1])*KClose[days-1]/10000));
+			json.put("LFluct", df.format((KClose[days-1]-KClose[days-2])/KClose[days-2]*100));
+			json.put("Date", KDate);
+			json.put("Open", KOpen);
+			json.put("Close", KClose);
+			json.put("Lowest", KLowest);
+			json.put("Highest", KHighest);
+			json.put("Volumn", KVolumn);
 		}
-		json.put("LClose", KClose[days-2]);
-		json.put("LOpen", KOpen[days-1]);
-		json.put("LHighest",  KHighest[days-1]);
-		json.put("LLowest",  KLowest[days-1]);
-		json.put("LVolumn", KVolumn[days-1]);
-		json.put("LMoney",  df.format(Double.parseDouble(KVolumn[days-1])*KClose[days-1]/10000));
-		json.put("LFluct", df.format((KClose[days-1]-KClose[days-2])/KClose[days-2]*100));
-		json.put("Date", KDate);
-		json.put("Open", KOpen);
-		json.put("Close", KClose);
-		json.put("Lowest", KLowest);
-		json.put("Highest", KHighest);
-		json.put("Volumn", KVolumn);
 		result = json.toString();
 		return "success";
 	}
@@ -162,48 +165,45 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		String endDate = request.getParameter("enddate"); 
 		String code1 = request.getParameter("code1"); 
 		String code2 = request.getParameter("code2"); 
+		System.out.println(beginDate+" "+endDate+" "+code1+" "+code2);
 		
-		Map<String, ArrayList<Double>> VSDatas = new HashMap<>();
-		ArrayList<String> date = new ArrayList<>();
-//		System.out.println(beginDate);
-		if(beginDate == null  || beginDate.equals("")){
-			VSDatas = getStockBLService.getVSData("1", "10", "2005-02-01","2005-07-01");
-			date = getStockBLService.getDate("1", "10", "2005-02-01","2005-07-01");
-		}else{
-			VSDatas = getStockBLService.getVSData(code1, code2, beginDate, endDate);
-			date = getStockBLService.getDate(code1, code2, beginDate, endDate);
-		}
-		
-		ArrayList<Double> close1 = new ArrayList<>();
-		ArrayList<Double> close2 = new ArrayList<>();
-		
-		String[] name = new String[2];
-		Iterator it = VSDatas.entrySet().iterator();
-		int n = 0;
-		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
-			name[n] = (String) entry.getKey();
-			n++;
-		}
-		close1 = VSDatas.get(name[0]);
-		close2 = VSDatas.get(name[1]);
-		
-		int days = date.size();
-		String[] dates = new String[days];
-		Double[] stock1 = new Double[days];
-		Double[] stock2 = new Double[days];
-		
-		for(int i=0; i<days; i++){
-			dates[i] = date.get(i);
-			stock1[i] = close1.get(i);
-			stock2[i] = close2.get(i);
-		}
-		
+		Map<String, ArrayList<String>> VSData = getStockBLService.getVSdata(code1, code2, beginDate, endDate);
 		JSONObject json = new JSONObject();
-		json.put("Name", name);
-		json.put("Date", dates);
-		json.put("Stock1", stock1);
-		json.put("Stock2", stock2);
+		json.put("result", VSData.get("result").get(0));
+		if(VSData.get("result").get(0).equals("success")){
+			ArrayList<String> datelist = VSData.get("date");
+			ArrayList<String> fluctlist1 = VSData.get("fluct1");
+			ArrayList<String> fluctlist2 = VSData.get("fluct2");
+			ArrayList<String> namelist = VSData.get("name");
+			ArrayList<String> p1 = VSData.get("parameter1");
+			ArrayList<String> p2 = VSData.get("parameter2");
+			String[] name = new String[2];
+			String[] date = new String[datelist.size()];
+			Double[] fluct1 = new Double[fluctlist1.size()];
+			Double[] fluct2 = new Double[fluctlist1.size()];
+			String[] parameter1 = new String[5];
+			String[] parameter2 = new String[5];
+			
+			for(int i=0;i<datelist.size();i++){
+				date[i] = datelist.get(i);
+				fluct1[i] = Double.valueOf(fluctlist1.get(i));
+				fluct2[i] = Double.valueOf(fluctlist2.get(i));
+				System.out.println(date[i]+"----"+fluct1[i]+"-----"+fluct2[i]);
+			}
+			for(int i=0;i<5;i++){
+				parameter1[i] = p1.get(i);
+				parameter2[i] = p2.get(i);
+			}
+			name[0] = namelist.get(0);
+			name[1] = namelist.get(1);
+			System.out.println(name[0]+"----"+name[1]);
+			json.put("Name", name);
+			json.put("Date", date);
+			json.put("Stock1", fluct1);
+			json.put("Stock2", fluct2);
+			json.put("parameter1", parameter1);
+			json.put("parameter2", parameter2);
+		}
 		result = json.toString();
 		return SUCCESS;
 	}
@@ -249,6 +249,49 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 	}
 	
 	/**
+	 * 获得个股分析的股票数据
+	 * @return
+	 */
+	public String getStockGains(){
+//		System.out.println("getStockGains");
+		Map<String, ArrayList<String>> data = new HashMap<>();
+		
+		String code = request.getParameter("code");
+		String begin = request.getParameter("begin");
+		String end = request.getParameter("end");
+//		System.out.println(code+" "+begin+" "+end);
+		if(code.equals("") || code == null){
+			data = getStockBLService.getStockGains("1", "2014-05-01","2014-07-01");
+		}else{
+			data = getStockBLService.getStockGains(code, begin, end);
+		}
+		
+		ArrayList<String> date = new ArrayList<>();
+		ArrayList<String> adj = new ArrayList<>();
+		ArrayList<String> name = new ArrayList<>();
+		date = data.get("date");
+		adj = data.get("adjClose");
+		name = data.get("name");
+//		System.out.println("date "+date.size());
+		int days = date.size();
+		String[] dates = new String[days];
+		Double[] adjClose = new Double[days];
+		
+		for(int i=0; i<days; i++){
+			dates[i] = date.get(i);
+			adjClose[i] = Double.parseDouble(adj.get(i));
+		}
+//		System.out.println(dates[0]+" "+dates[1]);
+		
+		JSONObject json = new JSONObject();
+		json.put("Name", name.get(0));
+		json.put("Date", dates);
+		json.put("AdjClose", adjClose);
+		result = json.toString();
+		return SUCCESS;
+	}
+	
+	/**
 	 * 保存用户想要搜索的股票代码
 	 * @return
 	 */
@@ -265,6 +308,7 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		
 		if(!IsCode(Code)){
 			Code = Tran(getKGraphDataService.getCodeByName(Code));
+			System.out.println(Code);
 		}
 		
 		if(Code.equals("000000")){
@@ -302,6 +346,148 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		String page = request.getParameter("page");
 		System.out.println(page);
 		ArrayList<StockPO> poList = getStockBLService.getStockMessage();
+		
+		int n1 = 0;
+		int n2 = 0;
+		if(page.equals("-1")){
+			n1 = (WebCookieVO.getpage()-1)*10;
+		}else if(page.equals("-2")){
+			n1 = (WebCookieVO.getpage()+1)*10;
+		}else{
+			n1 = Integer.valueOf(page)*10;
+		}
+		WebCookieVO.setpage(n1/10);
+		if((n1+10)>poList.size()){
+			n2 = poList.size();
+		}else{
+			n2 = n1+10;
+		}
+		
+		String[] index = new String[poList.size()];
+		String[] code = new String[poList.size()];
+		String[] name = new String[poList.size()];
+		String[] open = new String[poList.size()];
+		String[] high = new String[poList.size()];
+		String[] low = new String[poList.size()];
+		String[] close = new String[poList.size()];
+		String[] fluctuation = new String[poList.size()];
+		String[] volume = new String[poList.size()];
+		int i = 0;
+		for(int k=n1;k<n2;k++){
+			DecimalFormat df = new DecimalFormat("0.00");
+			
+			index[i] = Integer.toString(k+1);
+			code[i] = poList.get(k).getCode();
+			name[i] = getStockBLService.getNameByCode(code[i]);
+			open[i] = df.format(poList.get(k).getOpen());
+			high[i] = df.format(poList.get(k).getHigh());
+			low[i] = df.format(poList.get(k).getLow());
+			close[i] = df.format(poList.get(k).getClose());
+			volume[i] = poList.get(k).getVolume();
+			ArrayList<StockPO> lastday = getStockBLService.getLastStockByCode(code[i]);
+			System.out.println(k+" "+lastday);
+			double fluct = (poList.get(k).getClose()-lastday.get(0).getClose())/lastday.get(0).getClose();
+			fluctuation[i] = df.format(fluct*100);
+			i++;
+		}
+		
+		JSONObject json = new JSONObject();
+		json.put("index", index);
+		json.put("code", code);
+		json.put("name", name);
+		json.put("open", open);
+		json.put("high", high);
+		json.put("low", low);
+		json.put("close", close);
+		json.put("fluctuation", fluctuation);
+		json.put("volume", volume);
+		int length = 0;
+		if(poList.size()%10==0){
+			length = poList.size()/10;
+		}else{
+			length = poList.size()/10+1;
+		}
+		json.put("length", length);
+		json.put("now", n1/10+1);
+		result = json.toString();
+		return "success";
+	}
+	
+	public String getGemStockMessage(){
+		String page = request.getParameter("page");
+		System.out.println(page);
+		ArrayList<StockPO> poList = getStockBLService.getGemStockMessage();
+		
+		int n1 = 0;
+		int n2 = 0;
+		if(page.equals("-1")){
+			n1 = (WebCookieVO.getpage()-1)*10;
+		}else if(page.equals("-2")){
+			n1 = (WebCookieVO.getpage()+1)*10;
+		}else{
+			n1 = Integer.valueOf(page)*10;
+		}
+		WebCookieVO.setpage(n1/10);
+		if((n1+10)>poList.size()){
+			n2 = poList.size();
+		}else{
+			n2 = n1+10;
+		}
+		
+		String[] index = new String[poList.size()];
+		String[] code = new String[poList.size()];
+		String[] name = new String[poList.size()];
+		String[] open = new String[poList.size()];
+		String[] high = new String[poList.size()];
+		String[] low = new String[poList.size()];
+		String[] close = new String[poList.size()];
+		String[] fluctuation = new String[poList.size()];
+		String[] volume = new String[poList.size()];
+		int i = 0;
+		for(int k=n1;k<n2;k++){
+			DecimalFormat df = new DecimalFormat("0.00");
+			
+			index[i] = Integer.toString(k+1);
+			code[i] = poList.get(k).getCode();
+			name[i] = getStockBLService.getNameByCode(code[i]);
+			open[i] = df.format(poList.get(k).getOpen());
+			high[i] = df.format(poList.get(k).getHigh());
+			low[i] = df.format(poList.get(k).getLow());
+			close[i] = df.format(poList.get(k).getClose());
+			volume[i] = poList.get(k).getVolume();
+			ArrayList<StockPO> lastday = getStockBLService.getLastStockByCode(code[i]);
+			System.out.println(k+" "+lastday);
+			double fluct = (poList.get(k).getClose()-lastday.get(0).getClose())/lastday.get(0).getClose();
+			fluctuation[i] = df.format(fluct*100);
+			i++;
+		}
+		
+		JSONObject json = new JSONObject();
+		json.put("index", index);
+		json.put("code", code);
+		json.put("name", name);
+		json.put("open", open);
+		json.put("high", high);
+		json.put("low", low);
+		json.put("close", close);
+		json.put("fluctuation", fluctuation);
+		json.put("volume", volume);
+		int length = 0;
+		if(poList.size()%10==0){
+			length = poList.size()/10;
+		}else{
+			length = poList.size()/10+1;
+		}
+		json.put("length", length);
+		json.put("now", n1/10+1);
+		result = json.toString();
+		return "success";
+	}
+	
+	public String getSmeStockMessage(){
+		String page = request.getParameter("page");
+		System.out.println(page);
+		ArrayList<StockPO> poList = getStockBLService.getSmeStockMessage();
 		
 		int n1 = 0;
 		int n2 = 0;

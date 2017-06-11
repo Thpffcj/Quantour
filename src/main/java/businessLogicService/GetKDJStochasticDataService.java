@@ -15,5 +15,5 @@ public interface GetKDJStochasticDataService {
 
 	public MeanReversionVO getParameter();
 	
-	public ArrayList<String> getSuggest();
+	public String[] getSuggest();
 }

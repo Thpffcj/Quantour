@@ -1,20 +1,15 @@
 package po;
 
-/**
- * 
- * @author 费慧通
- *创业板
- */
-public class GemClassifiedPO {
+public class MainClassifiedPO {
 
 	private String code;
 	private String name;
 	
-	public GemClassifiedPO() {
+	public MainClassifiedPO() {
 		super();
 	}
 
-	public GemClassifiedPO(String code, String name) {
+	public MainClassifiedPO(String code, String name) {
 		super();
 		this.code = code;
 		this.name = name;

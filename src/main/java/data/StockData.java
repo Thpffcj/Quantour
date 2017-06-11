@@ -61,76 +61,6 @@ public class StockData implements StockDataService {
 	}
 	
 	/**
-	 * 根据版块获得开盘价
-	 */
-	public ArrayList<Double> getStockOpenBySection(String section, String begin, String end){
-		ArrayList<Double> open = new ArrayList<Double>();
-
-		String code = "";
-		if(section.equals("主板")){
-			code = "000300";
-		}else if(section.equals("创业板")){
-			code = "399005";
-		}else if(section.equals("中小板")){
-			code = "399006";
-		}
-		try {
-			Scanner sc = new Scanner(getClass().getClassLoader().getResourceAsStream("CSV/"+ code + ".csv"),"UTF-8");
-			SimpleDateFormat time = new SimpleDateFormat("MM/dd/yy");
-			Date BeginDate = time.parse(begin);
-			Date EndDate = time.parse(end);
-			while (sc.hasNextLine()) {
-				String line = sc.nextLine();
-				String[] message = line.split("\t");
-				Date now = time.parse(message[0]);
-				if ((now.after(BeginDate) && now.before(EndDate)) || now.equals(BeginDate) || now.equals(EndDate)) {
-					open.add(Double.parseDouble(message[2]));
-				}
-			}
-			sc.close();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
-		return open;
-	}
-	
-	/**
-	 * 根据版块获得复权收盘价
-	 */
-	public ArrayList<Double> getStockAdjCloseBySection(String section, String begin, String end){
-		ArrayList<Double> adjClose = new ArrayList<Double>();
-
-		String code = "";
-		if(section == "主板"){
-			code = "000300";
-		}else if(section == "创业板"){
-			code = "399005";
-		}else if(section == "中小板"){
-			code = "399006";
-		}
-		try {
-			Scanner sc = new Scanner(getClass().getClassLoader().getResourceAsStream("CSV/"+ code + ".csv"),"UTF-8");
-			SimpleDateFormat time = new SimpleDateFormat("MM/dd/yy");
-			Date BeginDate = time.parse(begin);
-			Date EndDate = time.parse(end);
-			while (sc.hasNextLine()) {
-				String line = sc.nextLine();
-				String[] message = line.split("\t");
-				Date now = time.parse(message[0]);
-				if ((now.after(BeginDate) && now.before(EndDate)) || now.equals(BeginDate) || now.equals(EndDate)) {
-					adjClose.add(Double.parseDouble(message[1]));
-				}
-			}
-			sc.close();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-
-		return adjClose;
-	}
-	
-	/**
 	 * 根据开始日期、结束日期和股票编号得到股票列表
 	 */
 	public ArrayList<StockPO> getStockByCodeAndDate(int code, String begin, String end) {
@@ -139,12 +69,19 @@ public class StockData implements StockDataService {
 		Transaction transaction = null;
 		ArrayList<StockPO> stockList = new ArrayList<StockPO>();
 
+//		transaction = session.beginTransaction();
+//		String hql = "from StockPO where code=? and date>=? and date<=?";
+//		Query query = session.createQuery(hql);
+//		query.setParameter(0, Tran(String.valueOf(code)));
+//		query.setParameter(1, begin);
+//		query.setParameter(2, end);
+//		stockList = (ArrayList<StockPO>) query.getResultList();
+//		transaction.commit();
+//		session.close();
 		ArrayList<String> days;
 		try {
 			transaction = session.beginTransaction();
 			days = dateProcessingService.splitDays(begin, end);
-//			System.out.println(code + " " + begin + " " + end + " " + days.size());
-//			System.out.println(Tran(String.valueOf(code)));
 			for(int i=0; i<days.size(); i++){
 				String hql = "from StockPO where code=? and date=?";
 				Query query = session.createQuery(hql);
@@ -189,6 +126,46 @@ public class StockData implements StockDataService {
 		transaction.commit();
 		session.close();
 		return benchmark;
+	}
+	
+	public ArrayList<BasePO> getBenchmarkByDate(String name,String begin,String end){
+		
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		ArrayList<BasePO> stockList = new ArrayList<BasePO>();
+
+		String code = "hs300";
+		if(name.equals("主板")){
+			code = "hs300";
+		}else if(name.equals("创业板")){
+			code = "399005";
+		}else if(name.equals("中小板")){
+			code = "399006";
+		}
+		ArrayList<String> days;
+		try {
+			transaction = session.beginTransaction();
+			days = dateProcessingService.splitDays(begin, end);
+			for(int i=0; i<days.size(); i++){
+				String hql = "from BasePO where code=? and date=?";
+				Query query = session.createQuery(hql);
+				query.setParameter(0, code);
+				query.setParameter(1, days.get(i));
+				BasePO spo = new BasePO();
+				try {
+					spo = (BasePO) query.getSingleResult();
+					stockList.add(spo);
+					transaction.commit();
+				} catch (Exception e) {
+					continue;
+				}
+			}
+			session.close();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+
+		return stockList;
 	}
 	
 	/**
@@ -390,19 +367,17 @@ public class StockData implements StockDataService {
 	 * 得到所有股票编号和名称
 	 */
 	public ArrayList<StockPO> getCodeAndName(){
-//		此方法已废除
-//		Session session = sessionFactory.openSession();
-//		Transaction transaction = null;
-//		
-//		ArrayList<StockPO> list = new ArrayList<>();
-//		transaction = session.beginTransaction();
-//		String hql = "from StockPO";
-//		Query query = session.createQuery(hql);
-//		list = (ArrayList<StockPO>)query.getResultList();
-//		transaction.commit();
-//		session.close();
-//		return list;
-		return null;
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		
+		ArrayList<StockPO> list = new ArrayList<>();
+		transaction = session.beginTransaction();
+		String hql = "from StockPO";
+		Query query = session.createQuery(hql);
+		list = (ArrayList<StockPO>)query.getResultList();
+		transaction.commit();
+		session.close();
+		return list;
 	}
 	
 	public ArrayList<String> getPlate(String plate_type){
@@ -465,14 +440,24 @@ public class StockData implements StockDataService {
 
 	public ArrayList<String> getDate(String begin, String end) {
 		
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		
 		ArrayList<String> days = new ArrayList<String>();
 
-		String code = "000300";
-		try {
-			days = dateProcessingService.splitDays(begin, end);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		String code = "399006";
+		
+			transaction = session.beginTransaction();
+			String hql = "select date from BasePO where code=? and date>=? and date<=?";
+			Query query = session.createQuery(hql);
+			query.setParameter(0, code);
+			query.setParameter(1, begin);
+			query.setParameter(2, end);
+			days = (ArrayList<String>) query.getResultList();
+			transaction.commit();
+			session.close();
+//			days = dateProcessingService.splitDays(begin, end);
+		
 
 		return days;
 	}
@@ -506,6 +491,60 @@ public class StockData implements StockDataService {
 		}
 		return last;
 		
+	}
+	
+	/**
+	 * 得到所有创业板股票代码
+	 * @return
+	 */
+	public ArrayList<String> getSmeAllCode(){
+		ArrayList<String> codelist = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		
+		transaction = session.beginTransaction();
+		String hql = "select code from SmeClassifiedPO";
+		Query query = session.createQuery(hql);
+		codelist = (ArrayList<String>) query.getResultList();
+		transaction.commit();
+		session.close();
+		return codelist;
+	}
+	
+	/**
+	 * 得到所有中小板股票代码
+	 * @return
+	 */
+	public ArrayList<String> getGemAllCode(){
+		ArrayList<String> codelist = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		
+		transaction = session.beginTransaction();
+		String hql = "select code from GemClassifiedPO";
+		Query query = session.createQuery(hql);
+		codelist = (ArrayList<String>) query.getResultList();
+		transaction.commit();
+		session.close();
+		return codelist;
+	}
+	
+	/**
+	 * 得到所有主板股票代码
+	 * @return
+	 */
+	public ArrayList<String> getMainAllCode(){
+		ArrayList<String> codelist = new ArrayList<>();
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		
+		transaction = session.beginTransaction();
+		String hql = "select code from MainClassifiedPO";
+		Query query = session.createQuery(hql);
+		codelist = (ArrayList<String>) query.getResultList();
+		transaction.commit();
+		session.close();
+		return codelist;
 	}
 	
 }
