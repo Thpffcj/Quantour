@@ -131,9 +131,12 @@ public class GetRSIData implements GetRSIDataService{
 			date.add(stockList.get(i - 1).getDate());
 			dataset.addValue(100 * up / (up + down), series, stockList.get(i - 1).getDate());
 		}
+		ArrayList<String> name = new ArrayList<>();
+		name.add(stockDataService.getNameByCode(Integer.parseInt(condition)));
 		// System.out.println(date.size()+" "+value.size());
 		data.put("date", date);
 		data.put("value", value);
+		data.put("name", name);
 		// RSIDatas.put(condition, value);
 		// newStockPool.add(condition);
 		return data;

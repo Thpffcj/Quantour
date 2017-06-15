@@ -25,23 +25,31 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 		$("#begindate").datepicker({
-	        onSelect: function(selected) {	          
+			minDate: new Date(2015, 1 - 1 , 1),
+			maxDate: new Date(2017, 6 - 1 , 13),
+			onSelect: function(selected) {	          
 	        	$("#enddate").datepicker("option","minDate", selected)
 		    }
 		});
 		$("#enddate").datepicker({ 
-		    onSelect: function(selected) {
+			minDate: new Date(2015, 1 - 1 , 1),
+			maxDate: new Date(2017, 6 - 1 , 13),
+			onSelect: function(selected) {
 		        $("#begindate").datepicker("option","maxDate", selected)
 		    }
 		});
 		
 		$("#begindate1").datepicker({
-	        onSelect: function(selected) {	          
+			minDate: new Date(2015, 1 - 1 , 1),
+			maxDate: new Date(2017, 6 - 1 , 13),
+			onSelect: function(selected) {	          
 	        	$("#enddate1").datepicker("option","minDate", selected)
 		    }
 		});
 		$("#enddate1").datepicker({ 
-		    onSelect: function(selected) {
+			minDate: new Date(2015, 1 - 1 , 1),
+			maxDate: new Date(2017, 6 - 1 , 13),
+			onSelect: function(selected) {
 		        $("#begindate1").datepicker("option","maxDate", selected)
 		    }
 		});
@@ -77,7 +85,7 @@
 		<div>
 			<div>
 				<ul id="navul">
-					<li><a><img id="photo"></a></li>
+					<li><a><img src="images/Icon.jpg"></a></li>
 					<li><a href="Main.jsp">首页</a></li>
 					<li><a href="Market.jsp">行情中心</a></li>
 					<li><a href="Stock.jsp">个股展示</a></li>
@@ -87,7 +95,7 @@
 				</ul>
 			</div>
 			<ul id="userul">
-				<li class="firstli"><img src="images/photo.png"></li>
+				<li class="firstli"><img id="photo"></li>
 				<li class="firstli"><a href="javascript:void(0)" id="loginUserName">${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
@@ -212,18 +220,37 @@
 		<div class="stockpre">
 			<form action="">
 				<label>调整K线图时间:</label>
-					<input type="text" id="begindate" value = "2016-05-25" placeholder = "请选择开始日期">
+					<input type="text" id="begindate" value = "2016-06-13" placeholder = "请选择开始日期">
 				<label>---</label>
-					<input type="text" id="enddate" value = "2017-05-25" placeholder = "请选择结束日期">
+					<input type="text" id="enddate" value = "2017-06-13" placeholder = "请选择结束日期">
 				<button type = "button" class = "btn" id="searchKGraph">确定</button>
 			</form>
 			<script type="text/javascript">
 			$(document).ready(function(){ 
 				showKGraph()
 				$("#searchKGraph").click(function(){ 
+					var begindate = $("#begindate").val();
+					var enddate = $("#enddate").val();
+					if(begindate==""||enddate==""){
+						$("#search-modal-prompt").html("输入框不能为空!");
+						$("#modal-yes").attr("href","#");
+						$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+						$("#search-modal").modal('show');
+						return;
+					}
 					showKGraph()
 				});
 				$("#searchTrendGraph").click(function(){ 
+					var begindate = $("#begindate1").val();
+					var enddate = $("#enddate1").val();
+					var daynum = $("#daynum").val();
+					if(begindate==""||enddate==""||daynum==""){
+						$("#search-modal-prompt").html("输入框不能为空!");
+						$("#modal-yes").attr("href","#");
+						$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\" data-dismiss=\"modal\">确定</button>");
+						$("#search-modal").modal('show');
+						return;
+					}
 					showTrendgraphGraph()
 				});
 			});
@@ -235,9 +262,9 @@
 		</div>
 		<div class="trend-input">
 			<label>基础时间:</label>
-				<input type="text" id="begindate1" value = "2016-05-25" placeholder = "请选择开始日期">
+				<input type="text" id="begindate1" value = "2017-05-13" placeholder = "请选择开始日期">
 			<label>---</label>
-				<input type="text" id="enddate1" value = "2017-05-25" placeholder = "请选择结束日期">
+				<input type="text" id="enddate1" value = "2017-06-13" placeholder = "请选择结束日期">
 			<label>预测天数:</label>
 				<input type="text" id="daynum" value="10" placeholder="请选择预测的天数">
 			<button type = "button" class = "btn" id="searchTrendGraph">确定</button>

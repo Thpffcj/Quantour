@@ -41,7 +41,9 @@
 			firstDay : 1,
 			isRTL : false,
 			showMonthAfterYear : true,
-			yearSuffix : '年'
+			yearSuffix : '年',
+			minDate: new Date(2015, 1 - 1 , 1),
+			maxDate: new Date(2017, 6 - 1 , 13),
 		};
 		$.datepicker.setDefaults($.datepicker.regional['zh-CN']);
 	});
@@ -165,7 +167,7 @@
 
 		<div>
 				<label style="color: white; font-weight: 100;">请选择日期:</label>
-				<input type="text" id="date" value="2017-05-25" name="date">
+				<input type="text" id="date" value="2017-06-13" name="date">
 				<button type="submit" class="btn" id="SearchUpDownGraph">确认</button>
 		</div>
 		
@@ -176,7 +178,7 @@
 					showUpDownGraph()
 				});
 			});
-			</script>
+		</script>
 			
 		<div class="clearfix">
 			<div class="updown" id="echarts1"></div>
@@ -216,7 +218,7 @@
 		<div class="others">
 			<!-- 上证指数 -->
 			<div class="flash" id="benchmark1"></div>
-			<!-- 深证指数 -->
+			<!-- 中小板指数 -->
 			<div class="flash" id="benchmark2"></div>
 			<!-- 创业板指数 -->
 			<div class="flash" id="benchmark3"></div>
@@ -557,6 +559,9 @@
 	<script type="text/javascript">
 
 		function showUpDownGraph(){
+			$("#echarts1").html("");
+			$('#upList').html("");
+			$('#downList').html("");
 
 		var datas = new Array;
 		var upsName = new Array;
@@ -573,48 +578,56 @@
 			dataType : "json",
 			success : function(data) {
 				var resultJSONData = JSON.parse(data);
-				for (i = 0; i < resultJSONData.Data.length; i++) {
-					datas[i] = resultJSONData.Data[i];
-				}
-				for(i = 0; i<resultJSONData.UpName.length; i++){
-					upsName[i] = resultJSONData.UpName[i];
-					upsAmplitude[i] = resultJSONData.UpAmplitude[i];
-					downsName[i] = resultJSONData.DownName[i];
-					downsAmplitude[i] = resultJSONData.DownAmplitude[i];
-				}
+				var result = resultJSONData.Result;
+				if(result=="wrong"){
+					$("#search-modal-prompt").html("当前日期为非交易日!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result=="success"){
+					for (i = 0; i < resultJSONData.Data.length; i++) {
+						datas[i] = resultJSONData.Data[i];
+					}
+					for(i = 0; i<resultJSONData.UpName.length; i++){
+						upsName[i] = resultJSONData.UpName[i];
+						upsAmplitude[i] = resultJSONData.UpAmplitude[i];
+						downsName[i] = resultJSONData.DownName[i];
+						downsAmplitude[i] = resultJSONData.DownAmplitude[i];
+					}
 
-				for(i=0; i<resultJSONData.UpName.length; i++){
-					 $('#upList').append('<tr><td><a href="Stock.jsp" target="_blank" onclick="SearchStock(\''+upsName[i]+'\')">'+upsName[i]+'</a></td><td>'+upsAmplitude[i]+'</td></tr>');
-					 $('#downList').append('<tr><td><a href="Stock.jsp" target="_blank" onclick="SearchStock(\''+downsName[i]+'\')">'+downsName[i]+'</a></td><td>'+downsAmplitude[i]+'</td></tr>');
-				}
+					for(i=0; i<resultJSONData.UpName.length; i++){
+						 $('#upList').append('<tr><td><a href="Stock.jsp" target="_blank" onclick="SearchStock(\''+upsName[i]+'\')">'+upsName[i]+'</a></td><td>'+upsAmplitude[i]+'</td></tr>');
+						 $('#downList').append('<tr><td><a href="Stock.jsp" target="_blank" onclick="SearchStock(\''+downsName[i]+'\')">'+downsName[i]+'</a></td><td>'+downsAmplitude[i]+'</td></tr>');
+					}
 
-				var myChart = echarts.init(document.getElementById('echarts1'),
+					var myChart = echarts.init(document.getElementById('echarts1'),
 						'dark');
 
-				var option = {
-					backgroundColor : '#eee',
-					tooltip : {
-						show : true
-					},
-					legend : {
-						data : [ '数量' ]
-					},
-					xAxis : [ {
-						type : 'category',
-						data : ['跌停','-8%','-6%','-4%','-2%','0','2%','-4%','6%','8%','涨停']
-					} ],
-					yAxis : [ {
-						type : 'value'
-					} ],
-					series : [ {
-						"name" : "数量",
-						"type" : "bar",
-						"data" : datas
-					} ]
-				}
+					var option = {
+						backgroundColor : '#eee',
+						tooltip : {
+							show : true
+						},
+						legend : {
+							data : [ '数量' ]
+						},
+						xAxis : [ {
+							type : 'category',
+							data : ['跌停','-8%','-6%','-4%','-2%','0','2%','-4%','6%','8%','涨停']
+						} ],
+						yAxis : [ {
+							type : 'value'
+						} ],
+						series : [ {
+							"name" : "数量",
+							"type" : "bar",
+							"data" : datas
+						} ]
+					}
 
-				// 为echarts对象加载数据 
-				myChart.setOption(option);
+					// 为echarts对象加载数据 
+					myChart.setOption(option);
+				}
 			}
 		});
 		}
@@ -645,6 +658,10 @@
 				var myChart = echarts.init(document
 						.getElementById('benchmark1'));
 				option = {
+					title: {
+					     text: "上证指数",
+						 x: 'center'
+					},	
 					color : colors,
 					backgroundColor : '#eee',
 					tooltip : {
@@ -730,6 +747,10 @@
 				var myChart = echarts.init(document
 						.getElementById('benchmark2'));
 				option = {
+					title: {
+					     text: "中小板指数",
+						 x: 'center'
+					},	
 					color : colors,
 					backgroundColor : '#eee',
 					tooltip : {
@@ -815,6 +836,10 @@
 				var myChart = echarts.init(document
 						.getElementById('benchmark3'));
 				option = {
+					title: {
+					     text: "创业板指数",
+						 x: 'center'
+					},	
 					color : colors,
 					backgroundColor : '#eee',
 					tooltip : {

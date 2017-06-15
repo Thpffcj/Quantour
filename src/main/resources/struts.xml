@@ -207,6 +207,12 @@
      	</result>
      </action>
      
+     <action name="getMatchPlate" class="PlateAction" method="GetMatchPlate">
+     	<result type="json">
+     		<param name="root">result</param>
+     	</result>
+     </action>
+     
      <action name="PlateKGraph" class="PlateAction" method="getPlateKGraphData">
      	<result type="json">
      		<param name="root">result</param>

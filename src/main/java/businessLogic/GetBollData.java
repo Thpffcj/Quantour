@@ -101,17 +101,26 @@ public class GetBollData implements GetBollDataService{
 			code = Integer.parseInt(stockList.get(0).getCode());
 		}
 		
+		int flag = 0;
 		for(int i=0;i<19;i++){
 			isBegin = stockDataService.JudgeIfTheLast(code, begin);
 			//如果之前没有数据了
-			if(isBegin==-1){
-				beforeDays = i;
-				break;
+			if(isBegin == -1){
+				flag ++;
+				if(flag >=10){
+					beforeDays = i - 10;
+					break;
+				}
+				else{
+					begin = GetOrigin(String.valueOf(code),begin);
+				}
+				
 			}
 			else{
 				begin = GetOrigin(String.valueOf(code),begin);
 			}
 		}
+		System.out.println(begin+" "+beforeDays);
 		stockList = getStockData(condition,begin,end);
 //		
 //		// 保留收盘价数据的集合

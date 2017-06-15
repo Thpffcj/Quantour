@@ -50,7 +50,7 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			<ul id="match-list">
 			</ul>
 		</div>
-		<a href="javascript:void(0)" target="_blank" id="searchcode"><button type="button" class="search">搜索</button></a>
+		<a href="javascript:void(0)" target="_blank" id="searchcode"><button type="button" class="searchbtn">搜索</button></a>
 		
 		<script type="text/javascript">
 		$("#code").bind('input propertychange', function() {
@@ -131,6 +131,50 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		<div class="head">
 			<h2>概念板块</h2>
 		</div>
+		<div class="search">
+			<div class="left">
+				<input id="concept-plate-search" placeholder="搜索概念板块">
+				<ul id="match-plate1">
+				</ul>
+			</div>
+			<div class="right">
+				<button type="button" class="btn" onclick="searchConceptPlate()">搜索</button>
+			</div>
+			<script type="text/javascript">
+			$("#concept-plate-search").bind('input propertychange', function() {
+				$.ajax({
+					type: "POST",
+					url: "getMatchPlate",
+					data: {
+						enter: $("#concept-plate-search").val(),
+						type: "concept",
+					},
+					dataType: "json",
+					success: function(obj){
+						var result = JSON.parse(obj);
+						var s = "";
+						for(var i=0;i<5;i++){
+							if(result.name[i]!=null){
+								s = s+"<li onclick=\"getplate1('"+result.name[i]+"')\">&emsp;"+result.name[i]+"</li>";
+							}
+						}
+						$("#match-plate1").attr("style","");
+						$("#match-plate1").html(s);
+					}
+				});
+			});
+			
+			function getplate1(name){
+				$("#concept-plate-search").val(name);
+				$("#match-plate1").attr("style","display:none;");
+			}
+			
+			function searchConceptPlate(){
+				var plate = $("#concept-plate-search").val();
+				SavePlate('concept',plate);
+			}
+			</script>
+		</div>
 		<div class="prelist">
 			<table class="table table-hover table-striped">
 				<thead>
@@ -167,6 +211,50 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		<div class="head">
 			<h2>行业板块</h2>
 		</div>
+		<div class="search">
+			<div class="left">
+				<input id="industry-plate-search" placeholder="搜索行业板块">
+				<ul id="match-plate2">
+				</ul>
+			</div>
+			<div class="right">
+				<button type="button" class="btn" onclick="searchIndustryPlate()">搜索</button>
+			</div>
+			<script type="text/javascript">
+			$("#industry-plate-search").bind('input propertychange', function() {
+				$.ajax({
+					type: "POST",
+					url: "getMatchPlate",
+					data: {
+						enter: $("#industry-plate-search").val(),
+						type: "industry",
+					},
+					dataType: "json",
+					success: function(obj){
+						var result = JSON.parse(obj);
+						var s = "";
+						for(var i=0;i<5;i++){
+							if(result.name[i]!=null){
+								s = s+"<li onclick=\"getplate2('"+result.name[i]+"')\">&emsp;"+result.name[i]+"</li>";
+							}
+						}
+						$("#match-plate2").attr("style","");
+						$("#match-plate2").html(s);
+					}
+				});
+			});
+			
+			function getplate2(name){
+				$("#industry-plate-search").val(name);
+				$("#match-plate2").attr("style","display:none;");
+			}
+			
+			function searchIndustryPlate(){
+				var plate = $("#industry-plate-search").val();
+				SavePlate('industry',plate);
+			}
+			</script>
+		</div>
 		<div class="prelist">
 			<table class="table table-hover table-striped">
 				<thead>
@@ -202,6 +290,50 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		</div>
 		<div class="head">
 			<h2>地域板块</h2>
+		</div>
+		<div class="search">
+			<div class="left">
+				<input id="area-plate-search" placeholder="搜索地域板块">
+				<ul id="match-plate3">
+				</ul>
+			</div>
+			<div class="right">
+				<button type="button" class="btn" onclick="searchAreaPlate()">搜索</button>
+			</div>
+			<script type="text/javascript">
+			$("#area-plate-search").bind('input propertychange', function() {
+				$.ajax({
+					type: "POST",
+					url: "getMatchPlate",
+					data: {
+						enter: $("#area-plate-search").val(),
+						type: "area",
+					},
+					dataType: "json",
+					success: function(obj){
+						var result = JSON.parse(obj);
+						var s = "";
+						for(var i=0;i<5;i++){
+							if(result.name[i]!=null){
+								s = s+"<li onclick=\"getplate3('"+result.name[i]+"')\">&emsp;"+result.name[i]+"</li>";
+							}
+						}
+						$("#match-plate3").attr("style","");
+						$("#match-plate3").html(s);
+					}
+				});
+			});
+			
+			function getplate3(name){
+				$("#area-plate-search").val(name);
+				$("#match-plate3").attr("style","display:none;");
+			}
+			
+			function searchAreaPlate(){
+				var plate = $("#area-plate-search").val();
+				SavePlate('area',plate);
+			}
+			</script>
 		</div>
 		<div class="prelist">
 			<table class="table table-hover table-striped">
@@ -511,6 +643,27 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 		
 	}
 	
+	function SavePlate(pt,p){
+		$.ajax({ 
+			type : "POST",
+			url : "SavePlate",
+			data: {
+				type: pt,
+				plate: p,
+			},
+			dataType : "json",
+			success : function(obj) {
+				var result = JSON.parse(obj);
+				if(result.result=="success"){
+					window.open("PlatePre.jsp");
+				}else{
+					$("#search-modal-prompt").html("错误板块名称!");
+					$("#search-modal").modal('show');
+				}
+			}
+		});
+	}
+	
 	function SearchPlate(pt,p){
 		$.ajax({ 
 			type : "POST",
@@ -521,7 +674,6 @@ String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.
 			},
 			dataType : "json",
 			success : function(obj) {
-				
 			}
 		});
 	}

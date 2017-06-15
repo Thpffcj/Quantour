@@ -55,7 +55,7 @@ $(document).ready(function(){
     $("#enddate3").datepicker( "option", "showAnim", "clip");
     $("#slider1").slider({
         min: 1,
-        max: 100,
+        max: 30,
         value: 1,
         slide: function( event, ui ) {
           $( "#formation" ).val( ui.value );
@@ -64,7 +64,7 @@ $(document).ready(function(){
     $( "#formation" ).val( $( "#slider1" ).slider( "value" ) );
     $("#slider2").slider({
         min: 1,
-        max: 100,
+        max: 30,
         value: 1,
         slide: function( event, ui ) {
           $( "#holding" ).val( ui.value );
@@ -73,7 +73,7 @@ $(document).ready(function(){
     $( "#holding" ).val( $( "#slider2" ).slider( "value" ) );
     $("#slider3").slider({
         min: 1,
-        max: 100,
+        max: 30,
         value: 1,
         slide: function( event, ui ) {
           $( "#holding2" ).val( ui.value );
@@ -100,6 +100,8 @@ $(document).ready(function(){
 			dateFormat : 'yy-mm-dd',
 			firstDay : 1,
 			isRTL : false,
+			minDate: new Date(2015, 1 - 1 , 1),
+			maxDate: new Date(2017, 6 - 1 , 13),
 			showMonthAfterYear : true,
 			yearSuffix : '年'
 		};
@@ -228,22 +230,17 @@ $(document).ready(function(){
 		<div id="inputdiv1" class="input-form show">
 			<form>
 				<label>选择股票池:</label>
-				<select id = "stockpool">
+				<select id = "stockpool1">
 					<option value = "全部">全部</option>
 					<option value = "主板">主板</option>
 					<option value = "中小板">中小板</option>
 					<option value = "创业板">创业板</option>
 					<option value = "我的自选股">我的自选股</option>
 				</select>
-				<button type="button" class="btn-plus" data-toggle="modal" data-target="#addpool">
-					<span class="glyphicon glyphicon-plus"></span></button>
-				<br><br>
 				<label>回测时间:&emsp;</label>
 				<input type = "text" id = "begindate1" value="2016-05-25" placeholder="请选择开始日期">
 				<label>---</label>
 				<input type = "text" id = "enddate1" value="2016-10-25" placeholder="请选择结束日期">
-				<label>持有股票数:</label>
-				<input type = "number" id = "number" placeholder="请输入持有股票数">
 				<br><br>
 				<label>形成期:</label>
 				<label id="hold">持有期:</label>
@@ -251,25 +248,30 @@ $(document).ready(function(){
 				<output id="formation" style="color:#e0ffff; font-weight:bold;position:relative;left:265px;top:-44px;width:100px;"></output>
 				<div id="slider2"></div>
 				<output id="holding"  style="color:#e0ffff; font-weight:bold;position:relative;left:565px;top:-85px;width:100px;"></output>
+				<select style="position:relative;top:-110px;left:610px;" id="ishold">
+					<option>固定形成期</option>
+					<option>固定持有期</option>
+				</select>
 				<br>
-				<button type="submit" class="btn" style="position:relative;left: 700px;top: -134px;">开始回测</button>
+				<button type="button" class="btn" style="position:relative;left: 830px;top: -144px;" id="searchMoment">开始回测</button>
 			</form>
 		</div>
 		<div id="inputdiv2" class="input-form">
 			<form>
 				<label>选择股票池:</label>
-				<select id = "stockpool">
+				<select id = "stockpool2">
 					<option value = "全部">全部</option>
 					<option value = "主板">主板</option>
 					<option value = "中小板">中小板</option>
 					<option value = "创业板">创业板</option>
 					<option value = "我的自选股">我的自选股</option>
 				</select>
-				<button type="button" class="btn-plus" data-toggle="modal" data-target="#addpool"><span class="glyphicon glyphicon-plus"></span></button>
 				<label>回测时间:</label>
 				<input type = "text" id = "begindate2" value="2016-05-25" placeholder="请选择开始日期">
 				<label>---</label>
 				<input type = "text" id = "enddate2" value="2017-05-25" placeholder="请选择结束日期">
+				<label>持有股票数:</label>
+				<input type = "number" id = "number" placeholder="请输入持有股票数">
 				<br><br>
 				<label>&emsp;均&emsp;线:&emsp;</label>
 				<select id = "movingaverage">
@@ -281,17 +283,17 @@ $(document).ready(function(){
 				<div id="slider3"></div>
 				<output id="holding2" style="color:#e0ffff;font-weight:bold;position:relative;left:565px;top:-45px;width:100px;"></output>
 				<br>
-				<button type="submit" class="btn" style="position:relative;left: 700px;top: -94px;" id="searchMean">开始回测</button>
+				<button type="button" class="btn" style="position:relative;left: 700px;top: -94px;" id="searchMean">开始回测</button>
 			</form>
 			<br><br>
 			
 			<script type="text/javascript">
-				$(document).ready(function(){ 
-					showMeanReversionGraph()
+				$(document).ready(function(){
+					$("#searchMoment").click(function(){ 
+						mouse1('MStrategy');
+					});
 					$("#searchMean").click(function(){ 
-						showMeanReversionGraph()
-						showMeanReturnRateGraph()
-						showMeanWinningPercentageGraph()
+						mouse1('Mean');
 					});
 				});
 			</script>
@@ -300,13 +302,13 @@ $(document).ready(function(){
 		<div class="graph1">
 		<!-- 此处显示回测图标 -->
 			<div class="tablist">
-				<div class="item active" id="item1" onMouseOver="mouse1()">
+				<div class="item active" id="item1" onclick="mouse1('MStrategy')">
 					<h3>累计收益</h3>
 				</div>
-				<div class="item" id="item2" onMouseOver="mouse2()">
+				<div class="item" id="item2" onclick="mouse2('MStrategy')">
 					<h3>超额收益</h3>
 				</div>
-				<div class="item" id="item3" onMouseOver="mouse3()">
+				<div class="item" id="item3" onclick="mouse3('MStrategy')">
 					<h3>策略胜率</h3>
 				</div>
 			</div>
@@ -330,77 +332,83 @@ $(document).ready(function(){
 			<br>
 		</div>
 		<div class="input-quota">
+			<div class="input-quota-left">
 			<label>时间:</label>
 			<input type = "text" id = "begindate3" value="2016-05-25" placeholder="请选择开始日期">
 			<label>---</label>
 			<input type = "text" id = "enddate3" value="2017-05-25" placeholder="请选择结束日期">
 			<label>股票代码/名称:</label>
-			<input type="text" id="boolCode" placeholder="请输入股票代码/名称">
+			</div>
+			<div class="input-quota-right">
+				<input type="text" id="boolCode" placeholder="请输入股票代码/名称">
+				<ul id="prompt_list">
+				</ul>
+			</div>
 			<button type="button" id="begin-quota" class="btn" onclick="Quota('Boll')" style="margin-left:80px;">开始分析</button>
 		</div>
-		<p id="suggestion1"></p>
-		<p id="suggestion2"></p>
+		<p id="suggestion1" style="color: white;"></p>
+		<p id="suggestion2" style="color: white;"></p>
 		<div class="quota-result" id="strategyGraph">
 		</div>
+		<br><br>
 		<div class="quota-result1" id="strategyGraph1">
 		</div>
 
 		<script type="text/javascript">
-			$(document).ready(function() {
-				
+		$("#boolCode").bind('input propertychange', function() {
+			$.ajax({
+				type: "POST",
+				url: "getMatch",
+				data: {
+					enter: $("#boolCode").val(),
+				},
+				dataType: "json",
+				success: function(obj){
+					var result = JSON.parse(obj);
+					var s = "";
+					for(var i=0;i<5;i++){
+						if(result.name[i]!=null){
+							s = s+"<li onclick=\"getStock('"+result.code[i]+"')\">"+result.code[i]+"&emsp;&emsp;&emsp;"+result.name[i]+"</li>";
+						}
+					}
+					$("#prompt_list").attr("style","");
+					$("#prompt_list").html(s);
+				}
 			});
-			function Quota(type) {
-				if (type == 'Boll') {
-					$("#begin-quota").click(function() {
-						showBollGraph()
-						showStockGains()
-					});
-				}
-				if (type == 'KDJ') {
-					$("#begin-quota").click(function() {
-						showKDJGraph()
-						showStockGains()
-					});
-				}
-				if (type == 'RSI') {
-					$("#begin-quota").click(function() {
-						showRSIGraph()
-						showStockGains()
-					});
-				}
+		});
+		
+		function getStock(code){
+			$("#boolCode").val(code);
+			$("#prompt_list").attr("style","display:none;");
+		}
+			
+		function Quota(type) {
+			console.log(type);
+			var begindate3 = $("#begindate3").val();
+			var enddate3 = $("#enddate3").val();
+			var code = $("#boolCode").val();
+			if(begindate3==""||enddate3==""||code==""){
+				$("#search-modal-prompt").html("输入框不能为空!");
+				$("#search-modal").modal('show');
+				return;
 			}
+			if (type == 'Boll') {
+				showBollGraph();
+				showStockGains();
+			}
+			if (type == 'KDJ') {
+				showKDJGraph();
+				showStockGains();
+			}
+			if (type == 'RSI') {
+				showRSIGraph();
+				showStockGains();
+			}
+		}
 		</script>
 
 		<br><br><br>
 	</div>
-	
-	
-	<!-- 模态框（Modal） -->
-	<div class="modal fade" id="addpool" tabindex="-1" role="dialog"
-		aria-labelledby="myModalLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal"
-						aria-hidden="true">×</button>
-					<h4 class="modal-title" id="myModalLabel">新增股票池</h4>
-				</div>
-				<div class="modal-body">
-					<label>按下 ESC 按钮退出。</label> <br> 
-					股票池名称:&emsp;
-					<input type="text" value=""
-						placeholder="输入股票池的名称">
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-					<a href="User.jsp"><button type="button" class="btn btn-primary">确定</button></a>
-				</div>
-			</div>
-			<!-- /.modal-content -->
-		</div>
-		<!-- /.modal-dialog -->
-	</div>
-	<!-- /.modal -->
 	
 	<script type="text/javascript">
 	function way1(){
@@ -408,36 +416,138 @@ $(document).ready(function(){
 		document.getElementById("strategy2").className = "normal";
 		document.getElementById("inputdiv1").className = "input-form show";
 		document.getElementById("inputdiv2").className = "input-form";
+		$("#item1").attr("onclick","mouse1('MStrategy')");
+		$("#item2").attr("onclick","mouse2('MStrategy')");
+		$("#item3").attr("onclick","mouse3('MStrategy')");
 	}
 	function way2(){
 		document.getElementById("strategy1").className = "normal";
 		document.getElementById("strategy2").className = "active";
 		document.getElementById("inputdiv1").className = "input-form";
 		document.getElementById("inputdiv2").className = "input-form show";
+		$("#item1").attr("onclick","mouse1('Mean')");
+		$("#item2").attr("onclick","mouse2('Mean')");
+		$("#item3").attr("onclick","mouse3('Mean')");
 	}
-	function mouse1(){
+	function mouse1(type){
 		document.getElementById("item1").className = "item active";
 		document.getElementById("item2").className = "item";
 		document.getElementById("item3").className = "item";
 		document.getElementById("back-flow-graph1").className = "graph active";
 		document.getElementById("back-flow-graph2").className = "graph";
 		document.getElementById("back-flow-graph3").className = "graph";
+		if (type == 'MStrategy') {
+			var formation =  $("#formation").val();
+			var holding =  $("#holding").val();
+			var section =  $("#stockpool1").val();
+			var isHold =  $("#ishold").val();
+			var begin = $("#begindate1").val();
+			var end = $("#enddate1").val();
+			if(formation==""||holding==""||section==""||isHold==""||begin==""||end==""){
+				$("#search-modal-prompt").html("输入框不能为空!");
+				$("#search-modal").modal('show');
+				return;
+			}
+			var s = "<div class=\"loading\"><progress></progress><p>正在加载中，请稍候...</p></div>";
+			$("#back-flow-graph1").html(s);
+			showMStrategyComparedGraph();
+		}
+		if (type == 'Mean') {
+			var section = $("#stockpool2").val();
+			var begin = $("#begindate2").val();
+			var end = $("#enddate2").val();
+			var movingaverage = $("#movingaverage").val();
+			var hold = $("#holding2").val();
+			var number =$("#number").val();
+			if(section==""||begin==""||end==""||movingaverage==""||hold==""||number==""){
+				$("#search-modal-prompt").html("输入框不能为空!");
+				$("#search-modal").modal('show');
+				return;
+			}
+			var s = "<div class=\"loading\"><progress></progress><p>正在加载中，请稍候...</p></div>";
+			$("#back-flow-graph1").html(s);
+			showMeanReversionGraph();
+		}
 	}
-	function mouse2(){
+	function mouse2(type){
 		document.getElementById("item1").className = "item";
 		document.getElementById("item2").className = "item active";
 		document.getElementById("item3").className = "item";
 		document.getElementById("back-flow-graph1").className = "graph";
 		document.getElementById("back-flow-graph2").className = "graph active";
 		document.getElementById("back-flow-graph3").className = "graph";
+		if (type == 'MStrategy') {
+			var formation =  $("#formation").val();
+			var holding =  $("#holding").val();
+			var section =  $("#stockpool1").val();
+			var isHold =  $("#ishold").val();
+			var begin = $("#begindate1").val();
+			var end = $("#enddate1").val();
+			if(formation==""||holding==""||section==""||isHold==""||begin==""||end==""){
+				$("#search-modal-prompt").html("输入框不能为空!");
+				$("#search-modal").modal('show');
+				return;
+			}
+			var s = "<div class=\"loading\"><progress></progress><p>正在加载中，请稍候...</p></div>";
+			$("#back-flow-graph2").html(s);
+			showMStrategyExtraProfitGraph();
+		}
+		if (type == 'Mean') {
+			var section = $("#stockpool2").val();
+			var begin = $("#begindate2").val();
+			var end = $("#enddate2").val();
+			var movingaverage = $("#movingaverage").val();
+			var hold = $("#holding2").val();
+			var number =$("#number").val();
+			if(section==""||begin==""||end==""||movingaverage==""||hold==""||number==""){
+				$("#search-modal-prompt").html("输入框不能为空!");
+				$("#search-modal").modal('show');
+				return;
+			}
+			var s = "<div class=\"loading\"><progress></progress><p>正在加载中，请稍候...</p></div>";
+			$("#back-flow-graph2").html(s);
+			showMeanReturnRateGraph();
+		}
 	}
-	function mouse3(){
+	function mouse3(type){
 		document.getElementById("item1").className = "item";
 		document.getElementById("item2").className = "item";
 		document.getElementById("item3").className = "item active";
 		document.getElementById("back-flow-graph1").className = "graph";
 		document.getElementById("back-flow-graph2").className = "graph";
 		document.getElementById("back-flow-graph3").className = "graph active";
+		if (type == 'MStrategy') {
+			var formation =  $("#formation").val();
+			var holding =  $("#holding").val();
+			var section =  $("#stockpool1").val();
+			var isHold =  $("#ishold").val();
+			var begin = $("#begindate1").val();
+			var end = $("#enddate1").val();
+			if(formation==""||holding==""||section==""||isHold==""||begin==""||end==""){
+				$("#search-modal-prompt").html("输入框不能为空!");
+				$("#search-modal").modal('show');
+				return;
+			}
+			var s = "<div class=\"loading\"><progress></progress><p>正在加载中，请稍候...</p></div>";
+			$("#back-flow-graph3").html(s);
+			showMStrategyWinningGraph();
+		}
+		if (type == 'Mean') {
+			var section = $("#stockpool2").val();
+			var begin = $("#begindate2").val();
+			var end = $("#enddate2").val();
+			var movingaverage = $("#movingaverage").val();
+			var hold = $("#holding2").val();
+			var number =$("#number").val();
+			if(section==""||begin==""||end==""||movingaverage==""||hold==""||number==""){
+				$("#search-modal-prompt").html("输入框不能为空!");
+				$("#search-modal").modal('show');
+				return;
+			}
+			var s = "<div class=\"loading\"><progress></progress><p>正在加载中，请稍候...</p></div>";
+			$("#back-flow-graph3").html(s);
+			showMeanWinningPercentageGraph();
+		}
 	}
 	</script>
 	<script>
@@ -475,18 +585,19 @@ $(document).ready(function(){
 		var marketIncome = new Array;
 		var strategicIncome = new Array;
 
-		var colors = [ '#FF0000', '#0000FF', '#000000'  ];
+		var colors = [ '#FF0000', '#0000FF', '#000000' ];
 
 		$.ajax({
 			type : "GET",
-			url : "MStrategyComparedGraph",
+			url : "MeanReversionGraph",
 			data: {
 				loginUserName: $("#loginUserName").text(),
-				formation: $("#formation").val(),
-				holding: $("#holding").val(),
-				stock: $("#begindate2").val(),
-				begin: $("#begindate2").val(),
-				end: $("#enddate2").val()
+				section: $("#stockpool1").val(),
+				begin: $("#begindate1").val(),
+				end: $("#enddate1").val(),
+				movingaverage: $("#movingaverage").val(),
+				hold: $("#holding").val(),
+				shares: $("#formation").val(),
 			},
 			dataType : "json",
 			success : function(obj) {
@@ -549,7 +660,12 @@ $(document).ready(function(){
 					],
 					yAxis : [ {
 						scale: true,
-						type : 'value'
+						type : 'value',
+						axisLabel : {
+							formatter: function(value){
+								return value*100+"%";
+							}
+						},
 					} ],
 					series : [
 							{
@@ -580,14 +696,19 @@ $(document).ready(function(){
 		var date = new Array;
 		var values = new Array;
 
-		var colors = [ '#5793f3', '#d14a61', '#675bba', '#000000' ];
+		var colors = [ '#5793f3', '#d14a61', '#C0C0C0', '#000000' ];
 
 		$.ajax({
 			type : "GET",
-			url : "MStrategyExtraProfitGraph",
+			url : "MeanReturnRateGraph",
 			data: {
-				begin: $("#begindate2").val(),
-				end: $("#enddate2").val()
+				loginUserName: $("#loginUserName").text(),
+				section: $("#stockpool1").val(),
+				begin: $("#begindate1").val(),
+				end: $("#enddate1").val(),
+				movingaverage: $("#movingaverage").val(),
+				hold: $("#holding").val(),
+				shares: $("#formation").val(),
 			},
 			dataType : "json",
 			success : function(obj) {
@@ -645,7 +766,12 @@ $(document).ready(function(){
 					],
 					yAxis : [ {
 						scale: true,
-						type : 'value'
+						type : 'value',
+						axisLabel : {
+							formatter: function(value){
+								return value*100+"%";
+							}
+						},
 					} ],
 					series : [
 							{
@@ -653,7 +779,7 @@ $(document).ready(function(){
 								smooth : true,
 								 areaStyle: {
 						                normal: {
-						                    color:  'rgb(255, 70, 131)'
+						                    color:  'rgb(192, 192, 192)'
 						                }
 						            },
 								data : values
@@ -677,10 +803,15 @@ $(document).ready(function(){
 
 		$.ajax({
 			type : "GET",
-			url : "MStrategyWinningGraph",
+			url : "MeanWinningPercentageGraph",
 			data: {
-				begin: $("#begindate2").val(),
-				end: $("#enddate2").val()
+				loginUserName: $("#loginUserName").text(),
+				section: $("#stockpool1").val(),
+				begin: $("#begindate1").val(),
+				end: $("#enddate1").val(),
+				movingaverage: $("#movingaverage").val(),
+				hold: $("#holding").val(),
+				shares: $("#formation").val(),
 			},
 			dataType : "json",
 			success : function(obj) {
@@ -738,7 +869,12 @@ $(document).ready(function(){
 					],
 					yAxis : [ {
 						scale: true,
-						type : 'value'
+						type : 'value',
+						axisLabel : {
+							formatter: function(value){
+								return value*100+"%";
+							}
+						},
 					} ],
 					series : [
 							{
@@ -746,7 +882,7 @@ $(document).ready(function(){
 								smooth : true,
 								 areaStyle: {
 						                normal: {
-						                    color:  'rgb(255, 70, 131)'
+						                    color:  'rgb(192, 192, 192)'
 						                }
 						            },
 								data : values
@@ -772,11 +908,13 @@ $(document).ready(function(){
 			type : "GET",
 			url : "MeanReversionGraph",
 			data: {
-				stockpool: $("#stockpool").val(),
+				loginUserName: $("#loginUserName").text(),
+				section: $("#stockpool2").val(),
 				begin: $("#begindate2").val(),
 				end: $("#enddate2").val(),
 				movingaverage: $("#movingaverage").val(),
 				hold: $("#holding2").val(),
+				shares: $("#number").val(),
 			},
 			dataType : "json",
 			success : function(obj) {
@@ -839,7 +977,12 @@ $(document).ready(function(){
 					],
 					yAxis : [ {
 						scale: true,
-						type : 'value'
+						type : 'value',
+						axisLabel : {
+							formatter: function(value){
+								return value*100+"%";
+							}
+						},
 					} ],
 					series : [
 							{
@@ -870,14 +1013,19 @@ $(document).ready(function(){
 		var date = new Array;
 		var values = new Array;
 
-		var colors = [ '#5793f3', '#d14a61', '#675bba', '#000000' ];
+		var colors = [ '#5793f3', '#d14a61', '#C0C0C0', '#000000' ];
 
 		$.ajax({
 			type : "GET",
 			url : "MeanReturnRateGraph",
 			data: {
+				loginUserName: $("#loginUserName").text(),
+				section: $("#stockpool2").val(),
 				begin: $("#begindate2").val(),
-				end: $("#enddate2").val()
+				end: $("#enddate2").val(),
+				movingaverage: $("#movingaverage").val(),
+				hold: $("#holding2").val(),
+				shares: $("#number").val(),
 			},
 			dataType : "json",
 			success : function(obj) {
@@ -935,7 +1083,12 @@ $(document).ready(function(){
 					],
 					yAxis : [ {
 						scale: true,
-						type : 'value'
+						type : 'value',
+						axisLabel : {
+							formatter: function(value){
+								return value*100+"%";
+							}
+						},
 					} ],
 					series : [
 							{
@@ -943,7 +1096,7 @@ $(document).ready(function(){
 								smooth : true,
 								 areaStyle: {
 						                normal: {
-						                    color:  'rgb(255, 70, 131)'
+						                    color:  'rgb(192, 192, 192)'
 						                }
 						            },
 								data : values
@@ -969,8 +1122,13 @@ $(document).ready(function(){
 			type : "GET",
 			url : "MeanWinningPercentageGraph",
 			data: {
+				loginUserName: $("#loginUserName").text(),
+				section: $("#stockpool2").val(),
 				begin: $("#begindate2").val(),
-				end: $("#enddate2").val()
+				end: $("#enddate2").val(),
+				movingaverage: $("#movingaverage").val(),
+				hold: $("#holding2").val(),
+				shares: $("#number").val(),
 			},
 			dataType : "json",
 			success : function(obj) {
@@ -1028,7 +1186,12 @@ $(document).ready(function(){
 					],
 					yAxis : [ {
 						scale: true,
-						type : 'value'
+						type : 'value',
+						axisLabel : {
+							formatter: function(value){
+								return value*100+"%";
+							}
+						},
 					} ],
 					series : [
 							{
@@ -1036,7 +1199,7 @@ $(document).ready(function(){
 								smooth : true,
 								 areaStyle: {
 						                normal: {
-						                    color:  'rgb(255, 70, 131)'
+						                    color:  'rgb(192, 192, 192)'
 						                }
 						            },
 								data : values
@@ -1131,6 +1294,19 @@ $(document).ready(function(){
 				dataType : "json",
 				success : function(obj) {
 					var resultJSONData = JSON.parse(obj);
+					var result = resultJSONData.Result;
+					if(result=="wrong"){
+						$("#search-modal-prompt").html("无效的股票名称/代码!");
+						$("#modal-yes").attr("href","#");
+						$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+						$("#search-modal").modal('show');
+					}else if(result=="false"){
+						$("#search-modal-prompt").html("时间区域选择过短!");
+						$("#modal-yes").attr("href","#");
+						$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+						$("#search-modal").modal('show');
+					}
+					else if(result=="success"){
 					$("#suggestion1").html(resultJSONData.Suggestion[0]);
 					$("#suggestion2").html(resultJSONData.Suggestion[1]);
 					
@@ -1377,6 +1553,7 @@ $(document).ready(function(){
 					}
 					myChart.setOption(option);
 				}
+				}
 			});	
 		}	
 	</script>
@@ -1404,6 +1581,18 @@ $(document).ready(function(){
 			dataType : "json",
 			success : function(obj) {
 				var resultJSONData = JSON.parse(obj);
+				var result = resultJSONData.Result;
+				if(result=="wrong"){
+					$("#search-modal-prompt").html("无效的股票名称/代码!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result=="false"){
+					$("#search-modal-prompt").html("时间区域选择过短!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result=="success"){
 				$("#suggestion1").html(resultJSONData.Suggestion[0]);
 				$("#suggestion2").html(resultJSONData.Suggestion[1]);
 				
@@ -1478,6 +1667,7 @@ $(document).ready(function(){
 				}
 				myChart.setOption(option);
 			}
+			}
 		});
 	}
 	</script>
@@ -1506,6 +1696,18 @@ $(document).ready(function(){
 			dataType : "json",
 			success : function(obj) {
 				var resultJSONData = JSON.parse(obj);
+				var result = resultJSONData.Result;
+				if(result=="wrong"){
+					$("#search-modal-prompt").html("无效的股票名称/代码!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result=="false"){
+					$("#search-modal-prompt").html("时间区域选择过短!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result=="success"){
 				$("#suggestion1").html(resultJSONData.Suggestion[0]);
 				$("#suggestion2").html(resultJSONData.Suggestion[1]);
 				
@@ -1596,6 +1798,7 @@ $(document).ready(function(){
 				}
 				myChart.setOption(option);
 			}
+			}
 		});
 	}
 	</script>
@@ -1622,6 +1825,13 @@ $(document).ready(function(){
 			dataType : "json",
 			success : function(obj) {
 				var resultJSONData = JSON.parse(obj);
+				var result = resultJSONData.Result;
+				if(result=="wrong"){
+					$("#search-modal-prompt").html("无效的股票名称/代码!");
+					$("#modal-yes").attr("href","#");
+					$("#modal-yes").html("<button type=\"submit\" class=\"btn btn-primary\">确定</button>");
+					$("#search-modal").modal('show');
+				}else if(result=="success"){
 				for (i = 0; i < resultJSONData.Date.length; i++) {
 					date[i] = resultJSONData.Date[i];
 					value[i] = resultJSONData.AdjClose[i];
@@ -1692,6 +1902,7 @@ $(document).ready(function(){
 							} ]
 				}
 				myChart.setOption(option);
+			}
 			}
 		});
 	}

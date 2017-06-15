@@ -106,8 +106,17 @@ public class PlateAction extends SuperAction {
 		String platetype = request.getParameter("type");
 		String platename = request.getParameter("plate");
 		System.out.println(platename+platetype);
-		WebCookieVO.setplatetype(platetype);
-		WebCookieVO.setplatename(platename);
+		JSONObject json = new JSONObject();
+		String resultmessage = "";
+		if(getPlateDataService.IsLegalPlate(platename, platetype)){
+			WebCookieVO.setplatetype(platetype);
+			WebCookieVO.setplatename(platename);
+			resultmessage = "success";
+		}else{
+			resultmessage = "failure";
+		}
+		json.put("result", resultmessage);
+		result = json.toString();
 		return "success";
 	}
 	
@@ -196,6 +205,17 @@ public class PlateAction extends SuperAction {
 			length = childrendata.get("index").length/10+1;
 		}
 		json.put("length", length);
+		result = json.toString();
+		return "success";
+	}
+	
+	public String GetMatchPlate(){
+		String enter = request.getParameter("enter");
+		String plate_type = request.getParameter("type");
+		System.out.println(plate_type);
+		String[] name = getPlateDataService.GetMatchPlate(enter, plate_type);
+		JSONObject json = new JSONObject();
+		json.put("name", name);
 		result = json.toString();
 		return "success";
 	}

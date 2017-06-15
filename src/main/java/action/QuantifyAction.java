@@ -13,8 +13,11 @@ import businessLogic.MomentumStrategy;
 import businessLogicService.GetBollDataService;
 import businessLogicService.GetKDJStochasticDataService;
 import businessLogicService.GetRSIDataService;
+import businessLogicService.GetStockBLService;
 import businessLogicService.MeanReversionService;
 import businessLogicService.MomentumStrategyService;
+import data.StockData;
+import dataService.StockDataService;
 import po.StockPO;
 
 public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
@@ -49,6 +52,11 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 	private MomentumStrategyService momentumStrategyService;
 	public void setMomentumStrategyService(MomentumStrategyService momentumStrategyService){
 		this.momentumStrategyService = momentumStrategyService;
+	}
+	
+	private GetStockBLService getStockBLService;
+	public void setGetStockBLService(GetStockBLService getStockBLService) {
+		this.getStockBLService = getStockBLService;
 	}
 	
 	public String result;
@@ -138,12 +146,22 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		if(request.getParameter("holding") != null){
 			holdTime = Integer.parseInt(request.getParameter("holding"));
 		}
+		String isHold = request.getParameter("isHold");
+		boolean ishold = true;
+		int time = 0;
+		if(isHold.equals("固定形成期")){
+			ishold = true;
+			time = holdTime;
+		}else{
+			ishold = false;
+			time = existTime;
+		}
 		
 		Map<String, ArrayList<String>> data = new HashMap<>();
 		if(begin.equals("") || begin == null){
-			data = momentumStrategyService.getMStrategyWinningGraph("username","主板",false, 0, begin, end);
+			data = momentumStrategyService.getMStrategyWinningGraph("username","主板",false, 0, "2013-01-20", "2014-04-29");
 		}else{
-			data = momentumStrategyService.getMStrategyWinningGraph(username, section, false, 0, begin, end);
+			data = momentumStrategyService.getMStrategyWinningGraph(username, section, ishold, time , begin, end);
 		}
 		
 		ArrayList<String> date = new ArrayList<>();
@@ -177,14 +195,34 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 	public String getMStrategyExtraProfitGraph() throws ParseException{
 		System.out.println("getMStrategyExtraProfitGraph");
 		
+		String username = request.getParameter("loginUserName");
+		String section = request.getParameter("section");
 		String begin = request.getParameter("begin");
 		String end = request.getParameter("end");
+		int existTime = 30;
+		int holdTime = 30;
+		if(request.getParameter("formation") != null){
+			existTime = Integer.parseInt(request.getParameter("formation"));
+		}
+		if(request.getParameter("holding") != null){
+			holdTime = Integer.parseInt(request.getParameter("holding"));
+		}
+		String isHold = request.getParameter("isHold");
+		boolean ishold = true;
+		int time = 0;
+		if(isHold.equals("")){
+			ishold = true;
+			time = holdTime;
+		}else{
+			ishold = false;
+			time = existTime;
+		}
 		
 		Map<String, ArrayList<String>> data = new HashMap<>();
 		if(begin.equals("") || begin == null){
 			data = momentumStrategyService.getMStrategyExtraProfitGraph("username","主板",false, 0, begin, end);
 		}else{
-			data = momentumStrategyService.getMStrategyExtraProfitGraph("username","主板",false, 0, begin, end);
+			data = momentumStrategyService.getMStrategyExtraProfitGraph(username, section, ishold, time, begin, end);
 		}
 		
 		ArrayList<String> date = new ArrayList<>();
@@ -224,17 +262,18 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		String end = request.getParameter("end");
 		int moving = 20;
 		int hold = 5;
-		int shares = 1;
+		int shares = 5;
 		if(request.getParameter("movingaverage") != null){
 			moving = Integer.parseInt(request.getParameter("movingaverage"));
 		}
-		if(request.getParameter("holding2") != null){
-			hold = Integer.parseInt(request.getParameter("holding2"));
+		if(request.getParameter("hold") != null){
+			hold = Integer.parseInt(request.getParameter("hold"));
 		}
-		if(request.getParameter("holding2") != null){
-			shares = Integer.parseInt(request.getParameter("holding2"));
+		if(request.getParameter("shares") != null){
+			shares = Integer.parseInt(request.getParameter("shares"));
 		}
-		
+		System.out.println("section "+section+" moving "+moving+" hold "+hold+"shares "+shares);
+		moving = 20;
 		Map<String, ArrayList<String>> data = new HashMap<>();
 		try {
 			if(begin.equals("") || begin == null){
@@ -254,6 +293,12 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		strategic = data.get("strategic");
 		
 		int days = market.size();
+		if(market.size() > strategic.size()){
+			days = strategic.size();
+		}
+		if(market.size() > date.size()){
+			days = date.size();
+		}
 		String[] dates = new String[days];
 		Double[] marketIncome = new Double[days];
 		Double[] strategicIncome = new Double[days];
@@ -283,17 +328,18 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		String section = request.getParameter("section");
 		String begin = request.getParameter("begin");
 		String end = request.getParameter("end");
+		System.out.println(section);
 		int moving = 20;
 		int hold = 5;
 		int shares = 1;
 		if(request.getParameter("movingaverage") != null){
 			moving = Integer.parseInt(request.getParameter("movingaverage"));
 		}
-		if(request.getParameter("holding2") != null){
-			hold = Integer.parseInt(request.getParameter("holding2"));
+		if(request.getParameter("hold") != null){
+			hold = Integer.parseInt(request.getParameter("hold"));
 		}
-		if(request.getParameter("holding2") != null){
-			shares = Integer.parseInt(request.getParameter("holding2"));
+		if(request.getParameter("shares") != null){
+			shares = Integer.parseInt(request.getParameter("shares"));
 		}
 		
 		Map<String, ArrayList<String>> data = new HashMap<>();
@@ -343,11 +389,11 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		if(request.getParameter("movingaverage") != null){
 			moving = Integer.parseInt(request.getParameter("movingaverage"));
 		}
-		if(request.getParameter("holding2") != null){
-			hold = Integer.parseInt(request.getParameter("holding2"));
+		if(request.getParameter("hold") != null){
+			hold = Integer.parseInt(request.getParameter("hold"));
 		}
-		if(request.getParameter("holding2") != null){
-			shares = Integer.parseInt(request.getParameter("holding2"));
+		if(request.getParameter("shares") != null){
+			shares = Integer.parseInt(request.getParameter("shares"));
 		}
 		
 		Map<String, ArrayList<String>> data = new HashMap<>();
@@ -385,7 +431,28 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		String code = request.getParameter("code");
 		String begin = request.getParameter("begin");
 		String end = request.getParameter("end");
-		
+		String legal = "success";
+		JSONObject json = new JSONObject();
+		if(getStockBLService.IsLegalCode(code)){
+			legal = "success";
+			json.put("Result", legal);
+		}else{
+			legal = "wrong";
+			System.out.println(result);
+			json.put("Result", legal);
+			result = json.toString();
+			return SUCCESS;
+		}
+		if(getStockBLService.getDate(begin, end) <40){
+			legal = "false";
+			System.out.println(result);
+			json.put("Result", legal);
+			result = json.toString();
+			return SUCCESS;
+		}else{
+			legal = "success";
+			json.put("Result", legal);
+		}
 		System.out.println("RSI "+code+" "+begin+" "+end);
 		
 		Map<String, ArrayList<String>> data = new HashMap<>();
@@ -404,14 +471,15 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		int days = value.size();
 		Double[] values = new Double[days];
 		String[] dates = new String[days];
+		String[] name = new String[days];
 		for(int i=0; i<days; i++){
 			values[i] = Double.parseDouble(value.get(i));
 			dates[i] = date.get(i);
 		}
+		name[0] = data.get("name").get(0);
 		
 		String[] suggestion = getRSIDataService.getSuggest();
-		JSONObject json = new JSONObject();
-		json.put("Name", "深发展A");
+		json.put("Name", name);
 		json.put("Dates", dates);
 		json.put("Values", values);
 		json.put("Suggestion", suggestion);
@@ -425,6 +493,28 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		String code = request.getParameter("code");
 		String begin = request.getParameter("begin");
 		String end = request.getParameter("end");
+		String legal = "success";
+		JSONObject json = new JSONObject();
+		if(getStockBLService.IsLegalCode(code)){
+			legal = "success";
+			json.put("Result", legal);
+		}else{
+			legal = "wrong";
+			System.out.println(result);
+			json.put("Result", legal);
+			result = json.toString();
+			return SUCCESS;
+		}
+		if(getStockBLService.getDate(begin, end) <40){
+			legal = "false";
+			System.out.println(result);
+			json.put("Result", legal);
+			result = json.toString();
+			return SUCCESS;
+		}else{
+			legal = "success";
+			json.put("Result", legal);
+		}
 		
 		System.out.println("KDJ "+code+" "+begin+" "+end);
 		
@@ -456,10 +546,10 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 			JValue[i] = Double.parseDouble(J.get(i));
 			dates[i] = date.get(i);
 		}
-		
+		String[] name = new String[days];
+		name[0] = data.get("name").get(0);
 		String[] suggestion = getKDJStochasticDataService.getSuggest();
-		JSONObject json = new JSONObject();
-		json.put("Name", "深发展A");
+		json.put("Name", name);
 		json.put("Dates", dates);
 		json.put("K", KValue);
 		json.put("D", DValue);
@@ -475,6 +565,28 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		String code = request.getParameter("code");
 		String begin = request.getParameter("begin");
 		String end = request.getParameter("end");
+		String legal = "success";
+		JSONObject json = new JSONObject();
+		if(getStockBLService.IsLegalCode(code)){
+			legal = "success";
+			json.put("Result", legal);
+		}else{
+			legal = "wrong";
+			System.out.println(result);
+			json.put("Result", legal);
+			result = json.toString();
+			return SUCCESS;
+		}
+		if(getStockBLService.getDate(begin, end) <40){
+			legal = "false";
+			System.out.println(result);
+			json.put("Result", legal);
+			result = json.toString();
+			return SUCCESS;
+		}else{
+			legal = "success";
+			json.put("Result", legal);
+		}
 		
 		System.out.println("Boll "+code+" "+begin+" "+end);
 		
@@ -495,8 +607,9 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		ArrayList<String> highest = bollData.get("KHighest");
 		ArrayList<String> volumn = bollData.get("KVolumn");
 		ArrayList<Double> value = bollData1.get("standardDeviation");
+//		System.out.println("date "+date.size()+"value "+value.size());
 		
-		int days = bollData.get("KDate").size();
+		int days = value.size();
 		String[] KDate = new String[days];
 		Double[] KOpen = new Double[days];
 		Double[] KClose = new Double[days];
@@ -516,7 +629,6 @@ public class QuantifyAction extends SuperAction implements ModelDriven<StockPO>{
 		}
 		
 		String[] suggestion = getBollDataService.getSuggest();
-		JSONObject json = new JSONObject();
 		json.put("Date", KDate);
 		json.put("Open", KOpen);
 		json.put("Close", KClose);

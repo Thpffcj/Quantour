@@ -1,12 +1,10 @@
 package businessLogic;
 
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +12,6 @@ import java.util.Map;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import businessLogicService.MeanReversionService;
-import data.StockData;
-import data.UsersDaoImpl;
 import dataService.StockDataService;
 import dataService.UsersDao;
 import po.BasePO;
@@ -42,31 +38,46 @@ public class MeanReversion implements MeanReversionService{
 	static double winPercentage;
 	
 	//偏离度
-	static Map<String,ArrayList<Double>> deviationDegree = new HashMap<>();
+	static Map<String,ArrayList<Double>> deviationDegree;
 	//选中的股票
-	static ArrayList<String> selectShares = new ArrayList<>();
+	static ArrayList<String> selectShares;
 	//选中日期
-	static ArrayList<String> dates = new ArrayList<>();
+	static ArrayList<String> dates;
 	//新股票池
-	static ArrayList<String> newStockPool = new ArrayList<>();
+	static ArrayList<String> newStockPool;
 	//市场收益率
-	static ArrayList<Double> marketIncome = new ArrayList<>();
+	static ArrayList<Double> marketIncome;
 	//策略收益率
-	static ArrayList<Double> strategicIncome = new ArrayList<>();
+	static ArrayList<Double> strategicIncome;
 
 	
 	MeanReversionUtil util = new MeanReversionUtil();
 	MovingAverage movingAverage = new MovingAverage();
 	ParameterCalculation parameterCalculation = new ParameterCalculation(); 
 	
+	private Map<String, ArrayList<String>> meanReversionData;
 	private ArrayList<String> stockPool;
+	private Map<String, ArrayList<StockPO>> stocks;
 	private String section;
 	private String userName;
+	private int MIN = 1000;
+	private String MINCODE = null;
+	private String lastSection = null; 
+	private int lastShares = 0;
+	private int lastHoldPeriod = 0; 
+	private int lastFormingPeriod = 0; 
+	private String lastBegin = null;
+	private String lastEnd = null;
 
 	//注入股票查询的Dao
 	private StockDataService stockDataService;
 	public void setStockDataService(StockDataService stockDataService) {
 		this.stockDataService = stockDataService;
+	}
+	
+	private UsersDao usersDao;
+	public void setUsersDao(UsersDao usersDao) {
+		this.usersDao = usersDao;
 	}
 	
 	/**
@@ -76,44 +87,55 @@ public class MeanReversion implements MeanReversionService{
 	 */
 	public Map<String, ArrayList<String>> getMeanReversionGraphData(String section, String userName, int shares, int holdPeriod, int formingPeriod, String begin, String end){
 		
-		Map<String, ArrayList<String>> data = new HashMap<>();
-
+		if (meanReversionData != null && lastHoldPeriod == holdPeriod 
+				&& lastFormingPeriod == formingPeriod  && lastBegin.equals(begin) 
+				&& lastEnd.equals(end) && lastSection.equals(section) && lastShares == shares) {
+			return meanReversionData;
+		}
+		
+		meanReversionData = new HashMap<>();
+		stocks = new HashMap<>();
+		deviationDegree = new HashMap<>();
+		selectShares = new ArrayList<>();
+		dates = new ArrayList<>();
+		newStockPool = new ArrayList<>();
+		marketIncome = new ArrayList<>();
+		strategicIncome = new ArrayList<>();
+		stockPool = new ArrayList<>();
 		this.section = section;
 		this.userName = userName;
+		
+		Map<String, ArrayList<String>> data = new HashMap<>();
 		getSectionCode();
 		
 		System.out.println("stockPool "+stockPool.size());
 		
-		DecimalFormat df = new DecimalFormat("0.00%");
 		
 		int days = Integer.MAX_VALUE;
+//		System.out.println("----1----");
 		int daylong = stockDataService.getDate(begin, end).size();
-		String condition = null;
-		int tempDay = 0;
-		newStockPool = new ArrayList<>();
-		for(int i=0; i<100; i++){
-			ArrayList<StockPO> stock = stockDataService.getStockByCodeAndDate(Integer.valueOf(stockPool.get(i)), begin, end);
-			tempDay = stock.size();
-			if(tempDay >= 2*daylong/3){
-				newStockPool.add(stockPool.get(i));
-				if (tempDay <= days) {
-					days = tempDay;
-					condition = stockPool.get(i);
-				}
-			}
+		ArrayList<String> temp = new ArrayList<>();
+		for(int i=0; i<Math.min(100, stockPool.size()); i++){
+			temp.add(stockPool.get(i));
 		}
 		
-		ArrayList<StockPO> minStock = getStockData(condition, begin, end);
-		for (int i = minStock.size() - 1; i >= 0; i--) {
-			dates.add(minStock.get(i).getDate());
-		}
-		System.out.println("newStockPool "+newStockPool.size());
-		System.out.println("dates "+dates.size());
+//		System.out.println("newStockPool "+newStockPool.size());
+//		System.out.println("dates "+dates.size());
 		
 		//获得股票偏离度
 		deviationDegree = new HashMap<>();
-		getStockPoolDeviationDegree(newStockPool, formingPeriod, begin, end, daylong);
-	
+		getStockPoolDeviationDegree(temp, formingPeriod, begin, end, daylong);
+		System.out.println("MIN "+MIN+" MINCODE "+MINCODE);
+		ArrayList<StockPO> minStock = getStockData(MINCODE, begin, end);
+//		System.out.println("----3----");
+		for (int i = minStock.size() - 1; i >= 0; i--) {
+//			System.out.println("--loop--i----");
+			dates.add(minStock.get(i).getDate());
+		}
+		days = dates.size();
+//		System.out.println("----4----");
+		System.out.println("newStockPool "+newStockPool.size());
+		System.out.println("dates "+dates.size());
 		//
 //		System.out.println(newStockPool.size()+" "+dates.size());
 		
@@ -159,24 +181,31 @@ public class MeanReversion implements MeanReversionService{
 			mmoney = (marketIncome.get(marketIncome.size()-1)/marketIncome.size())*365;
 		}
 		
-		yearRateOfReturn = df.format(smoney);
-		benchmarkYearRateOfReturn = df.format(mmoney);
-		maximumRetracement = parameterCalculation.getMaxDrawdownLevel(strategicIncome);
-		beta = parameterCalculation.getBetaCoefficient(marketIncome,strategicIncome);
-		alpha = parameterCalculation.getAlphaCoefficient(smoney, marketIncome, strategicIncome);
-		sharpeRatio = parameterCalculation.getSharpeRatio(strategicIncome);
+//		yearRateOfReturn = df.format(smoney);
+//		benchmarkYearRateOfReturn = df.format(mmoney);
+//		maximumRetracement = parameterCalculation.getMaxDrawdownLevel(strategicIncome);
+//		beta = parameterCalculation.getBetaCoefficient(marketIncome,strategicIncome);
+//		alpha = parameterCalculation.getAlphaCoefficient(smoney, marketIncome, strategicIncome);
+//		sharpeRatio = parameterCalculation.getSharpeRatio(strategicIncome);
+//		
+//		ArrayList<String> parameter = new ArrayList<>();
+//		parameter.add(yearRateOfReturn);
+//		parameter.add(benchmarkYearRateOfReturn);
+//		parameter.add(maximumRetracement);
+//		parameter.add(String.valueOf(beta));
+//		parameter.add(alpha);
+//		parameter.add(String.valueOf(sharpeRatio));
+//		data.put("parameter", parameter);
 		
-		ArrayList<String> parameter = new ArrayList<>();
-		parameter.add(yearRateOfReturn);
-		parameter.add(benchmarkYearRateOfReturn);
-		parameter.add(maximumRetracement);
-		parameter.add(String.valueOf(beta));
-		parameter.add(alpha);
-		parameter.add(String.valueOf(sharpeRatio));
-		data.put("parameter", parameter);
-		
+		meanReversionData = data;
+		lastSection = section; 
+		lastShares = shares;
+		lastHoldPeriod = holdPeriod; 
+		lastFormingPeriod = formingPeriod; 
+		lastBegin = begin;
+		lastEnd = end;
 		System.out.println("getMeanReversionGraphData success");
-		return data;
+		return meanReversionData;
 	}
 	
 	/**
@@ -319,12 +348,12 @@ public class MeanReversion implements MeanReversionService{
 
 		ArrayList<Double> rateOfReturn = new ArrayList<>();
 		
-		Map<String, ArrayList<StockPO>> map = new HashMap<>();
-		for (String condition : shareNames) {
-			ArrayList<StockPO> stockList = new ArrayList<StockPO>();
-			stockList = getStockData(condition, begin, end);
-			map.put(condition, stockList);
-		}
+//		Map<String, ArrayList<StockPO>> map = new HashMap<>();
+//		for (String condition : shareNames) {
+//			ArrayList<StockPO> stockList = new ArrayList<StockPO>();
+//			stockList = getStockData(condition, begin, end);
+//			map.put(condition, stockList);
+//		}
 		
 		ArrayList<StockPO> stockList = new ArrayList<StockPO>();
 		double in = 0.0;
@@ -341,7 +370,7 @@ public class MeanReversion implements MeanReversionService{
 		for (int i = days-1; i >= 0; i--) {
 			if (isSell == 0) {
 				for (String condition : shareNames) {
-					stockList = map.get(condition);
+					stockList = stocks.get(condition);
 					spo = stockList.get(i);
 					in = stockList.get(days-1).getOpen();
 					out = spo.getAdjClose();
@@ -358,22 +387,18 @@ public class MeanReversion implements MeanReversionService{
 				
 				for (int j = 0; j < shares; j++) {
 //					ArrayList<stockPO> stockList = new ArrayList<stockPO>();
-					stockList = map.get(shareNames.get(m));
-					spo = stockList.get(i);
-					in = stockList.get(days-1-(nextPeriod/holdPeriod)*holdPeriod).getOpen();
-					out = spo.getClose();
-//					if(out<lastDay.get(j)){
-//						saveMoney += (out/in)*money;
-//					}
-					lastDay.add(out);
-//					System.out.println(shareNames.get(m)+" "+out+" "+in);
-					rate += (out/in)*money;
-					m++;
+					stockList = stocks.get(shareNames.get(m));
+					if(stockList != null && stockList.size() >= days){
+						spo = stockList.get(i);
+						in = stockList.get(days-1-(nextPeriod/holdPeriod)*holdPeriod).getOpen();
+						out = spo.getClose();
+						lastDay.add(out);
+						rate += (out/in)*money;
+						m++;
+					}
 				}
-//				System.out.println(rate);
 				nextPeriod++;
 				if(nextPeriod % holdPeriod == 0){
-//					System.out.println(money);
 					money = rate/shares;
 				}
 				
@@ -408,10 +433,11 @@ public class MeanReversion implements MeanReversionService{
 	    	 Map<Double,String> temp = new HashMap<>(); 
 	    	 int index = 0;
 	    	 for(ArrayList<Double> list : deviationDegree.values()){
-//	    		 System.out.println(days+" "+list.size());
-	    		 a[index] = list.get(day);
-	 	    	temp.put(a[index], names.get(index));
-	 	    	index++;
+	    		if(list.size() > day){
+	    			a[index] = list.get(day);
+		 	    	temp.put(a[index], names.get(index));
+		 	    	index++;
+	    		}
 	 	     }
 	 	    util.heapSort(a);
 	 	    int m = 0;
@@ -442,6 +468,7 @@ public class MeanReversion implements MeanReversionService{
 	 */
 	public void getStockPoolDeviationDegree(ArrayList<String> stockPool, int formingPeriod, String begin, String end, int standard){
 		for(int i=0; i<stockPool.size(); i++){
+//			System.out.println("getStockPoolDeviationDegree "+stockPool.get(i));
 			deviationDegree = getDeviationDegree(stockPool.get(i), formingPeriod, begin,end, standard);
 		}
 	}
@@ -488,19 +515,38 @@ public class MeanReversion implements MeanReversionService{
 			code = stockDataService.getCodeByName(condition);
 		}
 		
+		int flag = 0;
 		for(int i=0;i<formingPeriod-1;i++){
 			isBegin = stockDataService.JudgeIfTheLast(code, begin);
-			//
-			if(isBegin==-1){
-				beforeDays = i;
-				break;
+			if(isBegin == -1){
+				flag ++;
+				if(flag >=10){
+					beforeDays = i - 9;
+					break;
+				}
+				else{
+					begin = GetOrigin(String.valueOf(code),begin);
+				}
+				
 			}
 			else{
 				begin = GetOrigin(String.valueOf(code),begin);
 			}
 		}
+		flag = 0;
+//		System.out.println("beforeDays "+beforeDays);
 		stockList = getStockData(condition,begin,end);
 	
+		int daylong = stockDataService.getDate(begin, end).size();
+//		System.out.println("daylong "+daylong+" "+stockList.size());
+		if(stockList.size() <= 2*daylong/3 || stockList.size()<=20){
+			return deviationDegree;
+		}
+		if(stockList.size() < MIN){
+			MIN = stockList.size();
+			MINCODE = condition;
+		}
+		
 		StockPO spo = new StockPO();
 		ArrayList<Double> adjCloses = new ArrayList<>();
 		for(int i=stockList.size()-1;i>=0;i--){
@@ -513,7 +559,10 @@ public class MeanReversion implements MeanReversionService{
 		closes = movingAverage.getAveData(adjCloses,formingPeriod,beforeDays);
 	
 		ArrayList<Double> d = getDeviationDegree(closes,adjCloses,beforeDays);
+//		System.out.println("d "+d.size());
 		deviationDegree.put(condition, d);
+		newStockPool.add(condition);
+		stocks.put(condition, stockList);
 		
 		return deviationDegree;
 	}
@@ -551,7 +600,7 @@ public class MeanReversion implements MeanReversionService{
 			stockPool = stockDataService.getSmeAllCode();
 		}
 		else if(section.equals("我的自选股")){
-			UsersDao usersDao = new UsersDaoImpl();
+			System.out.println(userName);
 			stockPool = usersDao.getSelfStockByUsername(userName);
 		}
 	}

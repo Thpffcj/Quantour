@@ -33,6 +33,11 @@ public class MomentumStrategy implements MomentumStrategyService{
 	public void setStockDataService(StockDataService stockDataService) {
 		this.stockDataService = stockDataService;
 	}
+	
+	private UsersDao usersDao;
+	public void setUsersDao(UsersDao usersDao) {
+		this.usersDao = usersDao;
+	}
 		
 	private ArrayList<String> stockPool;
 	private String section;
@@ -84,7 +89,7 @@ public class MomentumStrategy implements MomentumStrategyService{
 		//策略和基准的累计收益率
 		ArrayList<String> Days = stockDataService.getDate(Begin, End);
 		ArrayList<Double> StrategyProfit = getWinnerProfitEveryday(time.parse(Begin),time.parse(End),holdTime,existTime);
-		ArrayList<Double> BenchmarkProfit = getBenchProfitEveryday(time.parse(Begin),time.parse(End));
+		ArrayList<Double> BenchmarkProfit = getBenchProfitEveryday(Begin, End);
 		System.out.println(StrategyProfit.size());
 		System.out.println(BenchmarkProfit.size());
 		//计算年化收益率
@@ -111,23 +116,25 @@ public class MomentumStrategy implements MomentumStrategyService{
 		//计算最大回撤率
 		this.maximumRetracement = p.getMaxDrawdownLevel(StrategyProfit);
 		//计算夏普比率
-//		this.sharpeRatio = p.getSharpeRatio(StrategyProfit);
+		this.sharpeRatio = p.getSharpeRatio(StrategyProfit);
 		//作图
 		Collections.reverse(Days);
 		
 		ArrayList<String> StrategyProfit_String = new ArrayList<>();
 		ArrayList<String> BenchmarkProfit_String = new ArrayList<>();
-		
+		DecimalFormat DF = (DecimalFormat) NumberFormat.getInstance();
+		DF.setMaximumFractionDigits(3);
+		DF.setRoundingMode(RoundingMode.HALF_UP);
 		for(int j=0;j<=Math.min(BenchmarkProfit.size(), StrategyProfit.size())-1;j++){
-			StrategyProfit_String.add(StrategyProfit.get(j).toString());
-			BenchmarkProfit_String.add(BenchmarkProfit.get(j).toString());
+			StrategyProfit_String.add(DF.format(StrategyProfit.get(j)));
+			BenchmarkProfit_String.add(DF.format(BenchmarkProfit.get(j)));
 		}
 		
 		data.put(strategy, StrategyProfit_String);
 		data.put(benchmark, BenchmarkProfit_String);
 		data.put(day, Days);
 
-		
+		System.out.println("getMStrategyComparedGraph success");
 		return data;
 	}
 
@@ -154,7 +161,7 @@ public class MomentumStrategy implements MomentumStrategyService{
 		
 		if(section==null){
 			int num = 0;
-			for(int i=0;i<stockPool.size();i++){
+			for(int i=0;i<Math.min(100, stockPool.size());i++){
 				ArrayList<StockPO> stock=stockDataService.getStockByCodeAndDate(Integer.valueOf(stockPool.get(i)), Begin, End);
 				
 				if(stock.size()>=daylong){
@@ -196,7 +203,7 @@ public class MomentumStrategy implements MomentumStrategyService{
 		data.put("额外收益率", ExtraProfit);
 		data.put("天数", DayLong);
 
-		
+		System.out.println("getMStrategyExtraProfitGraph success");
 		return data;
 	}
 
@@ -216,7 +223,7 @@ public class MomentumStrategy implements MomentumStrategyService{
 		ArrayList<String> WinPercentage = new ArrayList<>();
 		ArrayList<String> DayLong = new ArrayList<>();
 		ArrayList<String> Days = stockDataService.getDate(Begin, End);
-		ArrayList<Double> BenchmarkProfit = getBenchProfitEveryday(begin,end);
+		ArrayList<Double> BenchmarkProfit = getBenchProfitEveryday(Begin,End);
 		DecimalFormat df = new DecimalFormat("0.00%");
 		if(isHold){
 			for(int i=10;i<121;i+=10){
@@ -233,7 +240,7 @@ public class MomentumStrategy implements MomentumStrategyService{
 			}
 		}
 		else{
-			for(int i=Days.size()/10;i<=Days.size();i+=Days.size()/10){
+			for(int i=10;i<=Math.min(Days.size(), 100);i+=10){
 				int WinDay = 0;
 				ArrayList<Double> WinnerProfit = getWinnerProfitEveryday(begin,end,i,Time);
 				for(int j=0;j<Math.min(WinnerProfit.size(), BenchmarkProfit.size());j++){
@@ -249,6 +256,7 @@ public class MomentumStrategy implements MomentumStrategyService{
 		data.put("策略胜率", WinPercentage);
 		data.put("天数", DayLong);
 
+		System.out.println("getMStrategyWinningGraph success");
 		return data;
 	}
 	
@@ -264,12 +272,12 @@ public class MomentumStrategy implements MomentumStrategyService{
 		ArrayList<Double> existProfit = new ArrayList<Double>();
 		ArrayList<Double[]> holdProfit = new ArrayList<Double[]>();
 		
-		int WinnerNum = (stockPool.size()/5)+1;
+		int WinnerNum = (Math.min(100, stockPool.size())/5)+1;
 		int daylong = stockDataService.getDate(time.format(existBegin), time.format(holdEnd)).size();  
 		int holddaylong = stockDataService.getDate(time.format(holdBegin), time.format(holdEnd)).size(); 
 		
 		//判断股票在这段时间内是否有停牌
-		for(int i=0;i<stockPool.size();i++){
+		for(int i=0;i<Math.min(100, stockPool.size());i++){
 			//获得该股票从生成期到持有期结束的所有
 			ArrayList<StockPO> stock = stockDataService.getStockByCodeAndDate(Integer.valueOf(stockPool.get(i)), time.format(existBegin), time.format(holdEnd));
 //			System.out.println(stock.size());
@@ -354,7 +362,7 @@ public class MomentumStrategy implements MomentumStrategyService{
 		ArrayList<Double[]> Profit = new ArrayList<Double[]>();
 		
 		int daylong = stockDataService.getDate(time.format(Begin), time.format(End)).size(); 
-		for(int i=0;i<stockPool.size();i++){
+		for(int i=0;i<Math.min(100, stockPool.size());i++){
 			ArrayList<StockPO> stock=stockDataService.getStockByCodeAndDate(Integer.valueOf(stockPool.get(i)), time.format(Begin), time.format(End));
 			Collections.reverse(stock);				  
 			Double[] p = new Double[stock.size()];
@@ -420,21 +428,22 @@ public class MomentumStrategy implements MomentumStrategyService{
 	 * @param End
 	 * @return
 	 */
-	private ArrayList<Double> getBenchProfitEveryday(Date Begin,Date End){
+	private ArrayList<Double> getBenchProfitEveryday(String begin, String end) {
+		
 		ArrayList<Double> BenchmarkProfit = new ArrayList<Double>();
-		if(section==null){
-			BenchmarkProfit = getSelfChosenBench(Begin,End);
+
+		ArrayList<BasePO> Benchmark = stockDataService.getBenchmarkByDate(section, begin, end);
+		BenchmarkProfit = new ArrayList<Double>();
+
+		BasePO basePO = new BasePO();
+		double income = 0.0;
+		double open = Benchmark.get(0).getAdjOpen();
+		for (int i = 0; i < Benchmark.size(); i++) {
+			basePO = Benchmark.get(i);
+			income = (basePO.getAdjClose() - open) / open;
+			BenchmarkProfit.add(income);
 		}
-		else{
-			ArrayList<BasePO> Benchmark = stockDataService.getBenchmarkByDate(section, time.format(Begin), time.format(End));
-//			System.out.println(Benchmark.size()+"a");
-			BenchmarkProfit = new ArrayList<Double>();
-			
-			for(int i=0;i<Benchmark.size();i++){
-				double income = (Benchmark.get(Benchmark.size()-1).getAdjClose()-Benchmark.get(0).getAdjOpen())/Benchmark.get(0).getAdjOpen();
-				BenchmarkProfit.add(income);
-			}
-		}
+
 		return BenchmarkProfit;
 	}
 	/**
@@ -487,40 +496,10 @@ public class MomentumStrategy implements MomentumStrategyService{
 			stockPool = stockDataService.getSmeAllCode();
 		}
 		else if(section.equals("我的自选股")){
-			UsersDao usersDao = new UsersDaoImpl();
+			System.out.println(userName);
 			stockPool = usersDao.getSelfStockByUsername(userName);
 		}
 	}
-//	private boolean isEqual(ArrayList<String> a1,ArrayList<String> a2){
-//		if(a1.size()==a2.size()){
-//			for(int i=0;i<a1.size();i++){
-//				if(!a1.get(i).equals(a2.get(i))){
-//					return false;
-//				}
-//			}
-//			return true;
-//		}
-//		return false;
-//	}
-//	
-//	private boolean IsEqualsection(String last,String now){
-//		if(last==null){
-//			if(now==null){
-//				return true;
-//			}else{
-//				return false;
-//			}
-//		}else{
-//			if(now ==null){
-//				return false;
-//			}else{
-//				if(last.equals(now)){
-//					return true;
-//				}
-//				return false;
-//			}
-//		}
-//	}
 	
 	@Override
 	public MeanReversionVO getParameter() {

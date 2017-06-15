@@ -20,39 +20,49 @@ public class UsersDaoImpl implements UsersDao{
 	}
 	
 	public boolean usersLogin(String username, String password) {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		transaction = session.beginTransaction();
 		String hql = "";
 		try{
-			Session session = sessionFactory.openSession();
 			hql = "from UserPO where username=? and password=? ";
 			Query query = session.createQuery(hql);
 			query.setParameter(0, username);
 			query.setParameter(1, password);
 			List list = query.list();
 			if(list.size()>0){
+				transaction.commit();
+				session.close();
 				return true;
 			}else{
+				transaction.commit();
+				session.close();
 				return false;
 			}
 		}
 		catch(Exception ex){
 			ex.printStackTrace();
+			transaction.commit();
+			session.close();
 			return false;
 		}
 	}
 
 	public boolean usersRegister(String username, String password) {
 		Session session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
+		Transaction transaction = null;
+		transaction = session.beginTransaction();
 		UserPO user = new UserPO();
 		user.setUid(getNewUid());
 		user.setUsername(username);
 		user.setPassword(password);
 		user.setAvatar("");
 		session.save(user);
-		tx.commit();
-		if(tx != null){
-			tx = null;
+		transaction.commit();
+		if(transaction != null){
+			transaction = null;
 		}
+		session.close();
 		return true;
 	}
 	
@@ -61,26 +71,32 @@ public class UsersDaoImpl implements UsersDao{
 	 */
 	public boolean ChangeName(String newname, String oldname){
 		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		transaction = session.beginTransaction();
 		String h = "select u.username from UserPO u";
 		Query q = session.createQuery(h);
 		ArrayList<String> namelist = new ArrayList<>();
 		namelist = (ArrayList<String>) q.getResultList();
 		for(int i=0;i<namelist.size();i++){
 			if(newname.equals(namelist.get(i))){
+				transaction.commit();
+				session.close();
 				return false;
 			}
 		}
 		
-		Transaction tx = session.beginTransaction();
 		String hql = "update UserPO u set u.username='"+newname+"'where u.username=?";
 		Query query = session.createQuery(hql);
 		query.setParameter(0, oldname);
 		int num = query.executeUpdate();
 		System.out.println(num);
-		tx.commit();
 		if(num<=0){
+			transaction.commit();
+			session.close();
 			return false;
 		}
+		transaction.commit();
+		session.close();
 		return true;
 	}
 	
@@ -90,17 +106,23 @@ public class UsersDaoImpl implements UsersDao{
 	 * @return
 	 */
 	public String getPasswordByUsername(String username){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		transaction = session.beginTransaction();
 		String hql = "";
 		try{
-			Session session = sessionFactory.openSession();
 			hql = "select password from UserPO where username=?";
 			Query query = session.createQuery(hql);
 			query.setParameter(0, username);
 			String password = (String) query.getSingleResult();
+			transaction.commit();
+			session.close();
 			return password;
 		}
 		catch(Exception ex){
 			ex.printStackTrace();
+			transaction.commit();
+			session.close();
 			return "";
 		}
 	}
@@ -111,10 +133,14 @@ public class UsersDaoImpl implements UsersDao{
 	 */
 	public ArrayList<String> getAllUsername(){
 		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		transaction = session.beginTransaction();
 		String h = "select u.username from UserPO u";
 		Query q = session.createQuery(h);
 		ArrayList<String> namelist = new ArrayList<>();
 		namelist = (ArrayList<String>) q.getResultList();
+		transaction.commit();
+		session.close();
 		return namelist;
 	}
 	
@@ -126,16 +152,20 @@ public class UsersDaoImpl implements UsersDao{
 	 */
 	public boolean ChangePassword(String username,String password){
 		Session session = sessionFactory.openSession();
-		Transaction tx = session.beginTransaction();
+		Transaction transaction = null;
+		transaction = session.beginTransaction();
 		String hql = "update UserPO u set u.password='"+password+"'where u.username=?";
 		Query query = session.createQuery(hql);
 		query.setParameter(0, username);
 		int num = query.executeUpdate();
 		System.out.println(num);
-		tx.commit();
 		if(num<=0){
+			transaction.commit();
+			session.close();
 			return false;
 		}
+		transaction.commit();
+		session.close();
 		return true;
 	}
 	
@@ -146,17 +176,23 @@ public class UsersDaoImpl implements UsersDao{
 	 * @return
 	 */
 	public String getPhoto(String username){
+		Session session = sessionFactory.openSession();
+		Transaction transaction = null;
+		transaction = session.beginTransaction();
 		String hql = "";
 		try{
-			Session session = sessionFactory.openSession();
 			hql = "select avatar from UserPO where username=?";
 			Query query = session.createQuery(hql);
 			query.setParameter(0, username);
 			String avatar = (String) query.getSingleResult();
+			transaction.commit();
+			session.close();
 			return avatar;
 		}
 		catch(Exception ex){
 			ex.printStackTrace();
+			transaction.commit();
+			session.close();
 			return "";
 		}
 	}

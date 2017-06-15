@@ -51,21 +51,33 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 	public String getUpsAndDownsGraph(){
 		
 		String date = request.getParameter("date");
-		System.out.println(date);
+		System.out.println("getUpsAndDownsGraph()-----"+date);
 		UpsAndDownsPO upsAndDownsPO = new UpsAndDownsPO();
 		ArrayList<StockNameAndUpsPO> ups = new ArrayList<>();
 		ArrayList<StockNameAndUpsPO> downs = new ArrayList<>();
 		int[] data;
 		
 		if(date == null  || date.equals("")){
-			upsAndDownsPO = getStockBLService.getDistributionOfUpsAndDowns("2017-05-25");
+			upsAndDownsPO = getStockBLService.getDistributionOfUpsAndDowns("2017-06-13");
 		}else{
 			upsAndDownsPO = getStockBLService.getDistributionOfUpsAndDowns(date);
 		}
 		
+		JSONObject json = new JSONObject();
+		
 		data = upsAndDownsPO.getUpsAndDowns();
 		ups = upsAndDownsPO.getUps_Max();
 		downs = upsAndDownsPO.getDowns_Max();
+		if(ups.size() == 0){
+			String legal = "wrong";
+			System.out.println(legal);
+			json.put("Result", legal);
+			result = json.toString();
+			return SUCCESS;
+		}else{
+			String legal = "success";
+			json.put("Result", legal);
+		}
 		
 		int days = ups.size();
 		String[] upName = new String[days];
@@ -80,7 +92,6 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 			downAmplitude[i] = df.format(downs.get(i).getUps()*100)+"%";
 		}
 		
-		JSONObject json = new JSONObject();
 		json.put("Data", data);
 		json.put("UpName", upName);
 		json.put("UpAmplitude", upAmplitude);
@@ -259,6 +270,18 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		String code = request.getParameter("code");
 		String begin = request.getParameter("begin");
 		String end = request.getParameter("end");
+		
+		JSONObject json = new JSONObject();
+		if(getStockBLService.IsLegalCode(code)){
+			String legal = "success";
+			json.put("Result", legal);
+		}else{
+			String legal = "wrong";
+			System.out.println(result);
+			json.put("Result", legal);
+			result = json.toString();
+			return SUCCESS;
+		}
 //		System.out.println(code+" "+begin+" "+end);
 		if(code.equals("") || code == null){
 			data = getStockBLService.getStockGains("1", "2014-05-01","2014-07-01");
@@ -283,7 +306,6 @@ public class StockAction extends SuperAction implements ModelDriven<StockPO> {
 		}
 //		System.out.println(dates[0]+" "+dates[1]);
 		
-		JSONObject json = new JSONObject();
 		json.put("Name", name.get(0));
 		json.put("Date", dates);
 		json.put("AdjClose", adjClose);

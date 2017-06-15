@@ -17,7 +17,7 @@ body {
 	width: 150px;
 }
 
-.divinput .search {
+.divinput .searchbtn {
 	float: left;
 	background-color: #5584ff;
 	font-size: 16px;
@@ -128,6 +128,59 @@ h2 {
 	padding: 5px 20px 5px 20px;
 	width: 20px;
 	height: 30px;
+}
+
+.search {
+	height: 50px;
+	margin: 10px 0px 10px 50px;
+}
+
+.search input {
+	width: 180px;
+	height: 30px;
+	border-color: #ccc;
+	border: 1px solid transparent;
+	border-radius: 3px;
+}
+
+.search .btn {
+	padding: 5px 16px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: 400;
+    position: relative;
+    left: 20px;
+    background-color: #5584ff;
+}
+
+.search .left {
+	float: left;
+}
+
+.search ul {
+	position: absolute;
+	z-index: 1;
+	background-color: white;
+	width: 180px;
+	border:	1px solid black;
+}
+
+.search li {
+	color: black;
+	list-style-type: none;
+	position: relative;
+	left: -40px;
+	width: 178px;
+	padding: 5px 0px 5px 0px;
+}
+
+.search li:hover {
+	background-color: #d3d3d3;
+	cursor: pointer;
+}
+
+.search .right {
+	float: left;
 }
 
 .modal {

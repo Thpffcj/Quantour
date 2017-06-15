@@ -195,7 +195,6 @@ a.normal {
 
 .graph1 .item:hover {
 	background: #fff;
-    border-left: 6px solid #d75442;
 }
 
 .graph1 .tablist .active {
@@ -221,7 +220,13 @@ a.normal {
 }
 
 .result .active {
+	text-align: center;
 	display: block;
+}
+
+.loading {
+	position: relative;
+	top: 180px;
 }
 
 #slider3 {
@@ -248,16 +253,45 @@ a.normal {
 	border: 1px solid transparent;
 	border-radius: 3px;
 }
+
+.input-quota-left {
+	float: left;
+}
+
+.input-quota-right {
+	float: left;
+}
+
+.input-quota-right ul {
+	position: absolute;
+	z-index: 1;
+	background-color: white;
+	width: 180px;
+	border:	1px solid black;
+}
+
+.input-quota-right li {
+	color: black;
+	list-style-type: none;
+	position: relative;
+	left: -40px;
+	width: 178px;
+	padding: 5px 0px 5px 0px;
+}
+
+.input-quota-right li:hover {
+	background-color: #d3d3d3;
+	cursor: pointer;
+}
+
 .quota-result {
 	width: 1200px;
 	height: 400px;
-	background-color: white;
 }
 
 .quota-result1 {
 	width: 1200px;
 	height: 400px;
-	background-color: white;
 }
 
 .modal {

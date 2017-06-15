@@ -182,6 +182,9 @@ public class GetKGraphData implements GetKGraphDataService{
 			
 		}else if(IsCode){
 			for(int i=0;i<codelist.size();i++){
+				if(length>codelist.get(i).length()){
+					continue;
+				}
 				if(code.equals(codelist.get(i).substring(0,length))){
 					c[k] = codelist.get(i);
 					name[k] = namelist.get(i);
@@ -192,7 +195,10 @@ public class GetKGraphData implements GetKGraphDataService{
 				}
 			}
 		}else{
-			for(int i=0;i<codelist.size();i++){
+			for(int i=0;i<namelist.size();i++){
+				if(length>namelist.get(i).length()){
+					continue;
+				}
 				if(code.equals(namelist.get(i).substring(0,length))){
 					c[k] = codelist.get(i);
 					name[k] = namelist.get(i);

@@ -120,10 +120,10 @@ public class DateProcessing implements DateProcessingService {
         }
     }
     
-    public static void main(String[] args) throws ParseException {
-
-    	DateProcessing dp = new DateProcessing();
+//    public static void main(String[] args) throws ParseException {
+//
+//    	DateProcessing dp = new DateProcessing();
 //   	System.out.println(dp.count("2017-05-12", 20));
-    	System.out.println(dp.splitDays("2005-04-28","2005-04-29"));
-	}
+//    	System.out.println(dp.splitDays("2005-04-28","2005-04-29"));
+//	}
 }

@@ -26,6 +26,9 @@ public class GetPlateData implements GetPlateDataService {
 		this.stockDataService = stockDataService;
 	}
 
+	/**
+	 * 根据界面页面编号和板块类型得到板块
+	 */
 	public Map<String, String[]> GetPlate(String page,String plate_type) {
 		ArrayList<String> platelist = stockDataService.getPlate(plate_type);
 		System.out.println(platelist);
@@ -85,6 +88,9 @@ public class GetPlateData implements GetPlateDataService {
 		return platedata;
 	}
 
+	/**
+	 * 根据板块类型以及板块名称得到板块信息
+	 */
 	public ArrayList<String> GetPlateMessage(String plate_type, String plate) {
 		ArrayList<String> codelist = stockDataService.getCodeByPlate(plate_type, plate);
 		System.out.println(plate+codelist);
@@ -98,7 +104,7 @@ public class GetPlateData implements GetPlateDataService {
 		double max_fluctuation = -100.0;
 		for (int i = 0; i < codelist.size(); i++) {
 			ArrayList<StockPO> poList = stockDataService.getStockByCodeAndDate(Integer.valueOf(codelist.get(i)),
-					"2017-05-23", "2017-05-25");
+					"2017-06-11", "2017-06-13");
 			if (poList.size() >= 2) {
 				double fluctuation = (poList.get(0).getClose() - poList.get(1).getClose()) / poList.get(1).getClose();
 				if (fluctuation > 0) {
@@ -132,10 +138,13 @@ public class GetPlateData implements GetPlateDataService {
 		return result;
 	}
 	
+	/**
+	 * 得到板块K线图数据
+	 */
 	public Map<String, ArrayList<String>> getPlateKGraphData(String plate_type,String plate){
 		ArrayList<String> codelist = stockDataService.getCodeByPlate(plate_type, plate);
-		LocalDate begindate = LocalDate.of(2017, 5, 2);
-		LocalDate enddate = LocalDate.of(2017, 5, 25);
+		LocalDate begindate = LocalDate.of(2017, 4, 1);
+		LocalDate enddate = LocalDate.of(2017, 6, 13);
 		
 		DecimalFormat df = new DecimalFormat("0.00");
 		
@@ -189,6 +198,9 @@ public class GetPlateData implements GetPlateDataService {
 		return result;
 	}
 	
+	/**
+	 * 根据板块名称得到板块成分股信息
+	 */
 	public Map<String, String[]> getChildrenMessage(String page,String plate_type,String plate){
 		Map<String, String[]> result = new HashMap<>();
 		ArrayList<String> codelist = stockDataService.getCodeByPlate(plate_type, plate);
@@ -216,14 +228,14 @@ public class GetPlateData implements GetPlateDataService {
 			index[k] = Integer.toString(i+1);
 			code[k] = codelist.get(i);
 			name[k] = stockDataService.getNameByCode(Integer.valueOf(code[k]));
-			ArrayList<StockPO> po = stockDataService.getStockByCodeAndDate(Integer.valueOf(code[k]), "2017-05-25", "2017-05-25");
+			ArrayList<StockPO> po = stockDataService.getStockByCodeAndDate(Integer.valueOf(code[k]), "2017-06-13", "2017-06-13");
 			if(po.size()>0){
 				open[k] = df.format(po.get(0).getOpen());
 				high[k] = df.format(po.get(0).getHigh());
 				low[k] = df.format(po.get(0).getLow());
 				close[k] = df.format(po.get(0).getClose());
-				String yesterday = time.format(getDayBefore("2017-05-25", Integer.valueOf(code[k])));
-				if(yesterday.equals("2017-05-25")){
+				String yesterday = time.format(getDayBefore("2017-06-13", Integer.valueOf(code[k])));
+				if(yesterday.equals("2017-06-13")){
 					fluct[k] = "- -";
 				}else{
 					ArrayList<StockPO> pos = stockDataService.getStockByCodeAndDate(Integer.valueOf(code[k]), yesterday, yesterday);
@@ -252,6 +264,63 @@ public class GetPlateData implements GetPlateDataService {
 		return result;
 	}
 	
+	
+	/**
+	 * 根据输入框输入得到匹配的板块名称
+	 * @param enter
+	 * @param plate_type
+	 * @return
+	 */
+	public String[] GetMatchPlate(String enter, String plate_type){
+		String name = enter.replace(" ", "");
+		System.out.println(name);
+		ArrayList<String> platename = stockDataService.getPlate(plate_type);
+		int length = name.length();
+		if(length==0){
+			return null;
+		}
+		int k = 0;
+		String[] matchlist = new String[5];
+		for(int i=0;i<platename.size();i++){
+			if(platename.get(i).length()<length){
+				continue;
+			}
+			System.out.println(platename.get(i).substring(0,length)+"   "+name);
+			if(platename.get(i).substring(0,length).equals(name)){
+				matchlist[k] = platename.get(i);
+				k++;
+				if(k==5){
+					break;
+				}
+			}
+		}
+		return matchlist;
+	}
+	
+	/**
+	 * 判断输入的是否为正确的板块名称
+	 * @param plate
+	 * @param plate_type
+	 * @return
+	 */
+	public boolean IsLegalPlate(String enter, String plate_type){
+		String plate = enter.replace(" ", "");
+		ArrayList<String> platename = stockDataService.getPlate(plate_type);
+		for(int i=0;i<platename.size();i++){
+			if(platename.get(i).equals(plate)){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * 得到前一个交易日
+	 * @param today
+	 * @param code
+	 * @return
+	 */
 	private Date getDayBefore(String today, int code) {
 		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
 		if(code==603580||code==2876){
@@ -280,11 +349,6 @@ public class GetPlateData implements GetPlateDataService {
 			e.printStackTrace();
 		}
 		return dayBefore;
-	}
-	
-	public static void main(String[] args){
-		System.out.println(LocalDate.now().plusDays(1).toString());
-		System.out.println();
 	}
 
 }

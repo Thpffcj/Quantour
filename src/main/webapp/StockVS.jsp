@@ -18,11 +18,15 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 		$("#begindate").datepicker({
+			minDate: new Date(2015, 1 - 1 , 1),
+			maxDate: new Date(2017, 6 - 1 , 13),
 	        onSelect: function(selected) {	          
 	        	$("#enddate").datepicker("option","minDate", selected)
 		    }
 		});
 		$("#enddate").datepicker({ 
+			minDate: new Date(2015, 1 - 1 , 1),
+			maxDate: new Date(2017, 6 - 1 , 13),
 		    onSelect: function(selected) {
 		        $("#begindate").datepicker("option","maxDate", selected)
 		    }
@@ -59,7 +63,7 @@
 		<div>
 			<div>
 				<ul id = "navul">
-					<li><a><img id="photo"></a></li>
+					<li><a><img src="images/Icon.jpg"></a></li>
 					<li><a href="Main.jsp">首页</a></li>
 					<li><a href="Market.jsp">行情中心</a></li>
 					<li><a href="Stock.jsp">个股展示</a></li>
@@ -69,7 +73,7 @@
 				</ul>
 			</div>
 			<ul id="userul">
-				<li class="firstli"><img src="images/photo.png"></li>
+				<li class="firstli"><img id="photo"></li>
 				<li class="firstli"><a href="javascript:void(0)">${sessionScope.loginUserName}</a>
 					<ul class="drop">
 						<li><a href="User.jsp">个人中心</a></li>
@@ -168,9 +172,9 @@
 			<form action="">
 				<div class="input-left">
 					<label>时间:</label>
-					<input type="text" id="begindate" value = "2016-05-25" placeholder = "请选择开始日期">
+					<input type="text" id="begindate" value = "2017-01-01" placeholder = "请选择开始日期">
 					<label>---</label>
-					<input type="text" id="enddate" value = "2017-05-25" placeholder = "请选择结束日期">
+					<input type="text" id="enddate" value = "2017-06-13" placeholder = "请选择结束日期">
 					<label>股票:</label>
 				</div>
 				<div class="stock-drop-list1">

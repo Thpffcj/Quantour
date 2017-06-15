@@ -137,11 +137,14 @@ public class GetKDJStochasticData implements GetKDJStochasticDataService{
 			J.add(String.valueOf(calculateJ(Double.parseDouble(D.get(D.size()-1)), Double.parseDouble(K.get(K.size()-1)))));
 			dates.add(stockList.get(i).getDate());
 		}
+		ArrayList<String> name = new ArrayList<>();
+		name.add(stockDataService.getNameByCode(Integer.parseInt(condition)));
 		
 		data.put("K", K);
 		data.put("D", D);
 		data.put("J", J);
 		data.put("date", dates);
+		data.put("name", name);
 //		for(int i=0; i<stockList.size()-cycle+1; i++){
 //			dataset.addValue(K.get(i), seriesK, dates.get(i));
 //			dataset.addValue(D.get(i), seriesD, dates.get(i));
@@ -473,4 +476,6 @@ public class GetKDJStochasticData implements GetKDJStochasticDataService{
 
 		return BenchmarkProfit;
 	}
+	
+	
 }

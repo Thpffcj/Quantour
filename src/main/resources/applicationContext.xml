@@ -126,12 +126,15 @@
 	<!-- 配置action类 -->
 	<bean id="RSIGraphAction" class="action.QuantifyAction" scope="prototype">
 		<property name="getRSIDataService" ref="getRSIDataService"></property>
+		<property name="getStockBLService" ref="getStockBLService"></property>
 	</bean>
 	<bean id="KDJStochasticGraphAction" class="action.QuantifyAction" scope="prototype">
 		<property name="getKDJStochasticDataService" ref="getKDJStochasticDataService"></property>
+		<property name="getStockBLService" ref="getStockBLService"></property>
 	</bean>
 	<bean id="BoolGraphAction" class="action.QuantifyAction" scope="prototype">
 		<property name="getBollDataService" ref="getBollDataService"></property>
+		<property name="getStockBLService" ref="getStockBLService"></property>
 	</bean>
 	<bean id="MeanReversionGraphAction" class="action.QuantifyAction" scope="prototype">
 		<property name="meanReversionService" ref="meanReversionService"></property>
@@ -164,9 +167,11 @@
 	</bean>
 	<bean id="meanReversionService" class="businessLogic.MeanReversion">
 		<property name="stockDataService" ref="stockDataService"></property>
+		<property name="usersDao" ref="usersDao"></property>
 	</bean>
 	<bean id="momentumStrategyService" class="businessLogic.MomentumStrategy">
 		<property name="stockDataService" ref="stockDataService"></property>
+		<property name="usersDao" ref="usersDao"></property>
 	</bean>
 	
 	<!-- predict -->

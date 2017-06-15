@@ -26,4 +26,8 @@ public interface GetStockBLService {
 	public String getNameByCode(String code);
 	
 	public ArrayList<StockPO> getLastStockByCode(String code);
+	
+	public boolean IsLegalCode(String code);
+	
+	public int getDate(String begin, String end);
 }

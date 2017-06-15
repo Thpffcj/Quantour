@@ -16,7 +16,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.tomcat.jni.Local;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 import org.hibernate.id.IntegralDataTypeHolder;
+import org.hibernate.query.Query;
 
 import com.opensymphony.xwork2.validator.annotations.DoubleRangeFieldValidator;
 
@@ -256,6 +259,7 @@ public class GetStockBL implements GetStockBLService {
 		
 		ArrayList<StockPO> stockList = stockDataService.getStockByDate(Date);
 		for (StockPO po : stockList) {
+			System.out.println(po.getCode());
 			Date yesterday = getDayBefore(Date, Integer.valueOf(po.getCode()));
 			if(Date.equals(time.format(yesterday))){
 				continue;
@@ -332,7 +336,10 @@ public class GetStockBL implements GetStockBLService {
 				dayBefore = time.parse(yesterday);
 				volume = stockDataService.getVolumeByDateAndCode(code, yesterday);
 				i++;
-			} while (volume == 0.0||i==7);
+				if(i==7){
+					return time.parse(today);
+				}
+			} while (volume == 0.0&&i!=7);
 
 		} catch (ParseException e) {
 			e.printStackTrace();
@@ -344,7 +351,7 @@ public class GetStockBL implements GetStockBLService {
 	 * 得到当天所有股票交易信息
 	 */
 	public ArrayList<StockPO> getStockMessage() {
-		return stockDataService.getStockByDate("2017-05-25");
+		return stockDataService.getStockByDate("2017-06-13");
 	}
 	
 	/**
@@ -354,7 +361,7 @@ public class GetStockBL implements GetStockBLService {
 		ArrayList<String> codelist = stockDataService.getGemAllCode();
 		ArrayList<StockPO> result = new ArrayList<>();
 		for(int i=0;i<codelist.size();i++){
-			ArrayList<StockPO> message = stockDataService.getStockByCodeAndDate(Integer.valueOf(codelist.get(i)), "2017-05-25", "2017-05-25");
+			ArrayList<StockPO> message = stockDataService.getStockByCodeAndDate(Integer.valueOf(codelist.get(i)), "2017-06-13", "2017-06-13");
 			if(message.size()>0){
 				result.add(message.get(0));
 			}
@@ -369,7 +376,7 @@ public class GetStockBL implements GetStockBLService {
 		ArrayList<String> codelist = stockDataService.getSmeAllCode();
 		ArrayList<StockPO> result = new ArrayList<>();
 		for(int i=0;i<codelist.size();i++){
-			ArrayList<StockPO> message = stockDataService.getStockByCodeAndDate(Integer.valueOf(codelist.get(i)), "2017-05-25", "2017-05-25");
+			ArrayList<StockPO> message = stockDataService.getStockByCodeAndDate(Integer.valueOf(codelist.get(i)), "2017-06-13", "2017-06-13");
 			if(message.size()>0){
 				result.add(message.get(0));
 			}
@@ -390,7 +397,7 @@ public class GetStockBL implements GetStockBLService {
 	public ArrayList<StockPO> getLastStockByCode(String code) {
 		SimpleDateFormat time = new SimpleDateFormat("yyyy-MM-dd");
 		// System.out.println("getLastStockByCode--------enter---------");
-		String date = time.format(getDayBefore("2017-05-25", Integer.valueOf(code)));
+		String date = time.format(getDayBefore("2017-06-13", Integer.valueOf(code)));
 		// System.out.println("getLastStockByCode--------end-------");
 		return stockDataService.getStockByCodeAndDate(Integer.valueOf(code), date, date);
 	}
@@ -447,7 +454,7 @@ public class GetStockBL implements GetStockBLService {
 	 * @param code
 	 * @return
 	 */
-	private boolean IsLegalCode(String code){
+	public boolean IsLegalCode(String code){
 		if(codelist==null){
 			codelist = stockDataService.GetAllCode();
 		}
@@ -459,6 +466,7 @@ public class GetStockBL implements GetStockBLService {
 		return false;
 	}
 
+	
 //	public static void main(String[] args) {
 //		GetStockBL bl = new GetStockBL();
 //		StockDataService stockDataService = new StockData();
@@ -468,4 +476,8 @@ public class GetStockBL implements GetStockBLService {
 //			System.out.println(a.getDowns_Max().get(i).getName() + ' ' + a.getDowns_Max().get(i).getUps());
 //
 //	}
+	
+	public int getDate(String begin, String end) {
+		return stockDataService.getDate(begin, end).size();
+	}
 }

@@ -141,6 +141,8 @@ public class StockData implements StockDataService {
 			code = "399005";
 		}else if(name.equals("中小板")){
 			code = "399006";
+		}else{
+			code = "hs300";
 		}
 		ArrayList<String> days;
 		try {
@@ -198,11 +200,14 @@ public class StockData implements StockDataService {
 	 */
 	public ArrayList<String> GetAllCode(){
 		Session session = sessionFactory.openSession();
-		
+		Transaction transaction = null;
+		transaction = session.beginTransaction();
 		ArrayList<String> namelist = new ArrayList<>();
 		String hql = "select code from NamelistPO";
 		Query query = session.createQuery(hql);
 		namelist = (ArrayList<String>) query.getResultList();
+		transaction.commit();
+		session.close();
 		return namelist;
 	}
 	
@@ -212,11 +217,14 @@ public class StockData implements StockDataService {
 	 */
 	public ArrayList<String> GetAllName(){
 		Session session = sessionFactory.openSession();
-		
+		Transaction transaction = null;
+		transaction = session.beginTransaction();
 		ArrayList<String> namelist = new ArrayList<>();
 		String hql = "select name from NamelistPO";
 		Query query = session.createQuery(hql);
 		namelist = (ArrayList<String>) query.getResultList();
+		transaction.commit();
+		session.close();
 		return namelist;
 	}
 	
@@ -349,17 +357,16 @@ public class StockData implements StockDataService {
 	
 	// 根据日期和股票名称得到当日交易量，若该日期不是工作日，返回0；否则返回股票1号的交易量，即非0；
 	public Double getVolumeByDateAndName(String Name,String Begin){
-
 		return getVolumeByDateAndCode(getCodeByName(Name),Begin);
 	}
 	
 	// 根据日期和股票号得到当日交易量，若该日期不是工作日，返回0；否则返回股票1号的交易量，即非0；是股票最开始一天则返回-1；(均线图专用方法！！)
 	public int JudgeIfTheLast(int code, String begin) {
 		double volume = getVolumeByDateAndCode(code, begin);
-		if(volume == 0.0){
-			return 0;
-		}else{
+		if(volume != 0.0){
 			return 1;
+		}else{
+			return -1;
 		}
 	}
 	
